@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to="JapaneseHelper">
+  <!-- Inherit our applications main module.                      -->
+  <inherits name='de.ws1718.ismla.JapaneseHelper.JapaneseHelper' />
+
+  <!-- Specify the path to any remote services.                   -->
+  <servlet path="/JapaneseHelper/greet" class="de.ws1718.ismla.JapaneseHelper.server.GreetingServiceImpl" />
+
+</module>
