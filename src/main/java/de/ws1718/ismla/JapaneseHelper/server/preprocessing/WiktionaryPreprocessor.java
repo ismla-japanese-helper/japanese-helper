@@ -34,7 +34,7 @@ public class WiktionaryPreprocessor extends RemoteServiceServlet {
 	// private static final String INFLECTION_TEMPLATES_PATH =
 	// "/WEB-INF/inflection-templates";
 	private static final String INFLECTION_TEMPLATES_PATH = "target/JapaneseHelper-1.0-SNAPSHOT/WEB-INF/inflection-templates";
-	private Map<String, Map<VerbForm, String>> inflections;
+	private Map<String, Map<Inflection, String>> inflections;
 
 	private void readFile() {
 		String line;
@@ -73,13 +73,13 @@ public class WiktionaryPreprocessor extends RemoteServiceServlet {
 			setUpTemplate(file);
 		}
 		logger.info("Read the following " + inflections.size() + " inflection maps:");
-		for (Entry<String, Map<VerbForm, String>> entry : inflections.entrySet()) {
+		for (Entry<String, Map<Inflection, String>> entry : inflections.entrySet()) {
 			logger.info(entry.getKey() + "-->" + entry.getValue());
 		}
 	}
 
 	private void setUpTemplate(File file) {
-		Map<VerbForm, String> inflectionScheme = new HashMap<>();
+		Map<Inflection, String> inflectionScheme = new HashMap<>();
 		String line;
 
 		// TODO can we make this work with
@@ -94,11 +94,12 @@ public class WiktionaryPreprocessor extends RemoteServiceServlet {
 					continue;
 				}
 				try {
-					VerbForm vf = VerbForm.valueOf(fields[0].trim().toUpperCase());
-					String ending = fields[1].trim();
+					Inflection vf = Inflection.valueOf(fields[0].trim().toUpperCase());
+					String ending = fields[1].trim().replaceAll("\\. ", "");
 					inflectionScheme.put(vf, ending);
 				} catch (IllegalArgumentException e) {
-					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")) {
+					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
+							&& (!line.contains("note"))) {
 						System.out.println(line);
 					}
 					continue;
