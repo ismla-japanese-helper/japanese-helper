@@ -1,0 +1,23 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-go-ku
+<includeonly>{{ja-verbconj-auto<!--
+-->|lemma={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{1|}}}|{{#invoke:ja|definal|{{PAGENAME}}}}}}<!--
+-->|kana={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{2|}}}|{{{1|}}}}}<!--
+-->|imperfective=か<!--
+-->|continuative=き<!--
+-->|terminal=く<!--
+-->|attributive=く<!--
+-->|hypothetical=け<!--
+-->|imperative=け<!--
+-->|passive=かれる<!--
+-->|causative=かせる<!--
+-->|causative2=かす<!--
+-->|potential=ける<!--
+-->|volitional=こう<!--
+-->|negative=かない<!--
+-->|negative_continuative=かず<!--
+-->|formal=きます<!--
+-->|perfective=いた<!--
+-->|conjunctive=いて<!--
+-->|hypothetical_conditional=けば<!--
+-->}}<!--
+--></includeonly><noinclude>{{documentation}}</noinclude>

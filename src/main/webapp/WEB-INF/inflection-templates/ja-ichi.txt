@@ -1,0 +1,33 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-ichi
+<includeonly>{{ja-verbconj-auto<!--
+-->|lemma={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{1|}}}|{{#invoke:ja|definal|{{PAGENAME}}}}}}<!--
+-->|kana={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{2|}}}|{{{1|}}}}}<!--
+-->|imperfective=<!--
+-->|continuative=<!--
+-->|terminal=る<!--
+-->|attributive=る<!--
+-->|hypothetical=れ<!--
+-->|imperative=よ<!--
+-->|imperative2=ろ<!--
+-->|passive=られる<!--
+-->|causative=させる<!--
+-->|causative2=さす<!--
+-->|potential=られる<!--
+-->|potential2=れる<!--
+-->|volitional=よう<!--
+-->|negative=ない<!--
+-->|negative2=ぬ<!--
+-->|negative3=ん<!--
+-->|negative_continuative=ず<!--
+-->|formal=ます<!--
+-->|perfective=た<!--
+-->|conjunctive=て<!--
+-->|hypothetical_conditional=れば<!--
+-->|imp1_note=&sup1;<!--
+-->|imp2_note=&sup2;<!--
+-->|pont2_note=&sup3;<!--
+-->|notes=<!--
+    --><small>&sup1; Written imperative</small><br/><!--
+    --><small>&sup2; Spoken imperative</small><br/><!--
+    --><small>&sup3; Colloquial potential</small><!--
+-->}}</includeonly><noinclude>{{documentation}}</noinclude>

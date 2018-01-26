@@ -1,0 +1,3 @@
+# don't version control the wiktionary (dump for now?)
+*
+!.gitignore

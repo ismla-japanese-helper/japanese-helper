@@ -1,0 +1,24 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-honorific
+<includeonly>{{ja-verbconj-auto<!--
+-->|lemma={{{1|}}}<!--
+-->|kana={{{2|}}}<!--
+-->|imperfective=ら<!--
+-->|continuative=い<!--
+-->|continuative2=り<!--
+-->|terminal=る<!--
+-->|attributive=る<!--
+-->|hypothetical=れ<!--
+-->|imperative=い<!--
+-->|passive=られる<!--
+-->|causative=らせる<!--
+-->|causative2=らす<!--
+-->|potential=れる<!--
+-->|volitional=ろう<!--
+-->|negative=らない<!--
+-->|negative_continuative=らず<!--
+-->|formal=います<!--
+-->|perfective=った<!--
+-->|conjunctive=って<!--
+-->|hypothetical_conditional=れば<!--
+-->}}<!--
+--></includeonly><noinclude>{{documentation}}</noinclude>

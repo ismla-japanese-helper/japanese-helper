@@ -1,0 +1,29 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-na
+<includeonly>{{ja-adj-infl<!--
+-->|lemma={{#ifeq:{{PAGENAME}}|{{{1|}}}|{{{1|}}}|{{PAGENAME}}}}<!--
+-->|kana={{#ifeq:{{PAGENAME}}|{{{1|}}}|{{{2|}}}|{{{1|}}}}}<!--
+-->|imperfective=. だろ<!--
+-->|continuative=. で<!--
+-->|terminal=. だ<!--
+-->|attributive=. な<!--
+-->|hypothetical=. なら<!--
+-->|imperative=. で あれ<!--
+-->|informal_negative=. で は ない<!--
+-->|informal_negative2=. じゃ ない<!--
+-->|informal_past=. だった<!--
+-->|informal_negative_past=. で は なかった<!--
+-->|informal_negative_past2=. じゃ なかった<!--
+-->|formal=. です<!--
+-->|formal_negative=. で は ありません<!--
+-->|formal_negative2=. じゃ ありません<!--
+-->|formal_past=. でした<!--
+-->|formal_negative_past=. で は ありません でした<!--
+-->|formal_negative_past2=. じゃ ありません でした<!--
+-->|conjunctive=. で<!--
+-->|conditional=. なら（ば）<!--
+-->|provisional=. だったら<!--
+-->|volitional=. だろう<!--
+-->|adverbial=. に<!--
+-->|degree=さ<!--
+-->}}<!--
+}</includeonly><noinclude>{{documentation}}</noinclude>

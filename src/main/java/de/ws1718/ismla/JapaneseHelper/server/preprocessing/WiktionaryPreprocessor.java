@@ -23,24 +23,22 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
-// TODO should we even make this accessible from the frontend? 
 public class WiktionaryPreprocessor extends RemoteServiceServlet {
 
 	private static final long serialVersionUID = -4971857652557473025L;
 	private static final Logger logger = Logger.getLogger(WiktionaryPreprocessor.class.getSimpleName());
 
-	// TODO make this more flexible
-	private static final String WIKTIONARY_DUMP_PATH = "/WEB-INF/wiktionary-dump/ja-wiki-preprocessed-20180112.tsv";
-	// private static final String INFLECTION_TEMPLATES_PATH =
-	// "/WEB-INF/inflection-templates";
-	private static final String INFLECTION_TEMPLATES_PATH = "target/JapaneseHelper-1.0-SNAPSHOT/WEB-INF/inflection-templates";
+	// TODO make this more flexible + GWT-friendly
+	private static final String RESOURCE_PATH = "src/main/webapp/WEB-INF/";
+	private static final String DICTIONARY_PATH = RESOURCE_PATH + "dictionary/ja-wiki-preprocessed-20180112.tsv";
+	private static final String INFLECTION_TEMPLATES_PATH = RESOURCE_PATH + "inflection-templates";
 	private Map<String, Map<Inflection, String>> inflections;
 
 	private void readFile() {
 		String line;
 		// try (InputStream stream =
-		// getServletContext().getResourceAsStream(WIKTIONARY_DUMP_PATH);
-		try (InputStream stream = new FileInputStream(WIKTIONARY_DUMP_PATH);
+		// getServletContext().getResourceAsStream(DICTIONARY_PATH);
+		try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(DICTIONARY_PATH);
 				BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
 			while ((line = br.readLine()) != null) {
 				line = line.trim();
@@ -85,9 +83,13 @@ public class WiktionaryPreprocessor extends RemoteServiceServlet {
 		// TODO can we make this work with
 		// getServletContext().getResourceAsStream ?
 		try (InputStream stream = new FileInputStream(file);
-				BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
+				BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
 			while ((line = br.readLine()) != null) {
 				line = line.trim();
+				if (line.startsWith("﻿##") || line.startsWith("##")) {
+					// the first version contains control characters
+					continue;
+				}
 				line = line.replaceAll("[->\\|<!]", "");
 				String[] fields = line.split("=");
 				if (fields.length != 2) {
@@ -100,7 +102,7 @@ public class WiktionaryPreprocessor extends RemoteServiceServlet {
 				} catch (IllegalArgumentException e) {
 					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
 							&& (!line.contains("note"))) {
-						System.out.println(line);
+						logger.warning("Could not parse the following line: " + line);
 					}
 					continue;
 				}

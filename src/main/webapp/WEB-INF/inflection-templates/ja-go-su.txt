@@ -1,0 +1,23 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-go-su
+<includeonly>{{ja-verbconj-auto<!--
+-->|lemma={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{1|}}}|{{#invoke:ja|definal|{{PAGENAME}}}}}}<!--
+-->|kana={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{2|}}}|{{{1|}}}}}<!--
+-->|imperfective=さ<!--
+-->|continuative=し<!--
+-->|terminal=す<!--
+-->|attributive=す<!--
+-->|hypothetical=せ<!--
+-->|imperative=せ<!--
+-->|passive=される<!--
+-->|causative=させる<!--
+-->|causative2=さす<!--
+-->|potential=せる<!--
+-->|volitional=そう<!--
+-->|negative=さない<!--
+-->|negative_continuative=さず<!--
+-->|formal=します<!--
+-->|perfective=した<!--
+-->|conjunctive=して<!--
+-->|hypothetical_conditional=せば<!--
+-->|notes={{{notes|}}}}}<!--
+--></includeonly><noinclude>{{documentation}}</noinclude>

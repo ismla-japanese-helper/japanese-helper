@@ -1,0 +1,25 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-i
+<includeonly>{{ja-adj-infl<!--
+-->|lemma={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{1|}}}|{{#invoke:ja|definal|{{PAGENAME}}}}}}<!--
+-->|kana={{#ifeq:{{#invoke:ja|definal|{{PAGENAME}}}}|{{{1|}}}|{{{2|}}}|{{{1|}}}}}<!--
+-->|imperfective=かろ<!--
+-->|continuative=く<!--
+-->|terminal=い<!--
+-->|attributive=い<!--
+-->|hypothetical=けれ<!--
+-->|imperative=かれ<!--
+-->|informal_negative=く ない<!--
+-->|informal_past=かった<!--
+-->|informal_negative_past=く なかった<!--
+-->|formal=い です<!--
+-->|formal_negative=く ない です<!--
+-->|formal_past=かった です<!--
+-->|formal_negative_past=く なかった です<!--
+-->|conjunctive=くて<!--
+-->|conditional=ければ<!--
+-->|provisional=かったら<!--
+-->|volitional=かろう<!--
+-->|adverbial=く<!--
+-->|degree=さ<!--
+-->}}<!--
+}</includeonly><noinclude>{{documentation}}</noinclude>

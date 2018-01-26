@@ -1,0 +1,28 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-suru
+<includeonly>{{ja-verbconj-auto<!--
+-->|suru=y<!--
+-->|lemma={{#if:{{{2|}}}|{{{1|}}}|{{PAGENAME}}}}<!--
+-->|kana={{#if:{{{2|}}}|{{{2|}}}|{{{1|}}}}}<!--
+-->|imperfective=. し<!--
+-->|continuative=. し<!--
+-->|terminal=. する<!--
+-->|attributive=. する<!--
+-->|hypothetical=. すれ<!--
+-->|imperative=. せよ<!--
+-->|imperative2=. しろ<!--
+-->|passive=. される<!--
+-->|causative=. させる<!--
+-->|causative2=. さす<!--
+-->|potential=. できる<!--
+-->|volitional=. しよう<!--
+-->|negative=. しない<!--
+-->|negative_continuative=. せず<!--
+-->|formal=. します<!--
+-->|perfective=. した<!--
+-->|conjunctive=. して<!--
+-->|hypothetical_conditional=. すれば<!--
+-->|imp1_note=&sup1;<!--
+-->|imp2_note=&sup2;<!--
+-->|notes=<small>&sup1; Written imperative</small><br/>
+<small>&sup2; Spoken imperative</small>}}<!--
+--></includeonly><noinclude>{{documentation}}</noinclude>

@@ -1,0 +1,22 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-zuru
+<includeonly>{{ja-verbconj-auto<!--
+-->|lemma={{{1|}}}<!--
+-->|kana={{{2|}}}<!--
+-->|imperfective=じ<!--
+-->|continuative=じ<!--
+-->|terminal=ずる<!--
+-->|attributive=ずる<!--
+-->|hypothetical=ずれ<!--
+-->|imperative=じろ<!--
+-->|passive=じさせられる<!--
+-->|causative=じさせる<!--
+-->|potential=じられる<!--
+-->|volitional=じよう<!--
+-->|negative=じない<!--
+-->|negative_continuative=じず<!--
+-->|formal=じます<!--
+-->|perfective=じた<!--
+-->|conjunctive=じて<!--
+-->|hypothetical_conditional=じられば<!--
+-->|notes={{{notes|}}}}}<!--
+--></includeonly><noinclude>{{documentation}}</noinclude>

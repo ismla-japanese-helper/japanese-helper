@@ -1,0 +1,26 @@
+﻿## Source: https://en.wiktionary.org/w/index.php?title=Template:ja-suru-tsu
+<includeonly>{{ja-verbconj-auto<!--
+-->|lemma={{{1|}}}<!--
+-->|kana={{{2|}}}<!--
+-->|imperfective=せ<!--
+-->|imperfective2=し<!--
+-->|continuative=し<!--
+-->|terminal=する<!--
+-->|attributive=する<!--
+-->|hypothetical=すれ<!--
+-->|imperative=しろ<!--
+-->|imperative2=せよ<!--
+-->|passive=せられる<!--
+-->|passive2=しられる<!--
+-->|causative=しさせる<!--
+-->|potential=せられる<!--
+-->|potential2=しられる<!--
+-->|volitional=しよう<!--
+-->|negative=しない<!--
+-->|negative_continuative=せず<!--
+-->|formal=します<!--
+-->|perfective=した<!--
+-->|conjunctive=して<!--
+-->|hypothetical_conditional=すれば<!--
+-->}}<!--
+--></includeonly><noinclude>{{documentation}}</noinclude>
