@@ -75,6 +75,12 @@ public class Token {
 		this.translation = translation;
 	}
 
+	@Override
+	public String toString() {
+		return "Token [form=" + form + ", pronunciation=" + pronunciation + ", pos=" + pos + ", translation="
+				+ translation + "]";
+	}
+
 	public void merge(Token other) {
 		// TODO
 	}
