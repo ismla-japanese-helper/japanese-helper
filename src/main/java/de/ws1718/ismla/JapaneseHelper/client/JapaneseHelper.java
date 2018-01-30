@@ -3,6 +3,11 @@ package de.ws1718.ismla.JapaneseHelper.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.RootPanel;
+import de.ws1718.ismla.JapaneseHelper.shared.Token;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -22,6 +27,16 @@ public class JapaneseHelper implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 
 	public void onModuleLoad() {
+		List<Token> testList = new ArrayList<>();
+		Token t1 = new Token("皆さん", "みなさん", "N", "We");
+		Token t2 = new Token("皆さん", "みなさん", "N", "We");
+		testList.add(t1);
+		testList.add(t2);
+
+		ResultsWidget rw = new ResultsWidget(testList);
+
+		RootPanel.get().add(rw);
+
 		greetingService.greetServer("", new AsyncCallback<String>() {
 			public void onFailure(Throwable caught) {
 			}

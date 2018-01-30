@@ -4,10 +4,5 @@
 	<ui:style>
 	</ui:style>
 	<g:HTMLPanel ui:field="resultsContainer">
-        <div class="container container-results">
-            <div class="row">
-
-            </div>
-        </div>
 	</g:HTMLPanel>
 </ui:UiBinder> 
