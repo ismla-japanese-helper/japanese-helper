@@ -7,12 +7,18 @@ public class Token {
 	private String pos;
 	// TODO make this a List<String> and split by the enumerators?
 	private String translation;
+	private String inflection;
 
 	public Token(String form, String pronunciation, String pos, String translation) {
+		this(form, pronunciation, pos, translation, null);
+	}
+
+	public Token(String form, String pronunciation, String pos, String translation, String inflection) {
 		this.form = form;
 		this.pronunciation = pronunciation;
 		this.pos = pos;
 		this.translation = translation;
+		this.inflection = inflection;
 	}
 
 	/**
@@ -75,11 +81,32 @@ public class Token {
 		this.translation = translation;
 	}
 
+	/**
+	 * @return the inflection
+	 */
+	public String getInflection() {
+		return inflection;
+	}
+
+	/**
+	 * @param inflection
+	 *            the inflection to set
+	 */
+	public void setInflection(String inflection) {
+		this.inflection = inflection;
+	}
+
 	@Override
 	public String toString() {
-		return "Token [form=" + form + ", pronunciation=" + pronunciation + ", pos=" + pos + ", translation="
-				+ translation + "]";
+		String s = form + "\t" + pronunciation + "\t" + pos + "\t" + translation;
+		if (inflection != null && !inflection.isEmpty()){
+			s += "\t" + inflection;
+		}
+		return s;
+//		return "Token [form=" + form + ", pronunciation=" + pronunciation + ", pos=" + pos + ", translation="
+//				+ translation + "]";
 	}
+	
 
 	public void merge(Token other) {
 		// TODO
