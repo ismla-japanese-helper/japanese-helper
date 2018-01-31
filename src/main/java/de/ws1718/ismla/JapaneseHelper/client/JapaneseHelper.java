@@ -25,17 +25,16 @@ public class JapaneseHelper implements EntryPoint {
 	 * service.
 	 */
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
 
 	public void onModuleLoad() {
-		List<Token> testList = new ArrayList<>();
-		Token t1 = new Token("皆さん", "みなさん", "N", "We");
-		Token t2 = new Token("皆さん", "みなさん", "N", "We");
-		testList.add(t1);
-		testList.add(t2);
 
-		ResultsWidget rw = new ResultsWidget(testList);
+		SentenceInputWidget input = new SentenceInputWidget();
+		RootPanel.get().add(input);
 
-		RootPanel.get().add(rw);
+//		ResultsWidget rw = new ResultsWidget(testList);
+//
+//		RootPanel.get().add(rw);
 
 		greetingService.greetServer("", new AsyncCallback<String>() {
 			public void onFailure(Throwable caught) {

@@ -1,7 +1,16 @@
 package de.ws1718.ismla.JapaneseHelper.shared;
 
-public class Token {
+import java.io.Serializable;
 
+public class Token implements Serializable {
+
+	public Token() {
+		// Not sure if I should fill them this way. Let's just try it then.
+		this.form = "dummy";
+		this.pronunciation = "dummy";
+		this.pos = "dummy";
+		this.translation = "dummy";
+	}
 	private String form;
 	private String pronunciation;
 	private String pos;

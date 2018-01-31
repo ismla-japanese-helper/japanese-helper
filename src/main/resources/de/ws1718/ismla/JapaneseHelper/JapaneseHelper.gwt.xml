@@ -19,4 +19,5 @@
   <source path='client' />
   <source path='shared' />
 
+    <servlet path="/LookupService" class="de.ws1718.ismla.JapaneseHelper.server.LookupServiceImpl"/>
 </module>

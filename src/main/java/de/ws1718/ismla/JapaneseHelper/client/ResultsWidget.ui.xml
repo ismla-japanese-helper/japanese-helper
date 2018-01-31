@@ -5,4 +5,4 @@
 	</ui:style>
 	<g:HTMLPanel ui:field="resultsContainer">
 	</g:HTMLPanel>
-</ui:UiBinder> 
+</ui:UiBinder>
