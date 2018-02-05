@@ -10,19 +10,19 @@
     <servlet-name>greetServlet</servlet-name>
     <servlet-class>de.ws1718.ismla.JapaneseHelper.server.GreetingServiceImpl</servlet-class>
   </servlet>
-    <servlet>
-        <servlet-name>de.ws1718.ismla.JapaneseHelper.JapaneseHelper LookupService</servlet-name>
-        <servlet-class>de.ws1718.ismla.JapaneseHelper.server.LookupServiceImpl</servlet-class>
-    </servlet>
+  <servlet>
+    <servlet-name>de.ws1718.ismla.JapaneseHelper.JapaneseHelper LookupService</servlet-name>
+    <servlet-class>de.ws1718.ismla.JapaneseHelper.server.LookupServiceImpl</servlet-class>
+  </servlet>
 
-    <servlet-mapping>
+  <servlet-mapping>
     <servlet-name>greetServlet</servlet-name>
     <url-pattern>/JapaneseHelper/greet</url-pattern>
   </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>de.ws1718.ismla.JapaneseHelper.JapaneseHelper LookupService</servlet-name>
-        <url-pattern>/JapaneseHelper/LookupService</url-pattern>
-    </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>de.ws1718.ismla.JapaneseHelper.JapaneseHelper LookupService</servlet-name>
+    <url-pattern>/JapaneseHelper/LookupService</url-pattern>
+  </servlet-mapping>
 
     <!-- Default page to serve -->
   <welcome-file-list>
