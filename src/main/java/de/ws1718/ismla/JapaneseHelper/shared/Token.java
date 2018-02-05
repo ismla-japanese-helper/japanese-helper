@@ -4,30 +4,44 @@ import java.io.Serializable;
 
 public class Token implements Serializable {
 
-	public Token() {
-		// Not sure if I should fill them this way. Let's just try it then.
-		this.form = "dummy";
-		this.pronunciation = "dummy";
-		this.pos = "dummy";
-		this.translation = "dummy";
-	}
+	private static final long serialVersionUID = -150279039676314554L;
+
 	private String form;
 	private String pronunciation;
 	private String pos;
+	private String inflectionParadigm;
 	// TODO make this a List<String> and split by the enumerators?
 	private String translation;
-	private String inflection;
+	private String inflectionInformation;
+
+	public Token() {
+		// Not sure if I should fill them this way. Let's just try it then.
+		this("dummy", "dummy", "dummy", "dummy");
+	}
 
 	public Token(String form, String pronunciation, String pos, String translation) {
 		this(form, pronunciation, pos, translation, null);
 	}
 
-	public Token(String form, String pronunciation, String pos, String translation, String inflection) {
+	public Token(String form, String pronunciation, String pos, String translation, String inflectionInformation) {
 		this.form = form;
 		this.pronunciation = pronunciation;
-		this.pos = pos;
+		if (pos == null || pos.trim().isEmpty()) {
+			this.pos = "";
+		}
+		if (pos.contains("[") && pos.contains("]")) {
+			int open = pos.indexOf("[");
+			int close = pos.indexOf("]");
+			if (open < close) {
+				this.pos = pos.substring(0, open);
+				inflectionParadigm = pos.substring(open + 1, close);
+				return;
+			}
+		} else {
+			this.pos = pos;
+		}
 		this.translation = translation;
-		this.inflection = inflection;
+		this.inflectionInformation = inflectionInformation;
 	}
 
 	/**
@@ -91,31 +105,34 @@ public class Token implements Serializable {
 	}
 
 	/**
-	 * @return the inflection
+	 * @return the inflectionInformation
 	 */
-	public String getInflection() {
-		return inflection;
+	public String getInflectionInformation() {
+		return inflectionInformation;
 	}
 
 	/**
-	 * @param inflection
-	 *            the inflection to set
+	 * @param inflectionInformation
+	 *            the inflectionInformation to set
 	 */
-	public void setInflection(String inflection) {
-		this.inflection = inflection;
+	public void setInflectionInformation(String inflection) {
+		this.inflectionInformation = inflection;
+	}
+
+	public String getInflectionParadigm() {
+		return inflectionParadigm;
+	}
+
+	public boolean isPredicate() {
+		return inflectionParadigm != null;
 	}
 
 	@Override
 	public String toString() {
-		String s = form + "\t" + pronunciation + "\t" + pos + "\t" + translation;
-		if (inflection != null && !inflection.isEmpty()){
-			s += "\t" + inflection;
-		}
-		return s;
-//		return "Token [form=" + form + ", pronunciation=" + pronunciation + ", pos=" + pos + ", translation="
-//				+ translation + "]";
+		return form + "\t" + pronunciation + "\t" + pos + "\t" + translation
+				+ (inflectionInformation == null || inflectionInformation.isEmpty() ? ""
+						: "\t" + inflectionInformation);
 	}
-	
 
 	public void merge(Token other) {
 		// TODO

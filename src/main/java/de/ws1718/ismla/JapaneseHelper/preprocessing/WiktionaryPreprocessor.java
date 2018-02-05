@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import de.ws1718.ismla.JapaneseHelper.server.preprocessing.Inflection;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 /**
@@ -49,8 +48,8 @@ public class WiktionaryPreprocessor {
 
 	public static void main(String[] args) {
 		WiktionaryPreprocessor wp = new WiktionaryPreprocessor();
-		wp.readTokens();
 		wp.setUpInflectionTemplates();
+		wp.readTokens();
 		wp.printFullDictionary();
 	}
 
@@ -85,8 +84,16 @@ public class WiktionaryPreprocessor {
 					continue;
 				}
 				Token tok = new Token(fields[0], fields[1], fields[2], fields[3]);
-				logger.info(tok.toString());
 				tokens.add(tok);
+				if (tok.isPredicate()) {
+					logger.info(tok.toString());
+					if (tok.getInflectionParadigm().equals("tari") || tok.getInflectionParadigm().equals("verbconj")
+							|| tok.getInflectionParadigm().equals("?") || tok.getInflectionParadigm().equals("kuru")) {
+						// TODO deal with this elsewhere
+						continue;
+					}
+					inflect(tok);
+				}
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -94,6 +101,21 @@ public class WiktionaryPreprocessor {
 			e.printStackTrace();
 		}
 		logger.info("read tokens");
+	}
+
+	private void inflect(Token tok) {
+		String inflectionName = tok.getInflectionParadigm();
+		Map<Inflection, String> paradigm = inflections.get(inflectionName);
+		for (Entry<Inflection, String> entry : paradigm.entrySet()) {
+			Inflection infl = entry.getKey();
+			String suffix = entry.getValue();
+			// TODO also incl. inflection paradigm?
+			Token tokInfl = new Token(tok.getForm() + suffix, tok.getPronunciation() + suffix, tok.getPos(),
+					tok.getTranslation(), infl.toString());
+			logger.info("created inflection " + infl.toString() + " " + suffix);
+			logger.info(tokInfl.toString());
+			tokens.add(tokInfl);
+		}
 	}
 
 	private void setUpInflectionTemplates() {
@@ -104,9 +126,9 @@ public class WiktionaryPreprocessor {
 		for (File file : inflectionFiles) {
 			setUpTemplate(file);
 		}
-		logger.info("Read the following " + inflections.size() + " inflection maps:");
+		logger.fine("Read the following " + inflections.size() + " inflection maps:");
 		for (Entry<String, Map<Inflection, String>> entry : inflections.entrySet()) {
-			logger.info(entry.getKey() + "-->" + entry.getValue());
+			logger.fine(entry.getKey() + "-->" + entry.getValue());
 		}
 	}
 
