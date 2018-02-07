@@ -74,7 +74,7 @@ public class WiktionaryPreprocessor {
 	private void readTokenFile(File file) {
 		String line;
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
-			while ((line = br.readLine()) != null) {
+			lines: while ((line = br.readLine()) != null) {
 				line = line.trim();
 				if (line.startsWith("﻿##") || line.startsWith("##")) {
 					// the first version contains control characters
@@ -84,14 +84,27 @@ public class WiktionaryPreprocessor {
 				if (fields.length < 4) {
 					continue;
 				}
-				Token tok = new Token(fields[0], fields[1], fields[2], fields[3]);
+				String form = fields[0];
+				String pronunciation = fields[1];
+				String pos = fields[2];
+				String translation = fields[3];
+				Token tok = new Token(form, pronunciation, pos, translation);
 				tokens.add(tok);
 				if (tok.isPredicate()) {
 					logger.info(tok.toString());
-					if (tok.getInflectionParadigm().equals("tari") || tok.getInflectionParadigm().equals("verbconj")
-							|| tok.getInflectionParadigm().equals("?") || tok.getInflectionParadigm().equals("kuru")) {
-						// TODO deal with this elsewhere
-						continue;
+					switch (tok.getInflectionParadigm()) {
+					case "tari":
+					case "verbconj":
+					case "?":
+					case "kuru":
+						// TODO actually deal with these cases
+						continue lines;
+					case "na":
+						// remove the final "(な)" that is included in the
+						// Wiktionary entries
+						tok = new Token(form.substring(0, form.length() - 3),
+								pronunciation.substring(0, pronunciation.length() - 3), pos, translation);
+						tokens.add(tok);
 					}
 					inflect(tok);
 				}
@@ -110,13 +123,30 @@ public class WiktionaryPreprocessor {
 		for (Entry<Inflection, String> entry : paradigm.entrySet()) {
 			Inflection infl = entry.getKey();
 			String suffix = entry.getValue();
+
+			// some entries contain optional kana (e.g. "なら（ば）" in ja-na.txt)
+			// let's create create tokens for both versions (e.g. "ならば" and "なら")
+			int parOpen = suffix.indexOf("（");
+			int parClose = suffix.indexOf("）");
+			if (parOpen != -1 && parClose != -1 && parClose > parOpen) {
+				// without optional kana
+				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parClose + 1), infl.toString());
+				// with optional kana
+				inflect(tok, suffix.substring(0, parOpen) 
+						+ suffix.substring(parOpen + 1, parClose)
+						+ suffix.substring(parClose + 1), infl.toString());
+			} else {
+				// regular entries
+				inflect(tok, suffix, infl.toString());
+			}
 			// TODO also incl. inflection paradigm?
-			Token tokInfl = new InflectedToken(tok, tok.getForm() + suffix, tok.getPronunciation() + suffix,
-					infl.toString());
-			logger.info("created inflection " + infl.toString() + " " + suffix);
-			logger.info(tokInfl.toString());
-			tokens.add(tokInfl);
 		}
+	}
+
+	private void inflect(Token tok, String suffix, String inflection) {
+		Token tokInfl = new InflectedToken(tok, tok.getForm() + suffix, tok.getPronunciation() + suffix, inflection);
+		logger.info(tokInfl.toString());
+		tokens.add(tokInfl);
 	}
 
 	private void setUpInflectionTemplates() {
