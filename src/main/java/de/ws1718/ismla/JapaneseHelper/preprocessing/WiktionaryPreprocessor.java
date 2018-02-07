@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 /**
@@ -110,8 +111,8 @@ public class WiktionaryPreprocessor {
 			Inflection infl = entry.getKey();
 			String suffix = entry.getValue();
 			// TODO also incl. inflection paradigm?
-			Token tokInfl = new Token(tok.getForm() + suffix, tok.getPronunciation() + suffix, tok.getPos(),
-					tok.getTranslation(), infl.toString());
+			Token tokInfl = new InflectedToken(tok, tok.getForm() + suffix, tok.getPronunciation() + suffix,
+					infl.toString());
 			logger.info("created inflection " + infl.toString() + " " + suffix);
 			logger.info(tokInfl.toString());
 			tokens.add(tokInfl);

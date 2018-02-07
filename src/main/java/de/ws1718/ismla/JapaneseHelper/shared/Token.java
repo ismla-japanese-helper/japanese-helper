@@ -12,18 +12,13 @@ public class Token implements Serializable {
 	private String inflectionParadigm;
 	// TODO make this a List<String> and split by the enumerators?
 	private String translation;
-	private String inflectionInformation;
 
 	public Token() {
-		// Not sure if I should fill them this way. Let's just try it then.
+		// TODO Not sure if I should fill them this way. Let's just try it then.
 		this("dummy", "dummy", "dummy", "dummy");
 	}
 
 	public Token(String form, String pronunciation, String pos, String translation) {
-		this(form, pronunciation, pos, translation, null);
-	}
-
-	public Token(String form, String pronunciation, String pos, String translation, String inflectionInformation) {
 		this.form = form;
 		this.pronunciation = pronunciation;
 		if (pos == null || pos.trim().isEmpty()) {
@@ -35,13 +30,11 @@ public class Token implements Serializable {
 			if (open < close) {
 				this.pos = pos.substring(0, open);
 				inflectionParadigm = pos.substring(open + 1, close);
-				return;
 			}
 		} else {
 			this.pos = pos;
 		}
 		this.translation = translation;
-		this.inflectionInformation = inflectionInformation;
 	}
 
 	/**
@@ -104,21 +97,6 @@ public class Token implements Serializable {
 		this.translation = translation;
 	}
 
-	/**
-	 * @return the inflectionInformation
-	 */
-	public String getInflectionInformation() {
-		return inflectionInformation;
-	}
-
-	/**
-	 * @param inflectionInformation
-	 *            the inflectionInformation to set
-	 */
-	public void setInflectionInformation(String inflection) {
-		this.inflectionInformation = inflection;
-	}
-
 	public String getInflectionParadigm() {
 		return inflectionParadigm;
 	}
@@ -129,9 +107,9 @@ public class Token implements Serializable {
 
 	@Override
 	public String toString() {
-		return form + "\t" + pronunciation + "\t" + pos + "\t" + translation
-				+ (inflectionInformation == null || inflectionInformation.isEmpty() ? ""
-						: "\t" + inflectionInformation);
+		return form + "\t" + pronunciation + "\t" + pos 
+				+ (isPredicate() ? "[" + inflectionParadigm + "]" : "")
+				+ "\t" + translation;
 	}
 
 	public void merge(Token other) {

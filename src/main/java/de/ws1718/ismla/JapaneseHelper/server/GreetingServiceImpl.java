@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import de.ws1718.ismla.JapaneseHelper.client.GreetingService;
+import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 /**
@@ -49,12 +50,14 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 					continue;
 				}
 				String[] fields = line.split("\t");
-				if (fields.length < 4) {
+
+				Token tok = null;
+				if (fields.length == 4) {
+					tok = new Token(fields[0], fields[1], fields[2], fields[3]);
+				} else if (fields.length == 6) {
+					tok = new InflectedToken(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]);
+				} else {
 					continue;
-				}
-				Token tok = new Token(fields[0], fields[1], fields[2], fields[3]);
-				if (fields.length == 5) {
-					tok.setInflectionInformation(fields[4]);
 				}
 				logger.info(tok.toString());
 				tokens.add(tok);
