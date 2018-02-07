@@ -10,7 +10,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SentenceInputWidget extends Composite {
@@ -38,7 +37,8 @@ public class SentenceInputWidget extends Composite {
             @Override
             public void onSuccess(List<Token> results) {
                 ResultsWidget rw = new ResultsWidget(results);
-                RootPanel.get().add(rw);
+                RootPanel.get("inputContainer").clear();
+                RootPanel.get("resultsContainer").add(rw);
             }
 
             @Override

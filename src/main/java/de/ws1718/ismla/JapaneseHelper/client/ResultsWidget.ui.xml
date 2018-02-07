@@ -2,7 +2,13 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
+		.submitButton {
+			display: block;
+			margin: 15px auto !important;
+		}
 	</ui:style>
-	<g:HTMLPanel ui:field="resultsContainer">
+	<g:HTMLPanel>
+		<g:Button styleName="{style.submitButton}" ui:field="clearButton"></g:Button>
+		<g:HTMLPanel ui:field="resultsContainer"></g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

@@ -17,13 +17,23 @@ public class ResultsWidget extends Composite {
 	@UiField
 	HTMLPanel resultsContainer;
 
+	@UiField
+	Button clearButton;
+
 	private static ResultsWidgetUiBinder uiBinder = GWT.create(ResultsWidgetUiBinder.class);
 
 	interface ResultsWidgetUiBinder extends UiBinder<Widget, ResultsWidget> {
 	}
 
+	@UiHandler("clearButton")
+	void onClick(ClickEvent e) {
+		RootPanel.get("resultsContainer").clear();
+		RootPanel.get("inputContainer").add(new SentenceInputWidget());
+	}
+
 	public ResultsWidget(List<Token> sentence) {
 		initWidget(uiBinder.createAndBindUi(this));
+		clearButton.setText("Enter new text");
 		// Or maybe I can indeed append a class to this one after all. What's the issue with that anyways.
 		resultsContainer.addStyleName("container");
 		HTML results = generateResultsTable(sentence);
@@ -51,8 +61,8 @@ public class ResultsWidget extends Composite {
 		representation += "<div class='row'>";
 
 		representation += "<div class='col-12'>" + t.getForm() + "</div>";
-		representation += "<div class='col-12'>" + t.getTranslation() + "</div>";
 		representation += "<div class='col-12'>" + t.getPronunciation() + "</div>";
+		representation += "<div class='col-12'>" + t.getTranslation() + "</div>";
 		representation += "<div class='col-12'>" + t.getPos() + "</div>";
 
 		representation += "</div>";

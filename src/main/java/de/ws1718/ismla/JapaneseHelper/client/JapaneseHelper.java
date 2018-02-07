@@ -30,11 +30,7 @@ public class JapaneseHelper implements EntryPoint {
 	public void onModuleLoad() {
 
 		SentenceInputWidget input = new SentenceInputWidget();
-		RootPanel.get().add(input);
-
-//		ResultsWidget rw = new ResultsWidget(testList);
-//
-//		RootPanel.get().add(rw);
+		RootPanel.get("inputContainer").add(input);
 
 		greetingService.greetServer("", new AsyncCallback<String>() {
 			public void onFailure(Throwable caught) {

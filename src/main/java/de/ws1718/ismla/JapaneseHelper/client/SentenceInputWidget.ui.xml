@@ -20,18 +20,6 @@
         <h3>Please input the Japanese sentence</h3>
         <g:TextArea styleName="{style.textField}" ui:field="inputField"></g:TextArea>
         <br></br>
-        <!--<h3>Transcriber options</h3>-->
-        <!--<g:FlowPanel>-->
-            <!--&lt;!&ndash; 			<g:Label ui:field="optionsTitle"></g:Label> &ndash;&gt;-->
-            <!--<g:CheckBox ui:field="stressMarkOption"></g:CheckBox>-->
-            <!--<g:CheckBox ui:field="romanizationOption"></g:CheckBox>-->
-            <!--<g:CheckBox ui:field="vowelTreatmentOption"></g:CheckBox>-->
-        <!--</g:FlowPanel>-->
         <g:Button styleName="{style.submitButton}" ui:field="submitButton"></g:Button>
-        <!-- We can brute force any HTML element in there -->
-        <!--<br></br>-->
-        <!--<br></br>-->
-        <!--<h3>Results</h3>-->
-        <!--<g:TextArea styleName="{style.textField}" ui:field="resultField"></g:TextArea>-->
     </g:HTMLPanel>
 </ui:UiBinder>
