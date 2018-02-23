@@ -1,0 +1,18 @@
+## based on https://en.wiktionary.org/wiki/%E3%81%82%E3%82%8B
+imperfective=有ら
+continuative=有り
+terminal=有る
+attributive=有る
+hypothetical=有れ
+imperative=有れ
+passive=有られる
+causative=有らせる
+causative2=有らす
+potential=有れる
+volitional=有ろう
+negative=無い
+negative_continuative=無く(て)
+formal=有ります
+perfective=有った
+conjunctive=有って
+hypothetical_conditional=有れば

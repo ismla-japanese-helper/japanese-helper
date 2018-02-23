@@ -91,17 +91,34 @@ public class WiktionaryPreprocessor {
 				Token tok = new Token(form, pronunciation, pos, translation);
 				tokens.add(tok);
 				if (tok.isPredicate()) {
-					logger.info(tok.toString());
 					switch (tok.getInflectionParadigm()) {
 					case "tari":
-					case "verbconj":
 					case "?":
 					case "kuru":
 						// TODO actually deal with these cases
 						continue lines;
+					case "verbconj":
+						switch (tok.getForm()) {
+						case "有る":
+						case "ある":
+							tok = new Token(form, pronunciation, "V[aru]", translation);
+							break;
+						case "する":
+						case "為る":
+							tok = new Token(form, pronunciation, "V[suru-indep]", translation);
+							break;
+						default:
+							// TODO add other cases instead
+							continue lines;
+						}
+						break;
+					case "suru":
+						// remove the final "する" from the Wiktionary entries
+						tok = new Token(form.substring(0, form.length() - 2),
+								pronunciation.substring(0, pronunciation.length() - 2), pos, translation);
+						break;
 					case "na":
-						// remove the final "(な)" that is included in the
-						// Wiktionary entries
+						// remove the final "(な)" from the Wiktionary entries
 						tok = new Token(form.substring(0, form.length() - 3),
 								pronunciation.substring(0, pronunciation.length() - 3), pos, translation);
 						tokens.add(tok);
@@ -120,33 +137,62 @@ public class WiktionaryPreprocessor {
 	private void inflect(Token tok) {
 		String inflectionName = tok.getInflectionParadigm();
 		Map<Inflection, String> paradigm = inflections.get(inflectionName);
+		if (paradigm == null) {
+			System.out.println(inflectionName);
+			System.out.println(tok);
+		}
 		for (Entry<Inflection, String> entry : paradigm.entrySet()) {
 			Inflection infl = entry.getKey();
 			String suffix = entry.getValue();
 
 			// some entries contain optional kana (e.g. "なら（ば）" in ja-na.txt)
-			// let's create create tokens for both versions (e.g. "ならば" and "なら")
+			// we create tokens for both versions (e.g. "ならば" and "なら")
 			int parOpen = suffix.indexOf("（");
 			int parClose = suffix.indexOf("）");
 			if (parOpen != -1 && parClose != -1 && parClose > parOpen) {
 				// without optional kana
-				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parClose + 1), infl.toString());
+				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parClose + 1), infl.toString(),
+						inflectionName);
 				// with optional kana
-				inflect(tok, suffix.substring(0, parOpen) 
-						+ suffix.substring(parOpen + 1, parClose)
-						+ suffix.substring(parClose + 1), infl.toString());
+				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parOpen + 1, parClose)
+						+ suffix.substring(parClose + 1), infl.toString(), inflectionName);
 			} else {
 				// regular entries
-				inflect(tok, suffix, infl.toString());
+				inflect(tok, suffix, infl.toString(), inflectionName);
 			}
 			// TODO also incl. inflection paradigm?
 		}
 	}
 
-	private void inflect(Token tok, String suffix, String inflection) {
-		Token tokInfl = new InflectedToken(tok, tok.getForm() + suffix, tok.getPronunciation() + suffix, inflection);
-		logger.info(tokInfl.toString());
+	private void inflect(Token tok, String suffix, String inflection, String inflectionName) {
+		String form = tok.getForm();
+		String formInfl = "";
+		String pronInfl = "";
+		
+		switch (inflectionName) {
+		case "aru":
+			if ("有る".equals(form)) {
+				formInfl = suffix;
+			} else {
+				formInfl = aruKanjiToKana(suffix);
+			}
+			pronInfl = aruKanjiToKana(suffix);
+			break;
+		case "suru-indep":
+			formInfl = suffix;
+			pronInfl = suffix;
+			break;
+		default:
+			formInfl = form + suffix;
+			pronInfl = tok.getPronunciation() + suffix;
+		}
+
+		Token tokInfl = new InflectedToken(tok, formInfl, pronInfl, inflection);
 		tokens.add(tokInfl);
+	}
+
+	private String aruKanjiToKana(String word) {
+		return word.replace('有', 'あ').replace('無', 'な');
 	}
 
 	private void setUpInflectionTemplates() {

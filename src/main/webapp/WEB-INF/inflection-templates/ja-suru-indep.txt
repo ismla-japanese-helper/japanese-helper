@@ -1,0 +1,21 @@
+## based on https://en.wiktionary.org/wiki/%E3%81%99%E3%82%8B
+imperfective=さ
+imperfective2=し
+imperfective3=せ
+continuative=し
+terminal=する
+attributive=する
+hypothetical=すれ
+imperative=せよ
+imperative2=しろ
+passive=される
+causative=させる
+causative2=さす
+potential=できる
+volitional=しよう
+negative=しない
+negative_continuative=せぞ
+formal=します
+perfective=した
+conjunctive=して
+hypothetical_conditional=すれば
