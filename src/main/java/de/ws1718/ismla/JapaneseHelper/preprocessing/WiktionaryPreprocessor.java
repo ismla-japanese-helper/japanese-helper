@@ -107,6 +107,15 @@ public class WiktionaryPreprocessor {
 						case "為る":
 							tok = new Token(form, pronunciation, "V[suru-indep]", translation);
 							break;
+						case "くれる":
+						case "呉れる":
+							tok = new Token(form, pronunciation, "V[kureru]", translation);
+							break;
+						case "べし":
+							// the pronunciation is listed as "suffix",
+							// so we re-use the kana from the form instead
+							tok = new Token(form, form, "V[beshi]", translation);
+							break;
 						default:
 							// TODO add other cases instead
 							continue lines;
@@ -118,9 +127,11 @@ public class WiktionaryPreprocessor {
 								pronunciation.substring(0, pronunciation.length() - 2), pos, translation);
 						break;
 					case "na":
-						// remove the final "(な)" from the Wiktionary entries
-						tok = new Token(form.substring(0, form.length() - 3),
-								pronunciation.substring(0, pronunciation.length() - 3), pos, translation);
+						// the Wiktionary entries end with "(な)"
+						// remove the parentheses
+						form = form.replaceAll("[\\(\\)]", "");
+						pronunciation = pronunciation.replaceAll("[\\(\\)]", "");
+						tok = new Token(form, pronunciation, pos, translation);
 						tokens.add(tok);
 					}
 					inflect(tok);
@@ -137,10 +148,7 @@ public class WiktionaryPreprocessor {
 	private void inflect(Token tok) {
 		String inflectionName = tok.getInflectionParadigm();
 		Map<Inflection, String> paradigm = inflections.get(inflectionName);
-		if (paradigm == null) {
-			System.out.println(inflectionName);
-			System.out.println(tok);
-		}
+
 		for (Entry<Inflection, String> entry : paradigm.entrySet()) {
 			Inflection infl = entry.getKey();
 			String suffix = entry.getValue();
@@ -170,6 +178,8 @@ public class WiktionaryPreprocessor {
 		String pronInfl = "";
 		
 		switch (inflectionName) {
+		// the templates ja-aru and ja-suru-indep include the stem
+		// since it is irregular for those verbs
 		case "aru":
 			if ("有る".equals(form)) {
 				formInfl = suffix;
@@ -183,8 +193,10 @@ public class WiktionaryPreprocessor {
 			pronInfl = suffix;
 			break;
 		default:
-			formInfl = form + suffix;
-			pronInfl = tok.getPronunciation() + suffix;
+			// remove the final syllable to get the stem
+			formInfl = form.substring(0, form.length() - 1) + suffix;
+			String pron = tok.getPronunciation();
+			pronInfl = pron.substring(0, pron.length() - 1) + suffix;
 		}
 
 		Token tokInfl = new InflectedToken(tok, formInfl, pronInfl, inflection);
@@ -243,10 +255,10 @@ public class WiktionaryPreprocessor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		inflections.put(getName(file), inflectionScheme);
+		inflections.put(getFileName(file), inflectionScheme);
 	}
 
-	private String getName(File file) {
+	private String getFileName(File file) {
 		return file.getName().replaceAll("(ja-)|(\\.txt)", "");
 	}
 
@@ -264,7 +276,7 @@ public class WiktionaryPreprocessor {
 		String fileName = DICTIONARY_GENERATED_PATH + "dictionary-full-" + year + month + day + ".tsv";
 		File file = new File(fileName);
 		try (PrintWriter pw = new PrintWriter(file)) {
-			pw.println("## Source: https://en.wiktionary.org/");
+			pw.println("## Based on data from https://en.wiktionary.org/");
 			for (Token tok : tokens) {
 				pw.println(tok);
 			}

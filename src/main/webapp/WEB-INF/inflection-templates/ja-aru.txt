@@ -1,4 +1,5 @@
 ## based on https://en.wiktionary.org/wiki/%E3%81%82%E3%82%8B
+## The stem is included here because it changes for negative inflections.
 imperfective=有ら
 continuative=有り
 terminal=有る

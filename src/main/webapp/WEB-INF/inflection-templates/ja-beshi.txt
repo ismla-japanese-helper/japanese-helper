@@ -1,0 +1,15 @@
+## based on https://en.wiktionary.org/wiki/%E3%81%B9%E3%81%97
+## Some of the usual inflections do not exist for べし.
+imperfective=から
+continuative=く
+continuative2=かり
+terminal=し
+attributive=き
+attributive2=かる
+hypothetical=けれ
+negative=きではない
+negative_continuative=からず
+negative_continuative=からざる
+perfective=きだった
+conjunctive=きで
+hypothetical_conditional=ければ

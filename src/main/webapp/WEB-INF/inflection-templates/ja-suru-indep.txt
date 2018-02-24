@@ -1,4 +1,5 @@
 ## based on https://en.wiktionary.org/wiki/%E3%81%99%E3%82%8B
+## The stem is included here because it changes for most inflections.
 imperfective=さ
 imperfective2=し
 imperfective3=せ

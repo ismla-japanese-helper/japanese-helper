@@ -1,0 +1,22 @@
+## based on https://en.wiktionary.org/wiki/%E3%81%8F%E3%82%8C%E3%82%8B
+## It is different from ja-ichi in that it has an irregular imperative.
+imperfective=
+continuative=
+terminal=る
+attributive=る
+hypothetical=れ
+imperative=
+passive=られる
+causative=させる
+causative2=さす
+potential=られる
+potential2=れる
+volitional=よう
+negative=ない
+negative2=ぬ
+negative3=ん
+negative_continuative=ず
+formal=ます
+perfective=た
+conjunctive=て
+hypothetical_conditional=れば
