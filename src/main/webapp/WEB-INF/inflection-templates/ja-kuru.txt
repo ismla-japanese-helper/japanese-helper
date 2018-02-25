@@ -1,0 +1,18 @@
+## based on https://en.wiktionary.org/wiki/%E9%80%A3%E3%82%8C%E3%81%A6%E6%9D%A5%E3%82%8B
+imperfective=こ
+continuative=き
+terminal=くる
+attributive=くる
+hypothetical=くれ
+imperative=こい
+passive=こられる
+causative=こさせる
+causative2=こさす
+potential=こられる
+volitional=こよう
+negative=こない
+negative_continuative=こず
+formal=きます
+perfective=きた
+conjunctive=きて
+hypothetical_conditional=くれば

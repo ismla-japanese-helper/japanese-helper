@@ -94,9 +94,12 @@ public class WiktionaryPreprocessor {
 					switch (tok.getInflectionParadigm()) {
 					case "tari":
 					case "?":
-					case "kuru":
 						// TODO actually deal with these cases
 						continue lines;
+					// case "kuru":
+					// tok = new Token(form, pronunciation, "V[kuru]",
+					// translation);
+					// break;
 					case "verbconj":
 						switch (tok.getForm()) {
 						case "有る":
@@ -174,9 +177,10 @@ public class WiktionaryPreprocessor {
 
 	private void inflect(Token tok, String suffix, String inflection, String inflectionName) {
 		String form = tok.getForm();
+		String pron = tok.getPronunciation();
 		String formInfl = "";
 		String pronInfl = "";
-		
+
 		switch (inflectionName) {
 		// the templates ja-aru and ja-suru-indep include the stem
 		// since it is irregular for those verbs
@@ -189,18 +193,40 @@ public class WiktionaryPreprocessor {
 			pronInfl = aruKanjiToKana(suffix);
 			break;
 		case "suru-indep":
+			// the する inflection does not include kanji,
+			// so form and pronunciation are identical
 			formInfl = suffix;
 			pronInfl = suffix;
+			break;
+		case "kuru":
+			/*
+			 * A special property of the verb with this inflection scheme is
+			 * that the vowel quality of final syllable of its stem (来) changes
+			 * for some of the inflections--this kanji is represented by
+			 * different kana when transcribing its pronunciation. Therefore, we
+			 * included the kana versions of this syllable in the template and
+			 * need to avoid including this syllable twice now.
+			 */
+			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
+			if ("連れて来る".equals(form)) {
+				formInfl = form.substring(0, form.length() - 1) + suffix.substring(1);
+			} else {
+				formInfl = pronInfl;
+			}
 			break;
 		default:
 			// remove the final syllable to get the stem
 			formInfl = form.substring(0, form.length() - 1) + suffix;
-			String pron = tok.getPronunciation();
 			pronInfl = pron.substring(0, pron.length() - 1) + suffix;
 		}
 
-		Token tokInfl = new InflectedToken(tok, formInfl, pronInfl, inflection);
-		tokens.add(tokInfl);
+		formInfl = removeWhiteSpace(formInfl);
+		pronInfl = removeWhiteSpace(pronInfl);
+		tokens.add(new InflectedToken(tok, formInfl, pronInfl, inflection));
+	}
+
+	private String removeWhiteSpace(String word) {
+		return word.replaceAll("\\s+", "");
 	}
 
 	private String aruKanjiToKana(String word) {
