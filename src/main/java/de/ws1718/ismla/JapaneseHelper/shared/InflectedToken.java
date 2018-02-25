@@ -7,11 +7,11 @@ public class InflectedToken extends Token {
 	private String inflection;
 
 	public InflectedToken(Token lemmaToken, String form, String pronunciation, String inflection) {
-		this(form, pronunciation, lemmaToken.getPos(), lemmaToken.getTranslation(), lemmaToken.getForm(), inflection);
+		this(form, pronunciation, lemmaToken.getPos(), lemmaToken.getTranslation(), inflection, lemmaToken.getForm());
 	}
 
-	public InflectedToken(String form, String pronunciation, String pos, String translation, String lemma,
-			String inflection) {
+	public InflectedToken(String form, String pronunciation, String pos, String translation, String inflection,
+			String lemma) {
 		super(form, pronunciation, pos, translation);
 		this.lemma = lemma;
 		this.inflection = inflection;
@@ -51,5 +51,45 @@ public class InflectedToken extends Token {
 	public String toString() {
 		return super.toString() + "\t" + inflection + "\t" + lemma;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((inflection == null) ? 0 : inflection.hashCode());
+		result = prime * result + ((lemma == null) ? 0 : lemma.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (!(obj instanceof InflectedToken)) {
+			return false;
+		}
+		InflectedToken other = (InflectedToken) obj;
+		if (inflection == null) {
+			if (other.inflection != null) {
+				return false;
+			}
+		} else if (!inflection.equals(other.inflection)) {
+			return false;
+		}
+		if (lemma == null) {
+			if (other.lemma != null) {
+				return false;
+			}
+		} else if (!lemma.equals(other.lemma)) {
+			return false;
+		}
+		return true;
+	}
+	
+	
 
 }

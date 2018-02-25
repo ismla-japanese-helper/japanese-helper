@@ -96,10 +96,6 @@ public class WiktionaryPreprocessor {
 					case "?":
 						// TODO actually deal with these cases
 						continue lines;
-					// case "kuru":
-					// tok = new Token(form, pronunciation, "V[kuru]",
-					// translation);
-					// break;
 					case "verbconj":
 						switch (tok.getForm()) {
 						case "有る":
@@ -123,11 +119,6 @@ public class WiktionaryPreprocessor {
 							// TODO add other cases instead
 							continue lines;
 						}
-						break;
-					case "suru":
-						// remove the final "する" from the Wiktionary entries
-						tok = new Token(form.substring(0, form.length() - 2),
-								pronunciation.substring(0, pronunciation.length() - 2), pos, translation);
 						break;
 					case "na":
 						// the Wiktionary entries end with "(な)"
@@ -181,10 +172,10 @@ public class WiktionaryPreprocessor {
 		String formInfl = "";
 		String pronInfl = "";
 
+		// get the stem of the predicate and add the inflectional suffix
 		switch (inflectionName) {
-		// the templates ja-aru and ja-suru-indep include the stem
-		// since it is irregular for those verbs
 		case "aru":
+			// the template ja-aru includes the stem because it is irregular
 			if ("有る".equals(form)) {
 				formInfl = suffix;
 			} else {
@@ -193,10 +184,24 @@ public class WiktionaryPreprocessor {
 			pronInfl = aruKanjiToKana(suffix);
 			break;
 		case "suru-indep":
-			// the する inflection does not include kanji,
-			// so form and pronunciation are identical
+			// the template ja-suru-indep includes the stem
+			// because it is irregular
 			formInfl = suffix;
 			pronInfl = suffix;
+			if ("為る".equals(form)) {
+				// there seems to be only one reading for the
+				// imperfective inflection of the kanji version
+				if (Inflection.IMPERFECTIVE.toString().equals(inflection)
+						|| Inflection.IMPERFECTIVE3.toString().equals(inflection)) {
+					return;
+				}
+				// turn the pure-kana forms into forms containing kanji
+				if (suffix.startsWith("で")) {
+					formInfl = "出" + suffix.substring(1);
+				} else {
+					formInfl = "為" + suffix.substring(1);
+				}
+			}
 			break;
 		case "kuru":
 			/*
@@ -213,6 +218,14 @@ public class WiktionaryPreprocessor {
 			} else {
 				formInfl = pronInfl;
 			}
+			break;
+		case "suru-i-ku":
+		case "suru-tsu":
+		case "suru":
+		case "zuru":
+			// remove the final する to get the stem
+			formInfl = form.substring(0, form.length() - 2) + suffix;
+			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
 		default:
 			// remove the final syllable to get the stem
@@ -255,19 +268,24 @@ public class WiktionaryPreprocessor {
 				BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
 			while ((line = br.readLine()) != null) {
 				line = line.trim();
-				if (line.startsWith("﻿##") || line.startsWith("##")) {
+				if (line.startsWith("﻿##") || line.startsWith("##") || !line.contains("=")) {
 					// the first version contains control characters
 					continue;
 				}
 				line = line.replaceAll("[->\\|<!]", "");
 				String[] fields = line.split("=");
-				if (fields.length != 2) {
-					continue;
+				String key = fields[0];
+				String suffix;
+				if (fields.length == 1) {
+					suffix = "";
+				} else {
+					suffix = fields[1];
 				}
 				try {
-					Inflection vf = Inflection.valueOf(fields[0].trim().toUpperCase());
-					String ending = fields[1].trim().replaceAll("\\. ", "");
+					Inflection vf = Inflection.valueOf(key.trim().toUpperCase());
+					String ending = suffix.trim().replaceAll("\\. ", "");
 					inflectionScheme.put(vf, ending);
+
 				} catch (IllegalArgumentException e) {
 					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
 							&& (!line.contains("note"))) {
@@ -289,17 +307,19 @@ public class WiktionaryPreprocessor {
 	}
 
 	private void printFullDictionary() {
-		LocalDateTime ldt = LocalDateTime.now();
-		int year = ldt.getYear();
-		String month = "" + ldt.getMonthValue();
-		if (month.length() == 1) {
-			month = "0" + month;
-		}
-		String day = "" + ldt.getDayOfMonth();
-		if (day.length() == 1) {
-			day = "0" + day;
-		}
-		String fileName = DICTIONARY_GENERATED_PATH + "dictionary-full-" + year + month + day + ".tsv";
+		// LocalDateTime ldt = LocalDateTime.now();
+		// int year = ldt.getYear();
+		// String month = "" + ldt.getMonthValue();
+		// if (month.length() == 1) {
+		// month = "0" + month;
+		// }
+		// String day = "" + ldt.getDayOfMonth();
+		// if (day.length() == 1) {
+		// day = "0" + day;
+		// }
+		// String fileName = DICTIONARY_GENERATED_PATH + "dictionary-full-" +
+		// year + month + day + ".tsv";
+		String fileName = DICTIONARY_GENERATED_PATH + "dictionary-full.tsv";
 		File file = new File(fileName);
 		try (PrintWriter pw = new PrintWriter(file)) {
 			pw.println("## Based on data from https://en.wiktionary.org/");

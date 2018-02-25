@@ -107,9 +107,70 @@ public class Token implements Serializable {
 
 	@Override
 	public String toString() {
-		return form + "\t" + pronunciation + "\t" + pos 
-				+ (isPredicate() ? "[" + inflectionParadigm + "]" : "")
-				+ "\t" + translation;
+		return form + "\t" + pronunciation + "\t" + pos + (isPredicate() ? "[" + inflectionParadigm + "]" : "") + "\t"
+				+ translation;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((form == null) ? 0 : form.hashCode());
+		result = prime * result + ((inflectionParadigm == null) ? 0 : inflectionParadigm.hashCode());
+		result = prime * result + ((pos == null) ? 0 : pos.hashCode());
+		result = prime * result + ((pronunciation == null) ? 0 : pronunciation.hashCode());
+		result = prime * result + ((translation == null) ? 0 : translation.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Token)) {
+			return false;
+		}
+		Token other = (Token) obj;
+		if (form == null) {
+			if (other.form != null) {
+				return false;
+			}
+		} else if (!form.equals(other.form)) {
+			return false;
+		}
+		if (inflectionParadigm == null) {
+			if (other.inflectionParadigm != null) {
+				return false;
+			}
+		} else if (!inflectionParadigm.equals(other.inflectionParadigm)) {
+			return false;
+		}
+		if (pos == null) {
+			if (other.pos != null) {
+				return false;
+			}
+		} else if (!pos.equals(other.pos)) {
+			return false;
+		}
+		if (pronunciation == null) {
+			if (other.pronunciation != null) {
+				return false;
+			}
+		} else if (!pronunciation.equals(other.pronunciation)) {
+			return false;
+		}
+		if (translation == null) {
+			if (other.translation != null) {
+				return false;
+			}
+		} else if (!translation.equals(other.translation)) {
+			return false;
+		}
+		return true;
 	}
 
 	public void merge(Token other) {
