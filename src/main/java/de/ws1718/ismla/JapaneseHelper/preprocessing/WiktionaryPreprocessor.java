@@ -90,6 +90,12 @@ public class WiktionaryPreprocessor {
 				String translation = fields[3];
 				Token tok = new Token(form, pronunciation, pos, translation);
 				tokens.add(tok);
+
+				// Add an additional entry with the dash removed, if the POS is "SFX".
+				if (tok.getPos().equals("SFX")) {
+					processSFXToken(tokens, tok);
+				}
+
 				if (tok.isPredicate()) {
 					switch (tok.getInflectionParadigm()) {
 					case "tari":
@@ -236,6 +242,11 @@ public class WiktionaryPreprocessor {
 		formInfl = removeWhiteSpace(formInfl);
 		pronInfl = removeWhiteSpace(pronInfl);
 		tokens.add(new InflectedToken(tok, formInfl, pronInfl, inflection));
+	}
+
+	private void processSFXToken(Set<Token> tokens, Token t) {
+		Token dashRemoved = new Token(t.getForm().replaceAll("-", ""), t.getPronunciation().replaceAll("-", ""), t.getPos(), t.getTranslation());
+		tokens.add(dashRemoved);
 	}
 
 	private String removeWhiteSpace(String word) {
