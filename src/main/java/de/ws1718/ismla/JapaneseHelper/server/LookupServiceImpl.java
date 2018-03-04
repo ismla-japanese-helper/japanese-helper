@@ -30,6 +30,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
     private Token convertToken(com.atilika.kuromoji.ipadic.Token t) {
         // TODO: To be implemented
         // This is dummy code.
-        return new Token("皆さん", "みなさん", "N", "We");
+//        return new Token("皆さん", "みなさん", "N", "1) We 2) archaic 3) test");
+        return new Token("皆さん", "みなさん", "N", "1) a land, a large place 2) a country in general, a region 3) a country as in a nation, a state 4) the office of emperor, the crown; affair s of state 5) a province of ancient Japan 6) the national  government in ancient Japan; the national capital in ancient Japan 7) one's birthplace");
     }
 }

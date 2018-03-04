@@ -6,6 +6,11 @@ public class InflectedToken extends Token {
 	private String lemma;
 	private String inflection;
 
+	public InflectedToken() {
+		// TODO Not sure if I should fill them this way. Let's just try it then.
+		this(new Token("dummy", "dummy", "dummy", "1) dummy"), "dummy", "dummy", "dummy");
+	}
+
 	public InflectedToken(Token lemmaToken, String form, String pronunciation, String inflection) {
 		this(form, pronunciation, lemmaToken.getPos(), lemmaToken.getTranslation(), inflection, lemmaToken.getForm());
 	}

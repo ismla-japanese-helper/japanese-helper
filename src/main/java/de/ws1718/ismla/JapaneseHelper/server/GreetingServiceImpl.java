@@ -69,43 +69,4 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		}
 		logger.info("read tokens");
 	}
-
-	// Only for use in tester classes.
-	public ArrayList<String> processGlossesTester(String glosses) {
-		return processGlosses(glosses);
-	}
-
-	private ArrayList<String> processGlosses(String glosses) {
-		ArrayList<String> results = new ArrayList<>();
-		// The position of the last index digit, e.g. '1' in "1) "
-		int lastIndexPos = -1;
-		String lastGloss = "";
-
-		for (int curPointer = 0; curPointer < glosses.length(); curPointer++) {
-			if (curPointer + 1 != glosses.length()) {
-				// Match an index term, e.g. 1)
-				if (Character.isDigit(glosses.charAt(curPointer)) && glosses.charAt(curPointer + 1) == ')') {
-					// If it's not the first gloss, we should have already recorded something previously
-					if (glosses.charAt(curPointer) != '1') {
-						lastGloss = glosses.substring(lastIndexPos + 3, curPointer - 1);
-					}
-					// Record the index position. This also works if it's the first gloss.:w
-					lastIndexPos = curPointer;
-				}
-			} else { // We've come to the end of the whole glosses string and we should record the last entry anyways.
-				// There is no extra space to deal with now. Need to stretch it to the end.
-				lastGloss = glosses.substring(lastIndexPos + 3, curPointer + 1);
-			}
-
-			// If we already got a gloss at the end of this step, we add it.
-			if (!lastGloss.isEmpty()) {
-				// A lot of entries are "?". We don't want to add such entries.
-				if (!lastGloss.equals("?")) {
-					results.add(lastGloss);
-				}
-				lastGloss = "";
-			}
-		}
-		return results;
-	}
 }
