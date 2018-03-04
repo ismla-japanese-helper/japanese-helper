@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -91,7 +90,8 @@ public class WiktionaryPreprocessor {
 				Token tok = new Token(form, pronunciation, pos, translation);
 				tokens.add(tok);
 
-				// Add an additional entry with the dash removed, if the POS is "SFX".
+				// Add an additional entry with the dash removed, if the POS is
+				// "SFX".
 				if (tok.getPos().equals("SFX")) {
 					processSFXToken(tokens, tok);
 				}
@@ -99,9 +99,17 @@ public class WiktionaryPreprocessor {
 				if (tok.isPredicate()) {
 					switch (tok.getInflectionParadigm()) {
 					case "tari":
-					case "?":
-						// TODO actually deal with these cases
+						// TODO actually deal with this
 						continue lines;
+					case "?":
+						/*
+						 * Some of the adjectives have the inflection tag "?".
+						 * Our heuristic of deciding its inflection scheme based
+						 * on the final syllable should work correctly in most
+						 * cases.
+						 */
+						tok = new Token(form, pronunciation, (form.endsWith("い") ? "A[i]" : "A[na]"), translation);
+						break;
 					case "verbconj":
 						switch (tok.getForm()) {
 						case "有る":
@@ -117,20 +125,18 @@ public class WiktionaryPreprocessor {
 							tok = new Token(form, pronunciation, "V[kureru]", translation);
 							break;
 						case "べし":
-							// the pronunciation is listed as "suffix",
-							// so we re-use the kana from the form instead
+							// The pronunciation is listed as "suffix",
+							// so we re-use the kana from the form instead.
 							tok = new Token(form, form, "V[beshi]", translation);
 							break;
 						default:
-							// TODO add other cases instead
 							continue lines;
 						}
 						break;
 					case "na":
-						// the Wiktionary entries end with "(な)"
-						// remove the parentheses
-						form = form.replaceAll("[\\(\\)]", "");
-						pronunciation = pronunciation.replaceAll("[\\(\\)]", "");
+						// The Wiktionary entries end with "(な)".
+						form = form.substring(0, form.length() - 3);
+						pronunciation = pronunciation.substring(0, pronunciation.length() - 3);
 						tok = new Token(form, pronunciation, pos, translation);
 						tokens.add(tok);
 					}
@@ -233,6 +239,10 @@ public class WiktionaryPreprocessor {
 			formInfl = form.substring(0, form.length() - 2) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
+		case "na":
+			formInfl = form + suffix;
+			pronInfl = pron + suffix;
+			break;
 		default:
 			// remove the final syllable to get the stem
 			formInfl = form.substring(0, form.length() - 1) + suffix;
@@ -245,7 +255,8 @@ public class WiktionaryPreprocessor {
 	}
 
 	private void processSFXToken(Set<Token> tokens, Token t) {
-		Token dashRemoved = new Token(t.getForm().replaceAll("-", ""), t.getPronunciation().replaceAll("-", ""), t.getPos(), t.getTranslation());
+		Token dashRemoved = new Token(t.getForm().replaceAll("-", ""), t.getPronunciation().replaceAll("-", ""),
+				t.getPos(), t.getTranslation());
 		tokens.add(dashRemoved);
 	}
 
@@ -318,18 +329,6 @@ public class WiktionaryPreprocessor {
 	}
 
 	private void printFullDictionary() {
-		// LocalDateTime ldt = LocalDateTime.now();
-		// int year = ldt.getYear();
-		// String month = "" + ldt.getMonthValue();
-		// if (month.length() == 1) {
-		// month = "0" + month;
-		// }
-		// String day = "" + ldt.getDayOfMonth();
-		// if (day.length() == 1) {
-		// day = "0" + day;
-		// }
-		// String fileName = DICTIONARY_GENERATED_PATH + "dictionary-full-" +
-		// year + month + day + ".tsv";
 		String fileName = DICTIONARY_GENERATED_PATH + "dictionary-full.tsv";
 		File file = new File(fileName);
 		try (PrintWriter pw = new PrintWriter(file)) {
