@@ -1,0 +1,17 @@
+## Based on https://en.wiktionary.org/wiki/%E3%81%A0
+imperfective=では
+continuative=で
+terminal=だ
+attributive=である
+hypothetical=なら
+hypothetical2=であれ
+volitional=だろう
+negative=ではない
+negative2=じゃない
+negative_continuative=ではなくて
+negative_continuative2=じゃなくて
+formal=です
+perfective=だった
+conjunctive=で
+hypothetical_conditional=ならば
+hypothetical_conditional2=であれば

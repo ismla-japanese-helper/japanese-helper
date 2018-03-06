@@ -1,0 +1,13 @@
+## Based on https://ja.wikipedia.org/wiki/%E5%BD%A2%E5%AE%B9%E5%8B%95%E8%A9%9E
+
+## section タルト型活用
+continuative=と
+attributive=たる
+imperative=たれ
+adverbial=と
+
+## section タリ活用
+imperfective=たる
+continuative2=たり
+terminal=たり
+hypothetical=たれ

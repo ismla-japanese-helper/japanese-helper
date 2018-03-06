@@ -116,13 +116,13 @@ public class Token implements Serializable {
 	}
 
 
-	public boolean isPredicate() {
+	public boolean inflects() {
 		return inflectionParadigm != null;
 	}
 
 	@Override
 	public String toString() {
-		return form + "\t" + pronunciation + "\t" + pos + (isPredicate() ? "[" + inflectionParadigm + "]" : "") + "\t"
+		return form + "\t" + pronunciation + "\t" + pos + (inflects() ? "[" + inflectionParadigm + "]" : "") + "\t"
 				+ translation;
 	}
 
@@ -189,7 +189,7 @@ public class Token implements Serializable {
 	}
 
 	public void merge(Token other) {
-		// TODO
+		// TODO issue #11
 	}
 
 	// Only for use in tester classes.

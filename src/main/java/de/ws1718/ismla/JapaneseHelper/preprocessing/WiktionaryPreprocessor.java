@@ -90,17 +90,22 @@ public class WiktionaryPreprocessor {
 				Token tok = new Token(form, pronunciation, pos, translation);
 				tokens.add(tok);
 
-				// Add an additional entry with the dash removed, if the POS is
-				// "SFX".
+				// Add an additional entry with the dash removed,
+				// if the POS is "SFX".
 				if (tok.getPos().equals("SFX")) {
 					processSFXToken(tokens, tok);
 				}
 
-				if (tok.isPredicate()) {
+				if ("です".equals(form) && "V".equals(pos)) {
+					// TODO check if です still doesn't have any inflection tag
+					// after the update of the Wiktionary dump
+					// if it does have one, move this new token assignment into
+					// the switch below
+					tok = new Token(form, pronunciation, "V[desu]", translation);
+				}
+
+				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
-					case "tari":
-						// TODO actually deal with this
-						continue lines;
 					case "?":
 						/*
 						 * Some of the adjectives have the inflection tag "?".
@@ -129,6 +134,9 @@ public class WiktionaryPreprocessor {
 							// so we re-use the kana from the form instead.
 							tok = new Token(form, form, "V[beshi]", translation);
 							break;
+						case "だ":
+							// TODO issue #14
+							tok = new Token(form, form, "V[da]", translation);
 						default:
 							continue lines;
 						}
@@ -240,6 +248,7 @@ public class WiktionaryPreprocessor {
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
 		case "na":
+		case "tari":
 			formInfl = form + suffix;
 			pronInfl = pron + suffix;
 			break;

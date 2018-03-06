@@ -12,7 +12,8 @@ public class InflectedToken extends Token {
 	}
 
 	public InflectedToken(Token lemmaToken, String form, String pronunciation, String inflection) {
-		this(form, pronunciation, lemmaToken.getPos(), lemmaToken.getTranslation(), inflection, lemmaToken.getForm());
+		this(form, pronunciation, lemmaToken.getPos() + "[" + lemmaToken.getInflectionParadigm() + "]",
+				lemmaToken.getTranslation(), inflection, lemmaToken.getForm());
 	}
 
 	public InflectedToken(String form, String pronunciation, String pos, String translation, String inflection,
@@ -94,7 +95,5 @@ public class InflectedToken extends Token {
 		}
 		return true;
 	}
-	
-	
 
 }
