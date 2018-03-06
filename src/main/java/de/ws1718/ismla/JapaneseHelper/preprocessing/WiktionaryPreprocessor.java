@@ -182,7 +182,6 @@ public class WiktionaryPreprocessor {
 				// regular entries
 				inflect(tok, suffix, infl.toString(), inflectionName);
 			}
-			// TODO also incl. inflection paradigm?
 		}
 	}
 
@@ -303,7 +302,7 @@ public class WiktionaryPreprocessor {
 					// the first version contains control characters
 					continue;
 				}
-				line = line.replaceAll("[->\\|<!]", "");
+				line = line.replaceAll("[->\\|<!{}]", "");
 				String[] fields = line.split("=");
 				String key = fields[0];
 				String suffix;
@@ -311,6 +310,7 @@ public class WiktionaryPreprocessor {
 					suffix = "";
 				} else {
 					suffix = fields[1];
+					suffix = suffix.replaceAll("\\w", "");
 				}
 				try {
 					Inflection vf = Inflection.valueOf(key.trim().toUpperCase());

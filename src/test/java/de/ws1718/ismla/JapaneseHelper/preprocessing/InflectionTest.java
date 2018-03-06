@@ -30,6 +30,7 @@ public class InflectionTest {
 	// templates taken from Wiktionary (V)
 	// all of the godan-type verbs (go-...) are inflected very similarly
 	private static final String GO_BU_TOK = "飛ぶ";
+	private static final String GO_RU_TOK = "伝わる";
 	private static final String HONORIFIC_TOK = "下さる";
 	private static final String ICHI_TOK = "生じる";
 	private static final String SURU_I_KU_TOK = "対する";
@@ -49,8 +50,8 @@ public class InflectionTest {
 
 	@BeforeClass
 	public static void readTokens() {
-		List<String> keys = new ArrayList<String>(Arrays.asList(I_TOK, NA_TOK, GO_BU_TOK, HONORIFIC_TOK, ICHI_TOK,
-				SURU_I_KU_TOK, SURU_TSU_TOK, SURU_TOK, ZURU_TOK, KURU_TOK, ARU_TOK, BESHI_TOK, KURERU_TOK,
+		List<String> keys = new ArrayList<String>(Arrays.asList(I_TOK, NA_TOK, GO_BU_TOK, GO_RU_TOK, HONORIFIC_TOK,
+				ICHI_TOK, SURU_I_KU_TOK, SURU_TSU_TOK, SURU_TOK, ZURU_TOK, KURU_TOK, ARU_TOK, BESHI_TOK, KURERU_TOK,
 				SURU_INDEP_TOK, TARI_TOK, QUESTION_MARK_I_TOK, QUESTION_MARK_NA_TOK
 		));
 		String line;
@@ -135,6 +136,18 @@ public class InflectionTest {
 		testInflection(tokens, pos, translation, "飛ばせる", "とばせる", CAUSATIVE, lemma);
 		testInflection(tokens, pos, translation, "飛ばず", "とばず", NEGATIVE_CONTINUATIVE, lemma);
 		testInflection(tokens, pos, translation, "飛んで", "とんで", CONJUNCTIVE, lemma);
+	}
+	
+	@Test
+	public void testGoRu() {
+		String lemma = GO_RU_TOK;
+		List<InflectedToken> tokens = map.get(lemma);
+		assertNotNull(tokens);
+		assertEquals(17, tokens.size());
+		String pos = "VI1[go-ru]";
+		String translation = "1) to be conveyed, to be communicated";
+		
+		testInflection(tokens, pos, translation, "伝わる", "つたわる", TERMINAL, lemma);
 	}
 
 	@Test
