@@ -1,5 +1,8 @@
 package de.ws1718.ismla.JapaneseHelper.shared;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class InflectedToken extends Token {
 
 	private static final long serialVersionUID = -8227675932132742011L;
@@ -7,18 +10,102 @@ public class InflectedToken extends Token {
 	private String inflection;
 
 	public InflectedToken() {
-		// TODO Not sure if I should fill them this way. Let's just try it then.
-		this(new Token("dummy", "dummy", "dummy", "1) dummy"), "dummy", "dummy", "dummy");
+		this("", "", "", "", new ArrayList<String>(), "", "");
 	}
 
+	/**
+	 * Constructs a new inflected token.
+	 * 
+	 * @param lemmaToken
+	 *            the lemma of this token
+	 * @param form
+	 *            the form (in kanji and kana)
+	 * @param pronunciation
+	 *            the pronunciation (in kana)
+	 * @param inflection
+	 *            the aspect/tense/voice/politeness/negation according to which
+	 *            this token is inflected
+	 */
 	public InflectedToken(Token lemmaToken, String form, String pronunciation, String inflection) {
-		this(form, pronunciation, lemmaToken.getPos() + "[" + lemmaToken.getInflectionParadigm() + "]",
-				lemmaToken.getTranslation(), inflection, lemmaToken.getForm());
+		this(form, pronunciation, lemmaToken.getPos(), lemmaToken.getInflectionParadigm(), lemmaToken.getTranslations(),
+				inflection, lemmaToken.getForm());
 	}
 
-	public InflectedToken(String form, String pronunciation, String pos, String translation, String inflection,
-			String lemma) {
-		super(form, pronunciation, pos, translation);
+	/**
+	 * Constructs a new inflected token.
+	 * 
+	 * @param form
+	 *            the form (in kanji and kana)
+	 * @param pronunciation
+	 *            the pronunciation (in kana)
+	 * @param posSimple
+	 *            the POS tag
+	 * @param inflectionParadigm
+	 *            the inflection paradigm
+	 * @param translations
+	 *            the list of translations
+	 * @param inflection
+	 *            the aspect/tense/voice/politeness/negation according to which
+	 *            this token is inflected
+	 * @param lemma
+	 *            the lemma of this token
+	 */
+	public InflectedToken(String form, String pronunciation, String posSimple, String inflectionParadigm,
+			List<String> translations, String inflection, String lemma) {
+		super(form, pronunciation, posSimple, inflectionParadigm, translations);
+		this.lemma = lemma;
+		this.inflection = inflection;
+	}
+
+	/**
+	 * Constructs a new inflected token.
+	 * 
+	 * @param form
+	 *            the form (in kanji and kana)
+	 * @param pronunciation
+	 *            the pronunciation (in kana)
+	 * @param posSimple
+	 *            the POS tag
+	 * @param inflectionParadigm
+	 *            the inflection paradigm
+	 * @param translation
+	 *            the enumeration of translations, e.g.
+	 *            "1) the first meaning 2) the second meaning 3) etc."
+	 * @param inflection
+	 *            the aspect/tense/voice/politeness/negation according to which
+	 *            this token is inflected
+	 * @param lemma
+	 *            the lemma of this token
+	 */
+	public InflectedToken(String form, String pronunciation, String posSimple, String inflectionParadigm,
+			String translation, String inflection, String lemma) {
+		super(form, pronunciation, new String[] { posSimple, inflectionParadigm }, translation);
+		this.lemma = lemma;
+		this.inflection = inflection;
+	}
+
+	/**
+	 * Constructs a new inflected token.
+	 * 
+	 * @param form
+	 *            the form (in kanji and kana)
+	 * @param pronunciation
+	 *            the pronunciation (in kana)
+	 * @param posAndInflection
+	 *            a String array of length 2 containing the POS tag and the
+	 *            inflection paradigm, in this order
+	 * @param translation
+	 *            the enumeration of translations, e.g.
+	 *            "1) the first meaning 2) the second meaning 3) etc."
+	 * @param inflection
+	 *            the aspect/tense/voice/politeness/negation according to which
+	 *            this token is inflected
+	 * @param lemma
+	 *            the lemma of this token
+	 */
+	public InflectedToken(String form, String pronunciation, String posAndInflection, String translation,
+			String inflection, String lemma) {
+		super(form, pronunciation, posAndInflection, translation);
 		this.lemma = lemma;
 		this.inflection = inflection;
 	}
@@ -72,10 +159,7 @@ public class InflectedToken extends Token {
 		if (this == obj) {
 			return true;
 		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (!(obj instanceof InflectedToken)) {
+		if (!super.equals(obj) || !(obj instanceof InflectedToken)) {
 			return false;
 		}
 		InflectedToken other = (InflectedToken) obj;
@@ -87,13 +171,9 @@ public class InflectedToken extends Token {
 			return false;
 		}
 		if (lemma == null) {
-			if (other.lemma != null) {
-				return false;
-			}
-		} else if (!lemma.equals(other.lemma)) {
-			return false;
+			return other.lemma == null;
 		}
-		return true;
+		return lemma.equals(other.lemma);
 	}
 
 }

@@ -93,7 +93,7 @@ public class WiktionaryPreprocessor {
 				// Add an additional entry with the dash removed,
 				// if the POS is "SFX".
 				if (tok.getPos().equals("SFX")) {
-					processSFXToken(tokens, tok);
+					processSFXToken(tok);
 				}
 
 				if ("です".equals(form) && "V".equals(pos)) {
@@ -262,9 +262,9 @@ public class WiktionaryPreprocessor {
 		tokens.add(new InflectedToken(tok, formInfl, pronInfl, inflection));
 	}
 
-	private void processSFXToken(Set<Token> tokens, Token t) {
+	private void processSFXToken(Token t) {
 		Token dashRemoved = new Token(t.getForm().replaceAll("-", ""), t.getPronunciation().replaceAll("-", ""),
-				t.getPos(), t.getTranslation());
+				t.getPos(), t.getInflectionParadigm(), t.getTranslations());
 		tokens.add(dashRemoved);
 	}
 

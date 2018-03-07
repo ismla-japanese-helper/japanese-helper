@@ -2,49 +2,85 @@ package de.ws1718.ismla.JapaneseHelper.shared;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Token implements Serializable {
 
 	private static final long serialVersionUID = -150279039676314554L;
 
+	// TODO check if we need to change the lists to the serializable type
+	// ArrayList
 	private String form;
 	private String pronunciation;
 	private String pos;
 	private String inflectionParadigm;
-	// TODO make this a List<String> and split by the enumerators?
-	private String translation;
+	private List<String> translations;
 
-	private List<String> glosses;
-
+	/**
+	 * Default constructor.
+	 */
 	public Token() {
-		// TODO Not sure if I should fill them this way. Let's just try it then.
-		this("dummy", "dummy", "dummy", "1) dummy");
+		this("", "", "", null, new ArrayList<String>());
 	}
 
-	// Just copies another token.
-	public Token(Token t) {
-		new Token(t.getForm(), t.getPronunciation(), t.getPos(), t.getTranslation());
+	/**
+	 * Constructs a new token.
+	 * 
+	 * @param form
+	 *            the form (in kanji and kana)
+	 * @param pronunciation
+	 *            the pronunciation (in kana)
+	 * @param posAndInflection
+	 *            the POS tag in one of the following formats:
+	 *            "pos[inflectionParadigm]" or "pos"
+	 * @param translation
+	 *            the enumeration of translations, e.g.
+	 *            "1) the first meaning 2) the second meaning 3) etc."
+	 */
+	public Token(String form, String pronunciation, String posAndInflection, String translation) {
+		this(form, pronunciation, processPosAndInflection(posAndInflection), translation);
 	}
 
-	public Token(String form, String pronunciation, String pos, String translation) {
+	/**
+	 * Constructs a new token.
+	 * 
+	 * @param form
+	 *            the form (in kanji and kana)
+	 * @param pronunciation
+	 *            the pronunciation (in kana)
+	 * @param posAndInflection
+	 *            a String array of length 2 containing the POS tag and the
+	 *            inflection paradigm, in this order
+	 * @param translation
+	 *            the enumeration of translations, e.g.
+	 *            "1) the first meaning 2) the second meaning 3) etc."
+	 */
+	public Token(String form, String pronunciation, String[] posAndInflection, String translation) {
+		this(form, pronunciation, posAndInflection[0], posAndInflection[1], processGlosses(translation));
+	}
+
+	/**
+	 * Constructs a new token.
+	 * 
+	 * @param form
+	 *            the form (in kanji and kana)
+	 * @param pronunciation
+	 *            the pronunciation (in kana)
+	 * @param posSimple
+	 *            the POS tag
+	 * @param inflectionParadigm
+	 *            the inflection paradigm
+	 * @param translation
+	 *            the list of translations
+	 */
+	public Token(String form, String pronunciation, String posSimple, String inflectionParadigm,
+			List<String> translations) {
 		this.form = form;
 		this.pronunciation = pronunciation;
-		if (pos == null || pos.trim().isEmpty()) {
-			this.pos = "";
-		}
-		if (pos.contains("[") && pos.contains("]")) {
-			int open = pos.indexOf("[");
-			int close = pos.indexOf("]");
-			if (open < close) {
-				this.pos = pos.substring(0, open);
-				inflectionParadigm = pos.substring(open + 1, close);
-			}
-		} else {
-			this.pos = pos;
-		}
-		this.translation = translation;
-		this.glosses = processGlosses(translation);
+		pos = posSimple;
+		this.inflectionParadigm = inflectionParadigm;
+		this.translations = translations;
 	}
 
 	/**
@@ -78,7 +114,7 @@ public class Token implements Serializable {
 	}
 
 	/**
-	 * @return the POS tag
+	 * @return the pos
 	 */
 	public String getPos() {
 		return pos;
@@ -86,44 +122,53 @@ public class Token implements Serializable {
 
 	/**
 	 * @param pos
-	 *            the POS tag to set
+	 *            the pos to set
 	 */
 	public void setPos(String pos) {
 		this.pos = pos;
 	}
 
 	/**
-	 * @return the translation
+	 * @return the inflection paradigm
 	 */
-	public String getTranslation() {
-		return translation;
-	}
-
-	/**
-	 * @param translation
-	 *            the translation to set
-	 */
-	public void setTranslation(String translation) {
-		this.translation = translation;
-	}
-
 	public String getInflectionParadigm() {
 		return inflectionParadigm;
 	}
 
-	public List<String> getGlosses() {
-		return glosses;
+	/**
+	 * @param inflectionParadigm
+	 *            the inflection paradigm to set
+	 */
+	public void setInflectionParadigm(String inflectionParadigm) {
+		this.inflectionParadigm = inflectionParadigm;
 	}
 
+	/**
+	 * @return the translations
+	 */
+	public List<String> getTranslations() {
+		return translations;
+	}
 
+	/**
+	 * @param translations
+	 *            the list of translations to set
+	 */
+	public void setTranslations(List<String> translations) {
+		this.translations = translations;
+	}
+
+	/**
+	 * @return true if this token is associated with an inflection paradigm
+	 */
 	public boolean inflects() {
-		return inflectionParadigm != null;
+		return inflectionParadigm != null || !inflectionParadigm.isEmpty();
 	}
 
 	@Override
 	public String toString() {
 		return form + "\t" + pronunciation + "\t" + pos + (inflects() ? "[" + inflectionParadigm + "]" : "") + "\t"
-				+ translation;
+				+ translations;
 	}
 
 	@Override
@@ -131,10 +176,10 @@ public class Token implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((form == null) ? 0 : form.hashCode());
+		result = prime * result + ((translations == null) ? 0 : translations.hashCode());
 		result = prime * result + ((inflectionParadigm == null) ? 0 : inflectionParadigm.hashCode());
 		result = prime * result + ((pos == null) ? 0 : pos.hashCode());
 		result = prime * result + ((pronunciation == null) ? 0 : pronunciation.hashCode());
-		result = prime * result + ((translation == null) ? 0 : translation.hashCode());
 		return result;
 	}
 
@@ -143,10 +188,7 @@ public class Token implements Serializable {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof Token)) {
+		if (obj == null || !(obj instanceof Token)) {
 			return false;
 		}
 		Token other = (Token) obj;
@@ -155,6 +197,13 @@ public class Token implements Serializable {
 				return false;
 			}
 		} else if (!form.equals(other.form)) {
+			return false;
+		}
+		if (translations == null) {
+			if (other.translations != null) {
+				return false;
+			}
+		} else if (!translations.equals(other.translations)) {
 			return false;
 		}
 		if (inflectionParadigm == null) {
@@ -172,32 +221,38 @@ public class Token implements Serializable {
 			return false;
 		}
 		if (pronunciation == null) {
-			if (other.pronunciation != null) {
-				return false;
-			}
-		} else if (!pronunciation.equals(other.pronunciation)) {
-			return false;
+			return other.pronunciation == null;
 		}
-		if (translation == null) {
-			if (other.translation != null) {
-				return false;
-			}
-		} else if (!translation.equals(other.translation)) {
-			return false;
-		}
-		return true;
+		return pronunciation.equals(other.pronunciation);
 	}
 
-	public void merge(Token other) {
-		// TODO issue #11
+	private static String[] processPosAndInflection(String pos) {
+		if (pos == null || pos.trim().isEmpty()) {
+			return new String[] { "", null };
+		}
+
+		String inflectionParadigm = null;
+		int open = pos.indexOf("[");
+		int close = pos.indexOf("]");
+		if (open != -1 && close != -1 && open < close) {
+			inflectionParadigm = pos.substring(open + 1, close);
+			pos = pos.substring(0, open);
+		}
+
+		return new String[] { pos, inflectionParadigm };
 	}
 
-	// Only for use in tester classes.
+	/**
+	 * Only for use in tester classes.
+	 * 
+	 * @param glosses
+	 * @return
+	 */
 	public ArrayList<String> processGlossesTester(String glosses) {
 		return processGlosses(glosses);
 	}
 
-	private ArrayList<String> processGlosses(String glosses) {
+	private static ArrayList<String> processGlosses(String glosses) {
 		ArrayList<String> results = new ArrayList<>();
 		// The position of the last index digit, e.g. '1' in "1) "
 		int lastIndexPos = 0;
@@ -207,16 +262,22 @@ public class Token implements Serializable {
 			if (curPointer + 1 != glosses.length()) {
 				// Match an index term, e.g. 1)
 				if (Character.isDigit(glosses.charAt(curPointer)) && glosses.charAt(curPointer + 1) == ')') {
-					// If it's not the first gloss, we should have already recorded something previously
+					// If it's not the first gloss, we should have already
+					// recorded something previously
 					if (glosses.charAt(curPointer) != '1') {
-						// Maybe I should keep the index after all (instead of +3). Let's see how this works.
+						// Maybe I should keep the index after all (instead of
+						// +3). Let's see how this works.
 						lastGloss = glosses.substring(lastIndexPos, curPointer - 1);
 					}
-					// Record the index position. This also works if it's the first gloss.
+					// Record the index position. This also works if it's the
+					// first gloss.
 					lastIndexPos = curPointer;
 				}
-			} else { // We've come to the end of the whole glosses string and we should record the last entry anyways.
-				// There is no extra space to deal with now. Need to stretch it to the end.
+			} else { // We've come to the end of the whole translations string
+						// and we
+						// should record the last entry anyways.
+				// There is no extra space to deal with now. Need to stretch it
+				// to the end.
 				lastGloss = glosses.substring(lastIndexPos, curPointer + 1);
 			}
 
@@ -231,4 +292,5 @@ public class Token implements Serializable {
 		}
 		return results;
 	}
+
 }

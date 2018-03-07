@@ -82,7 +82,7 @@ public class ResultsWidget extends Composite {
 		representation += "<div class='col-12'>" + t.getForm() + "</div>";
 		representation += "<div class='col-12'>" + t.getPronunciation() + "</div>";
 		// Manually added <a> here.
-		representation += "<div class='col-12' title='Click for full list of glosses'><a>" + t.getGlosses().get(0) + "</a></div>";
+		representation += "<div class='col-12' title='Click for full list of glosses'><a>" + t.getTranslations().get(0) + "</a></div>";
 		representation += "<div class='col-12'>" + t.getPos() + "</div>";
 
 		representation += "</div>";

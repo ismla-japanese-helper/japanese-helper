@@ -52,8 +52,7 @@ public class InflectionTest {
 	public static void readTokens() {
 		List<String> keys = new ArrayList<String>(Arrays.asList(I_TOK, NA_TOK, GO_BU_TOK, GO_RU_TOK, HONORIFIC_TOK,
 				ICHI_TOK, SURU_I_KU_TOK, SURU_TSU_TOK, SURU_TOK, ZURU_TOK, KURU_TOK, ARU_TOK, BESHI_TOK, KURERU_TOK,
-				SURU_INDEP_TOK, TARI_TOK, QUESTION_MARK_I_TOK, QUESTION_MARK_NA_TOK
-		));
+				SURU_INDEP_TOK, TARI_TOK, QUESTION_MARK_I_TOK, QUESTION_MARK_NA_TOK));
 		String line;
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(DICT_FILE), "UTF-8"))) {
 			while ((line = br.readLine()) != null) {
@@ -137,7 +136,7 @@ public class InflectionTest {
 		testInflection(tokens, pos, translation, "飛ばず", "とばず", NEGATIVE_CONTINUATIVE, lemma);
 		testInflection(tokens, pos, translation, "飛んで", "とんで", CONJUNCTIVE, lemma);
 	}
-	
+
 	@Test
 	public void testGoRu() {
 		String lemma = GO_RU_TOK;
@@ -146,7 +145,7 @@ public class InflectionTest {
 		assertEquals(17, tokens.size());
 		String pos = "VI1[go-ru]";
 		String translation = "1) to be conveyed, to be communicated";
-		
+
 		testInflection(tokens, pos, translation, "伝わる", "つたわる", TERMINAL, lemma);
 	}
 
@@ -333,7 +332,6 @@ public class InflectionTest {
 		testInflection(tokens, pos, translation, "為ず", "せず", NEGATIVE_CONTINUATIVE, lemma);
 		testInflection(tokens, pos, translation, "為て", "して", CONJUNCTIVE, lemma);
 	}
-	
 
 	@Test
 	public void testTari() {
@@ -343,7 +341,7 @@ public class InflectionTest {
 		assertEquals(8, tokens.size());
 		String pos = "A[tari]";
 		String translation = "1) wretched, miserable 2) terrible, extremely bad 3) going to great efforts";
-		
+
 		testInflection(tokens, pos, translation, "惨憺たる", "さんたんたる", ATTRIBUTIVE, lemma);
 	}
 

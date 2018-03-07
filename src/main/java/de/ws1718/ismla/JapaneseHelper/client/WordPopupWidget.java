@@ -25,7 +25,7 @@ public class WordPopupWidget extends Composite {
     public WordPopupWidget(Token word) {
         initWidget(ourUiBinder.createAndBindUi(this));
         glossesContainer.addStyleName("container");
-        HTML glossesList = generateGlossesList(word.getGlosses());
+        HTML glossesList = generateGlossesList(word.getTranslations());
         glossesContainer.add(glossesList);
     }
 
