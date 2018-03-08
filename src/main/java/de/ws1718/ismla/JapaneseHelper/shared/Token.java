@@ -9,13 +9,12 @@ public class Token implements Serializable {
 
 	private static final long serialVersionUID = -150279039676314554L;
 
-	// TODO check if we need to change the lists to the serializable type
-	// ArrayList
 	private String form;
 	private String pronunciation;
 	private String pos;
 	private String inflectionParadigm;
-	private List<String> translations;
+	// `Array`List because it needs to be serializable
+	private ArrayList<String> translations;
 
 	/**
 	 * Default constructor.
@@ -75,7 +74,7 @@ public class Token implements Serializable {
 	 *            the list of translations
 	 */
 	public Token(String form, String pronunciation, String posSimple, String inflectionParadigm,
-			List<String> translations) {
+			ArrayList<String> translations) {
 		this.form = form;
 		this.pronunciation = pronunciation;
 		pos = posSimple;
@@ -114,7 +113,7 @@ public class Token implements Serializable {
 	}
 
 	/**
-	 * @return the pos
+	 * @return the POS tag
 	 */
 	public String getPos() {
 		return pos;
@@ -122,7 +121,7 @@ public class Token implements Serializable {
 
 	/**
 	 * @param pos
-	 *            the pos to set
+	 *            the POS tag to set
 	 */
 	public void setPos(String pos) {
 		this.pos = pos;
@@ -146,7 +145,7 @@ public class Token implements Serializable {
 	/**
 	 * @return the translations
 	 */
-	public List<String> getTranslations() {
+	public ArrayList<String> getTranslations() {
 		return translations;
 	}
 
@@ -154,7 +153,7 @@ public class Token implements Serializable {
 	 * @param translations
 	 *            the list of translations to set
 	 */
-	public void setTranslations(List<String> translations) {
+	public void setTranslations(ArrayList<String> translations) {
 		this.translations = translations;
 	}
 
@@ -162,7 +161,7 @@ public class Token implements Serializable {
 	 * @return true if this token is associated with an inflection paradigm
 	 */
 	public boolean inflects() {
-		return inflectionParadigm != null || !inflectionParadigm.isEmpty();
+		return !(inflectionParadigm == null || inflectionParadigm.isEmpty());
 	}
 
 	@Override
@@ -274,8 +273,7 @@ public class Token implements Serializable {
 					lastIndexPos = curPointer;
 				}
 			} else { // We've come to the end of the whole translations string
-						// and we
-						// should record the last entry anyways.
+				// and we should record the last entry anyways.
 				// There is no extra space to deal with now. Need to stretch it
 				// to the end.
 				lastGloss = glosses.substring(lastIndexPos, curPointer + 1);
@@ -291,6 +289,26 @@ public class Token implements Serializable {
 			}
 		}
 		return results;
+	}
+
+	/**
+	 * Merges another token into this one. Assumes that both tokens share the
+	 * same form.
+	 * 
+	 * @param other
+	 *            the other token
+	 */
+	public void merge(Token other) {
+		pronunciation = merge(pronunciation, other.pronunciation);
+		pos = merge(pos, other.pos);
+		inflectionParadigm = merge(inflectionParadigm, other.inflectionParadigm);
+		translations.addAll(other.translations);
+	}
+
+	private String merge(String field, String other) {
+		field = field == null ? "" : field;
+		other = other == null ? "" : other;
+		return field + ", " + other;
 	}
 
 }

@@ -4,24 +4,28 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
+import de.ws1718.ismla.JapaneseHelper.server.GreetingServiceImpl;
+import de.ws1718.ismla.JapaneseHelper.server.LookupServiceImpl;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
@@ -38,13 +42,13 @@ public class WiktionaryPreprocessor {
 
 	private static final Logger logger = Logger.getLogger(WiktionaryPreprocessor.class.getSimpleName());
 
-	private static final String RESOURCES_PATH = "src/main/webapp/WEB-INF/";
+	private static final String RESOURCES_PATH = "src/main/webapp";
+	private static final String DICTIONARY_DUMP_PATH = RESOURCES_PATH + "/WEB-INF/dictionary/";
+	private static final String INFLECTION_TEMPLATES_PATH = RESOURCES_PATH + "/WEB-INF/inflection-templates/";
+	private static final String DICTIONARY_FULL_PATH = RESOURCES_PATH + LookupServiceImpl.DICTIONARY_PATH;
 
-	private static final String DICTIONARY_DUMP_PATH = RESOURCES_PATH + "dictionary/";
-	private static final String DICTIONARY_GENERATED_PATH = RESOURCES_PATH + "dictionary-full/";
-	private static final String INFLECTION_TEMPLATES_PATH = RESOURCES_PATH + "inflection-templates/";
 	private Map<String, Map<Inflection, String>> inflections;
-	private Set<Token> tokens = new HashSet<>();
+	private Multimap<String, Token> tokens = ArrayListMultimap.create();
 
 	public static void main(String[] args) {
 		WiktionaryPreprocessor wp = new WiktionaryPreprocessor();
@@ -88,7 +92,7 @@ public class WiktionaryPreprocessor {
 				String pos = fields[2];
 				String translation = fields[3];
 				Token tok = new Token(form, pronunciation, pos, translation);
-				tokens.add(tok);
+				addToken(tok);
 
 				// Add an additional entry with the dash removed,
 				// if the POS is "SFX".
@@ -146,7 +150,7 @@ public class WiktionaryPreprocessor {
 						form = form.substring(0, form.length() - 3);
 						pronunciation = pronunciation.substring(0, pronunciation.length() - 3);
 						tok = new Token(form, pronunciation, pos, translation);
-						tokens.add(tok);
+						addToken(tok);
 					}
 					inflect(tok);
 				}
@@ -157,6 +161,10 @@ public class WiktionaryPreprocessor {
 			e.printStackTrace();
 		}
 		logger.info("read tokens");
+	}
+
+	private void addToken(Token tok) {
+		tokens.put(tok.getForm(), tok);
 	}
 
 	private void inflect(Token tok) {
@@ -259,13 +267,12 @@ public class WiktionaryPreprocessor {
 
 		formInfl = removeWhiteSpace(formInfl);
 		pronInfl = removeWhiteSpace(pronInfl);
-		tokens.add(new InflectedToken(tok, formInfl, pronInfl, inflection));
+		addToken(new InflectedToken(tok, formInfl, pronInfl, inflection));
 	}
 
 	private void processSFXToken(Token t) {
-		Token dashRemoved = new Token(t.getForm().replaceAll("-", ""), t.getPronunciation().replaceAll("-", ""),
-				t.getPos(), t.getInflectionParadigm(), t.getTranslations());
-		tokens.add(dashRemoved);
+		addToken(new Token(t.getForm().replaceAll("-", ""), t.getPronunciation().replaceAll("-", ""), t.getPos(),
+				t.getInflectionParadigm(), t.getTranslations()));
 	}
 
 	private String removeWhiteSpace(String word) {
@@ -338,16 +345,13 @@ public class WiktionaryPreprocessor {
 	}
 
 	private void printFullDictionary() {
-		String fileName = DICTIONARY_GENERATED_PATH + "dictionary-full.tsv";
-		File file = new File(fileName);
-		try (PrintWriter pw = new PrintWriter(file)) {
-			pw.println("## Based on data from https://en.wiktionary.org/");
-			for (Token tok : tokens) {
-				pw.println(tok);
-			}
-		} catch (FileNotFoundException e) {
+		try (FileOutputStream fos = new FileOutputStream(DICTIONARY_FULL_PATH);
+				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+			oos.writeObject(tokens);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		logger.info("printed the full dictionary");
 	}
 

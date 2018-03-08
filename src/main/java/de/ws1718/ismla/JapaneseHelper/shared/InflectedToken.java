@@ -51,7 +51,7 @@ public class InflectedToken extends Token {
 	 *            the lemma of this token
 	 */
 	public InflectedToken(String form, String pronunciation, String posSimple, String inflectionParadigm,
-			List<String> translations, String inflection, String lemma) {
+			ArrayList<String> translations, String inflection, String lemma) {
 		super(form, pronunciation, posSimple, inflectionParadigm, translations);
 		this.lemma = lemma;
 		this.inflection = inflection;

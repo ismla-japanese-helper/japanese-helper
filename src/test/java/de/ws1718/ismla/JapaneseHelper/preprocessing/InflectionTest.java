@@ -1,28 +1,51 @@
 package de.ws1718.ismla.JapaneseHelper.preprocessing;
 
-import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.*;
-import static org.junit.Assert.*;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.ATTRIBUTIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.ATTRIBUTIVE2;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.CAUSATIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.CONJUNCTIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.FORMAL;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.FORMAL_NEGATIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.IMPERATIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.IMPERFECTIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.IMPERFECTIVE2;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.INFORMAL_PAST;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.NEGATIVE_CONTINUATIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.PASSIVE;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.POTENTIAL;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.PROVISIONAL;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.TERMINAL;
+import static de.ws1718.ismla.JapaneseHelper.preprocessing.Inflection.VOLITIONAL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.collect.Multimap;
+
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
+import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 public class InflectionTest {
 
-	private static final String DICT_FILE = "src/main/webapp/WEB-INF/dictionary-full/dictionary-full.tsv";
+	private static final String DICT_FILE = "src/main/webapp/WEB-INF/dictionary-full/dictionary-full.ser";
 	private static Map<String, List<InflectedToken>> map = new HashMap<String, List<InflectedToken>>();
+	private static final Logger logger = Logger.getLogger(InflectionTest.class.getSimpleName());
 
 	// templates taken from Wiktionary (ADJ)
 	private static final String I_TOK = "明るい";
@@ -53,35 +76,36 @@ public class InflectionTest {
 		List<String> keys = new ArrayList<String>(Arrays.asList(I_TOK, NA_TOK, GO_BU_TOK, GO_RU_TOK, HONORIFIC_TOK,
 				ICHI_TOK, SURU_I_KU_TOK, SURU_TSU_TOK, SURU_TOK, ZURU_TOK, KURU_TOK, ARU_TOK, BESHI_TOK, KURERU_TOK,
 				SURU_INDEP_TOK, TARI_TOK, QUESTION_MARK_I_TOK, QUESTION_MARK_NA_TOK));
-		String line;
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(DICT_FILE), "UTF-8"))) {
-			while ((line = br.readLine()) != null) {
-				line = line.trim();
-				if (line.startsWith("﻿##") || line.startsWith("##")) {
-					// the first version contains control characters
-					continue;
-				}
-				String[] fields = line.split("\t");
-				if (fields.length != 6) {
-					continue;
-				}
 
-				String lemma = fields[5];
-				if (!keys.contains(lemma)) {
-					continue;
-				}
-				List<InflectedToken> tokens = map.get(lemma);
-				if (tokens == null) {
-					tokens = new ArrayList<>();
-				}
-				tokens.add(new InflectedToken(fields[0], fields[1], fields[2], fields[3], fields[4], lemma));
-				map.put(lemma, tokens);
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		logger.info("reading file");
+		Multimap<String, Token> tokenMap = null;
+		try (InputStream is = new FileInputStream(DICT_FILE); ObjectInputStream ois = new ObjectInputStream(is)) {
+			tokenMap = (Multimap<String, Token>) ois.readObject();
 		} catch (IOException e) {
 			e.printStackTrace();
+			fail();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			fail();
 		}
+
+		logger.info("updating map");
+		for (Token tok : tokenMap.values()) {
+			if (tok instanceof InflectedToken) {
+				InflectedToken infTok = (InflectedToken) tok;
+				String lemma = infTok.getLemma();
+				if (keys.contains(lemma)){
+					List<InflectedToken> tokens = map.get(lemma);
+					if (tokens == null) {
+						tokens = new ArrayList<>();
+					}
+					tokens.add(infTok);
+					map.put(lemma, tokens);
+				}
+			}
+		}
+		logger.info("done");
+
 	}
 
 	private void testInflection(List<InflectedToken> tokens, String pos, String translation, String form,
