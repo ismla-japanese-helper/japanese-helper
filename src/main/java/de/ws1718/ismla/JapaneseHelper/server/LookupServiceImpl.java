@@ -2,17 +2,20 @@ package de.ws1718.ismla.JapaneseHelper.server;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.atilika.kuromoji.ipadic.Tokenizer;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+import com.mariten.kanatools.KanaConverter;
 import de.ws1718.ismla.JapaneseHelper.client.LookupService;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
+// First try to look up the base form of the word in the hashmap
+// If multiple entries, try POS tags
+// Also should try to combine the word with the word after it to see if it forms some inflection form.
 public class LookupServiceImpl extends RemoteServiceServlet implements LookupService {
 	private static final long serialVersionUID = 568570423376066244L;
 
@@ -23,51 +26,96 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public static final String DICTIONARY_PATH = "/WEB-INF/dictionary/";
 	public static final String INFLECTION_TEMPLATES_PATH = "/WEB-INF/inflection-templates/";
 
-	private Multimap<String, Token> tokens;
-
 	public List<Token> lookup(String sentence) {
-		readTokens();
+		ListMultimap<String, Token> tokenMap = readTokens();
 		Tokenizer tokenizer = new Tokenizer();
 		// This is the Token defined by the Kuromoji parser.
-		List<com.atilika.kuromoji.ipadic.Token> tokens = tokenizer.tokenize(sentence.trim());
+		List<com.atilika.kuromoji.ipadic.Token> ipaTokens = tokenizer.tokenize(sentence.trim());
 
 		// This is the Token defined by us.
-		List<Token> results = new ArrayList<>();
-		// Deal with this part of the code later.
-		for (com.atilika.kuromoji.ipadic.Token t : tokens) {
-			Token convertedToken = convertToken(t);
-			results.add(convertedToken);
-		}
+		List<Token> results = convertTokens(ipaTokens, tokenMap);
 
 		return results;
 	}
 
-	private Token convertToken(com.atilika.kuromoji.ipadic.Token t) {
-		logger.info(t.toString());
-		String form = t.getSurface();
-		// TODO use the Kuromoji-Wiktionary POS tag mapping here
-		// (and use the other POS levels for that mapping)
-		String pos = t.getPartOfSpeechLevel1();
-		// TODO we could use t.getPronunciation(), t.getReading()
-		String pron = t.getPronunciation();
-		logger.info(form + ", " + pos + ", " + pron);
+    private List<Token> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens, ListMultimap<String, Token> tokenMap) {
+		List<Token> tokens = new ArrayList<>();
 
-		Collection<Token> matches = tokens.get(form);
-		for (Token tok : matches) {
-			logger.info(tok.toString());
-		}
-		if (matches == null || matches.isEmpty()) {
-			// TODO transform pron, pos
-			return new Token(form, pron, pos, "1) [out-of-vocabulary]");
-		}
+		for (com.atilika.kuromoji.ipadic.Token t : ipaTokens) {
+			// TODO: See if the word is an inflected verb. If yes, try to lookup its full form instead of partial form.
+            String wiktionaryTag = convertPOSTag(t);
+            List<Token> dictTokens = tokenMap.get(t.getBaseForm());
+            // Try to search through the results if there are more than 1 matches.
+			if (dictTokens.size() > 1) {
+				String POS= convertPOSTag(t);
+				// "reading" is the official way something is read.
+				int conv_op_flags = KanaConverter.OP_ZEN_KATA_TO_ZEN_HIRA;
+				// Note that this is recorded in Katakana, while Wiktionary uses Hiragana. Seems some conversion will be needed.
+				String reading = KanaConverter.convertKana(t.getReading(), conv_op_flags);
 
-		ArrayList<Token> matchList = new ArrayList<>(matches);
+				Token tokenToReturn = dictTokens.get(0);
 
-		// TODO sort list
-		return matchList.get(0);
+				// Should we match against both pronunciation and POS and then gradually relaxing?
+				// It might be better to sort them first, indeed...
+				for (Token dictToken : dictTokens) {
+
+					// If both match we should be able to return this token pretty safely.
+					if (dictToken.getPronunciation().equals(reading) && dictToken.getPos().equals(POS)) {
+						logger.info("pronunciation from Wiktionary equals reading from Kuromoji");
+                        tokenToReturn = dictToken;
+                        break;
+					} else if (dictToken.getPronunciation().equals(reading) || dictToken.getPos().equals(POS)) { // Else, if one of the two criteria match, we keep the match but continue the search, since we might still encounter the perfect match later.
+						tokenToReturn = dictToken;
+					}
+				}
+
+				tokens.add(tokenToReturn);
+			} else if (dictTokens.size() == 1) {
+				tokens.add(dictTokens.get(0));
+			} else { // Encountered an out-of-dictionary entry.
+				tokens.add(new Token(t.getBaseForm(), t.getReading(), wiktionaryTag, "1) [out-of-vocabulary]"));
+			}
+        }
+
+        return tokens;
 	}
 
-	private void readTokens() {
+	private String convertPOSTag(com.atilika.kuromoji.ipadic.Token t) {
+		String ipadicTag = t.getPartOfSpeechLevel1();
+		switch (ipadicTag) {
+			case "名詞":
+				// Several possibilities under this category.
+				return "N";
+			case "動詞":
+				// Apparently Wiktionary differentiates between transitive and intransitive verbs but it's not sure whether IPAdic offers such a distinction.
+				return "V";
+			case "形容詞":
+				return "A";
+			case "副詞":
+				return "ADV";
+			case "接続詞":
+				return "CNJ";
+			case "感動詞":
+				return "ITJ";
+			case "助詞":
+				return "PRT";
+			case "助動詞":
+				// This seems weird. Might need to confirm further.
+				return "SFX";
+			case "連体詞":
+				// Really? This also seems quite weird.
+				return "DET";
+			case "接頭詞":
+				// Can't find an example of such a word in the dump yet. Something wrong with the dump?
+				return "PRE";
+			default:
+				// The remaining top-class tags would be "記号", "フィラー" and "その他", which shouldn't be relevant?
+				return "";
+		}
+	}
+
+
+	private ListMultimap<String, Token> readTokens() {
 		List<String> inflectionFiles = new ArrayList<String>(
 				getServletContext().getResourcePaths(INFLECTION_TEMPLATES_PATH));
 		List<InputStream> inflectionStreams = new ArrayList<>();
@@ -80,7 +128,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			dictionaryStreams.add(getServletContext().getResourceAsStream(file));
 		}
 		WiktionaryPreprocessor wp = new WiktionaryPreprocessor(inflectionFiles, inflectionStreams, dictionaryStreams);
-		tokens = wp.getTokens();
+		return wp.getTokens();
 	}
 
 }

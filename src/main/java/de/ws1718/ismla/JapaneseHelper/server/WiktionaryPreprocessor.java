@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
@@ -36,7 +36,7 @@ public class WiktionaryPreprocessor {
 	private static final Logger logger = Logger.getLogger(WiktionaryPreprocessor.class.getSimpleName());
 
 	private Map<String, Map<Inflection, String>> inflections;
-	private Multimap<String, Token> tokens;
+	private ListMultimap<String, Token> tokens;
 
 	public WiktionaryPreprocessor(List<String> inflectionFilenames, List<InputStream> inflectionStreams,
 			List<InputStream> dictionaryStreams) {
@@ -50,7 +50,7 @@ public class WiktionaryPreprocessor {
 		logger.info("read (and generated) " + tokens.size() + " tokens");
 	}
 
-	public Multimap<String, Token> getTokens() {
+	public ListMultimap<String, Token> getTokens() {
 		return tokens;
 	}
 
