@@ -1,5 +1,8 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
+import static de.ws1718.ismla.JapaneseHelper.server.Inflection.FORMAL_NEGATIVE;
+import static de.ws1718.ismla.JapaneseHelper.server.Inflection.FORMAL;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -193,8 +196,7 @@ public class WiktionaryPreprocessor {
 			if ("為る".equals(form)) {
 				// there seems to be only one reading for the
 				// imperfective inflection of the kanji version
-				if (Inflection.IMPERFECTIVE.equals(inflection)
-						|| Inflection.IMPERFECTIVE3.equals(inflection)) {
+				if (Inflection.IMPERFECTIVE.equals(inflection) || Inflection.IMPERFECTIVE3.equals(inflection)) {
 					return;
 				}
 				// turn the pure-kana forms into forms containing kanji
@@ -274,7 +276,7 @@ public class WiktionaryPreprocessor {
 	}
 
 	private void setUpTemplate(String filename, InputStream is) {
-		Map<Inflection, String> inflectionScheme = new HashMap<>();
+		Map<Inflection, String> inflectionParadigm = new HashMap<>();
 		String line;
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
@@ -297,7 +299,7 @@ public class WiktionaryPreprocessor {
 				try {
 					Inflection vf = Inflection.valueOf(key.trim().toUpperCase());
 					String ending = suffix.trim().replaceAll("\\. ", "");
-					inflectionScheme.put(vf, ending);
+					inflectionParadigm.put(vf, ending);
 
 				} catch (IllegalArgumentException e) {
 					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
@@ -312,7 +314,15 @@ public class WiktionaryPreprocessor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		inflections.put(getFileName(filename), inflectionScheme);
+
+		// The formal negative inflection is missing from a lot of the verb
+		// inflection templates.
+		if (inflectionParadigm.containsKey(FORMAL) && !inflectionParadigm.containsKey(FORMAL_NEGATIVE)) {
+			String suffix = inflectionParadigm.get(FORMAL).replace("ます", "ません");
+			inflectionParadigm.put(FORMAL_NEGATIVE, suffix);
+		}
+
+		inflections.put(getFileName(filename), inflectionParadigm);
 	}
 
 	private String getFileName(String filename) {

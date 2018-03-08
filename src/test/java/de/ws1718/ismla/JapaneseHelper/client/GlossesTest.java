@@ -2,7 +2,6 @@ package de.ws1718.ismla.JapaneseHelper.client;
 
 import java.util.ArrayList;
 
-import de.ws1718.ismla.JapaneseHelper.server.GreetingServiceImpl;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 public class GlossesTest {
