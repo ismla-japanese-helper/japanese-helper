@@ -2,8 +2,6 @@ package de.ws1718.ismla.JapaneseHelper.shared;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class Token implements Serializable {
 

@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jetty.websocket.api.SuspendToken;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -97,7 +98,7 @@ public class InflectionTest {
 		for (Token tok : tokenMap.values()) {
 			if (tok instanceof InflectedToken) {
 				InflectedToken infTok = (InflectedToken) tok;
-				String lemma = infTok.getLemma();
+				String lemma = infTok.getLemmaToken().getForm();
 				if (keys.contains(lemma)) {
 					List<InflectedToken> tokens = map.get(lemma);
 					if (tokens == null) {
@@ -136,19 +137,19 @@ public class InflectionTest {
 	}
 
 	private void testInflection(List<InflectedToken> tokens, String pos, String translation, String form,
-			String pronunciation, Inflection inflection, String lemma) {
-		assertTrue(tokens
-				.contains(new InflectedToken(form, pronunciation, pos, translation, inflection.toString(), lemma)));
+			String pronunciation, Inflection inflection, Token lemma) {
+		assertTrue(tokens.contains(new InflectedToken(lemma, form, pronunciation, inflection)));
 	}
 
 	@Test
 	public void testI() {
-		String lemma = I_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = I_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(19, tokens.size());
 		String pos = "A[i]";
 		String translation = "1) bright, light, luminous 2) merry, cheerful";
+		Token lemma = new Token(lemmaForm, "あかるい", pos, translation);
 		testInflection(tokens, pos, translation, "明るかろ", "あかるかろ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "明るかれ", "あかるかれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "明るかった", "あかるかった", INFORMAL_PAST, lemma);
@@ -158,13 +159,13 @@ public class InflectionTest {
 
 	@Test
 	public void testNa() {
-		String lemma = NA_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = NA_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(24, tokens.size());
 		String pos = "A[na]";
 		String translation = "1) strange 2) excellent";
-
+		Token lemma = new Token(lemmaForm, "みょう", pos, translation);
 		testInflection(tokens, pos, translation, "妙だろ", "みょうだろ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "妙であれ", "みょうであれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "妙だった", "みょうだった", INFORMAL_PAST, lemma);
@@ -174,13 +175,13 @@ public class InflectionTest {
 
 	@Test
 	public void testGoBu() {
-		String lemma = GO_BU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = GO_BU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(17, tokens.size());
 		String pos = "V1[go-bu]";
 		String translation = "1) to fly 2) to jump 3) to go quickly 4) to splash, splatter";
-
+		Token lemma = new Token(lemmaForm, "とぶ", pos, translation);
 		testInflection(tokens, pos, translation, "飛ば", "とば", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "飛べ", "とべ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "飛ばせる", "とばせる", CAUSATIVE, lemma);
@@ -190,25 +191,25 @@ public class InflectionTest {
 
 	@Test
 	public void testGoRu() {
-		String lemma = GO_RU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = GO_RU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(17, tokens.size());
 		String pos = "VI1[go-ru]";
 		String translation = "1) to be conveyed, to be communicated";
-
+		Token lemma = new Token(lemmaForm, "つたわる", pos, translation);
 		testInflection(tokens, pos, translation, "伝わる", "つたわる", TERMINAL, lemma);
 	}
 
 	@Test
 	public void testHonorific() {
-		String lemma = HONORIFIC_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = HONORIFIC_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(18, tokens.size());
 		String pos = "V1[honorific]";
 		String translation = "1) give";
-
+		Token lemma = new Token(lemmaForm, "くださる", pos, translation);
 		testInflection(tokens, pos, translation, "下さら", "くださら", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "下さい", "ください", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "下さらせる", "くださらせる", CAUSATIVE, lemma);
@@ -218,13 +219,13 @@ public class InflectionTest {
 
 	@Test
 	public void testIchi() {
-		String lemma = ICHI_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = ICHI_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(21, tokens.size());
 		String pos = "VT2[ichi]";
 		String translation = "1) come about, occur, arise 2) result from, be caused by";
-
+		Token lemma = new Token(lemmaForm, "しょうじる", pos, translation);
 		testInflection(tokens, pos, translation, "生じ", "しょうじ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "生じよ", "しょうじよ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "生じさせる", "しょうじさせる", CAUSATIVE, lemma);
@@ -234,13 +235,13 @@ public class InflectionTest {
 
 	@Test
 	public void testSuruIKu() {
-		String lemma = SURU_I_KU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = SURU_I_KU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(23, tokens.size());
 		String pos = "V3[suru-i-ku]";
 		String translation = "1) face each other 2) be in response to, be against";
-
+		Token lemma = new Token(lemmaForm, "たいする", pos, translation);
 		testInflection(tokens, pos, translation, "対さ", "たいさ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "対せ", "たいせ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "対させる", "たいさせる", CAUSATIVE, lemma);
@@ -250,13 +251,13 @@ public class InflectionTest {
 
 	@Test
 	public void testSuruTsu() {
-		String lemma = SURU_TSU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = SURU_TSU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(20, tokens.size());
 		String pos = "V3[suru-tsu]";
 		String translation = "1) guess, presume, sense";
-
+		Token lemma = new Token(lemmaForm, "さっする", pos, translation);
 		testInflection(tokens, pos, translation, "察せ", "さっせ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "察しろ", "さっしろ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "察しさせる", "さっしさせる", CAUSATIVE, lemma);
@@ -266,13 +267,13 @@ public class InflectionTest {
 
 	@Test
 	public void testSuru() {
-		String lemma = SURU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = SURU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(18, tokens.size());
 		String pos = "VB3[suru]";
 		String translation = "1) meet, assemble, gather 2) mediate";
-
+		Token lemma = new Token(lemmaForm, "かいする", pos, translation);
 		testInflection(tokens, pos, translation, "会し", "かいし", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "会せよ", "かいせよ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "会させる", "かいさせる", CAUSATIVE, lemma);
@@ -282,13 +283,13 @@ public class InflectionTest {
 
 	@Test
 	public void testZuru() {
-		String lemma = ZURU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = ZURU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(16, tokens.size());
 		String pos = "VT3[zuru]";
 		String translation = "1) believe, put trust in";
-
+		Token lemma = new Token(lemmaForm, "しんずる", pos, translation);
 		testInflection(tokens, pos, translation, "信じ", "しんじ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "信じろ", "しんじろ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "信じさせる", "しんじさせる", CAUSATIVE, lemma);
@@ -298,13 +299,13 @@ public class InflectionTest {
 
 	@Test
 	public void testKuru() {
-		String lemma = KURU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = KURU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(17, tokens.size());
 		String pos = "VI1[kuru]";
 		String translation = "1) bring (someone to a personplace)";
-
+		Token lemma = new Token(lemmaForm, "つれてくる", pos, translation);
 		testInflection(tokens, pos, translation, "連れて来", "つれてこ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "連れて来い", "つれてこい", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "連れて来させる", "つれてこさせる", CAUSATIVE, lemma);
@@ -314,13 +315,13 @@ public class InflectionTest {
 
 	@Test
 	public void testAru() {
-		String lemma = ARU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = ARU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(18, tokens.size());
 		String pos = "V[aru]";
 		String translation = "1) to exist (''inanimate objects'') 2) to be (''inanimate objects'') 3) to have (''inanimate objects'') 4) (of an accident) to happen";
-
+		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "あら", "あら", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "あれ", "あれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "あらせる", "あらせる", CAUSATIVE, lemma);
@@ -330,13 +331,13 @@ public class InflectionTest {
 
 	@Test
 	public void testBeshi() {
-		String lemma = BESHI_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = BESHI_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(13, tokens.size());
 		String pos = "V[beshi]";
 		String translation = "1) must, shall ####*####*##*";
-
+		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "べから", "べから", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "べかる", "べかる", ATTRIBUTIVE2, lemma);
 		testInflection(tokens, pos, translation, "べからず", "べからず", NEGATIVE_CONTINUATIVE, lemma);
@@ -354,13 +355,13 @@ public class InflectionTest {
 
 	@Test
 	public void testKureru() {
-		String lemma = KURERU_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = KURERU_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(20, tokens.size());
 		String pos = "V[kureru]";
 		String translation = "1) to give 2) to do for someone";
-
+		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "くれ", "くれ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "くれ", "くれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "くれさせる", "くれさせる", CAUSATIVE, lemma);
@@ -370,13 +371,13 @@ public class InflectionTest {
 
 	@Test
 	public void testSuruIndep() {
-		String lemma = SURU_INDEP_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = SURU_INDEP_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(18, tokens.size());
 		String pos = "V[suru-indep]";
 		String translation = "1) . [rare]";
-
+		Token lemma = new Token(lemmaForm, "する", pos, translation);
 		testInflection(tokens, pos, translation, "為", "し", IMPERFECTIVE2, lemma);
 		testInflection(tokens, pos, translation, "為よ", "せよ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "為せる", "させる", CAUSATIVE, lemma);
@@ -386,25 +387,25 @@ public class InflectionTest {
 
 	@Test
 	public void testTari() {
-		String lemma = TARI_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = TARI_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(8, tokens.size());
 		String pos = "A[tari]";
 		String translation = "1) wretched, miserable 2) terrible, extremely bad 3) going to great efforts";
-
+		Token lemma = new Token(lemmaForm, "さんたん", pos, translation);
 		testInflection(tokens, pos, translation, "惨憺たる", "さんたんたる", ATTRIBUTIVE, lemma);
 	}
 
 	@Test
 	public void testQuestionMarkI() {
-		String lemma = QUESTION_MARK_I_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = QUESTION_MARK_I_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(19, tokens.size());
 		String pos = "A[i]";
 		String translation = "1) beautiful [archaic]";
-
+		Token lemma = new Token(lemmaForm, "うつくしい", pos, translation);
 		testInflection(tokens, pos, translation, "美しかろ", "うつくしかろ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "美しかれ", "うつくしかれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "美しかった", "うつくしかった", INFORMAL_PAST, lemma);
@@ -414,13 +415,13 @@ public class InflectionTest {
 
 	@Test
 	public void testQuestionMarkNa() {
-		String lemma = QUESTION_MARK_NA_TOK;
-		List<InflectedToken> tokens = map.get(lemma);
+		String lemmaForm = QUESTION_MARK_NA_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(24, tokens.size());
 		String pos = "A[na]";
 		String translation = "1) be like, look like, seem like, as if, having the likeness of";
-
+		Token lemma = new Token(lemmaForm, "よう", pos, translation);
 		testInflection(tokens, pos, translation, "様だろ", "ようだろ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "様であれ", "ようであれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "様だった", "ようだった", INFORMAL_PAST, lemma);

@@ -157,19 +157,18 @@ public class WiktionaryPreprocessor {
 			int parClose = suffix.indexOf("）");
 			if (parOpen != -1 && parClose != -1 && parClose > parOpen) {
 				// without optional kana
-				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parClose + 1), infl.toString(),
-						inflectionName);
+				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parClose + 1), infl, inflectionName);
 				// with optional kana
 				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parOpen + 1, parClose)
-						+ suffix.substring(parClose + 1), infl.toString(), inflectionName);
+						+ suffix.substring(parClose + 1), infl, inflectionName);
 			} else {
 				// regular entries
-				inflect(tok, suffix, infl.toString(), inflectionName);
+				inflect(tok, suffix, infl, inflectionName);
 			}
 		}
 	}
 
-	private void inflect(Token tok, String suffix, String inflection, String inflectionName) {
+	private void inflect(Token tok, String suffix, Inflection inflection, String inflectionName) {
 		String form = tok.getForm();
 		String pron = tok.getPronunciation();
 		String formInfl = "";
@@ -194,8 +193,8 @@ public class WiktionaryPreprocessor {
 			if ("為る".equals(form)) {
 				// there seems to be only one reading for the
 				// imperfective inflection of the kanji version
-				if (Inflection.IMPERFECTIVE.toString().equals(inflection)
-						|| Inflection.IMPERFECTIVE3.toString().equals(inflection)) {
+				if (Inflection.IMPERFECTIVE.equals(inflection)
+						|| Inflection.IMPERFECTIVE3.equals(inflection)) {
 					return;
 				}
 				// turn the pure-kana forms into forms containing kanji
