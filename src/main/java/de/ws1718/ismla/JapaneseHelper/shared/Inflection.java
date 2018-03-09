@@ -5,7 +5,7 @@ import java.io.Serializable;
 public enum Inflection implements Serializable {
 
 	// stem forms
-	IMPERFECTIVE, CONTINUATIVE, TERMINAL, ATTRIBUTIVE, HYPOTHETICAL, IMPERATIVE,
+	IMPERFECTIVE, CONTINUATIVE, TERMINAL, ATTRIBUTIVE, HYPOTHETICAL, REALIS, IMPERATIVE,
 	// key constructions (verb + adj)
 	FORMAL, VOLITIONAL, CONJUNCTIVE,
 	// key constructions (verb)

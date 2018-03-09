@@ -1,0 +1,9 @@
+## Based on https://ja.wikipedia.org/wiki/%E5%BD%A2%E5%AE%B9%E5%8B%95%E8%A9%9E
+## section ナリ活用
+imperfective=なら
+continuative=なり
+continuative2=に
+terminal=なり
+attributive=なる
+realis=なれ
+imperative=なれ

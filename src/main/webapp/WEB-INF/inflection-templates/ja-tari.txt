@@ -7,7 +7,7 @@ imperative=たれ
 adverbial=と
 
 ## section タリ活用
-imperfective=たる
+imperfective=たら
 continuative2=たり
 terminal=たり
-hypothetical=たれ
+realis=たれ

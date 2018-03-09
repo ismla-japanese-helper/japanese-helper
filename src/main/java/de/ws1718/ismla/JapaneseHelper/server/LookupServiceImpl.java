@@ -50,8 +50,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			logger.info(tok.toString());
 			// TODO: See if the word is an inflected verb. If yes, try to lookup
 			// its full form instead of partial form.
-			String wiktionaryTag = convertPOSTag(tok);
-			List<Token> dictTokens = tokenMap.get(tok.getBaseForm());
+			List<Token> dictTokens = tokenMap.get(tok.getSurface());
 			// Sort the results if there are several matches.
 			dictTokens = sortTokens(tok, dictTokens);
 
@@ -77,10 +76,11 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public static List<Token> sortTokens(com.atilika.kuromoji.ipadic.Token tokKuromoji, List<Token> dictTokens) {
 		String posKuromoji = convertPOSTag(tokKuromoji);
 		String pronKuromoji = convertPronunciation(tokKuromoji.getReading());
+		logger.info(posKuromoji + "\t" + pronKuromoji);
 
 		if (dictTokens == null || dictTokens.isEmpty()) {
 			return Arrays
-					.asList(new Token(tokKuromoji.getBaseForm(), pronKuromoji, posKuromoji, "1) [out-of-vocabulary]"));
+					.asList(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, "1) [out-of-vocabulary]"));
 		}
 
 		// primary sort order: POS tag
@@ -96,6 +96,9 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		});
 
 		Collections.sort(dictTokens, comp);
+		for (Token tok : dictTokens) {
+			logger.info("\t" + tok);
+		}
 		return dictTokens;
 	}
 
@@ -153,22 +156,6 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		// ones are as well. If the pronunciation is already in hiragana, this
 		// does not change anything.
 		return KanaConverter.convertKana(pron, KanaConverter.OP_ZEN_KATA_TO_ZEN_HIRA);
-	}
-
-	private ListMultimap<String, Token> readTokens() {
-		List<String> inflectionFiles = new ArrayList<String>(
-				getServletContext().getResourcePaths(INFLECTION_TEMPLATES_PATH));
-		List<InputStream> inflectionStreams = new ArrayList<>();
-		for (String file : inflectionFiles) {
-			inflectionStreams.add(getServletContext().getResourceAsStream(file));
-		}
-		List<String> dictionaryFiles = new ArrayList<String>(getServletContext().getResourcePaths(DICTIONARY_PATH));
-		List<InputStream> dictionaryStreams = new ArrayList<>();
-		for (String file : dictionaryFiles) {
-			dictionaryStreams.add(getServletContext().getResourceAsStream(file));
-		}
-		WiktionaryPreprocessor wp = new WiktionaryPreprocessor(inflectionFiles, inflectionStreams, dictionaryStreams);
-		return wp.getTokens();
 	}
 
 }

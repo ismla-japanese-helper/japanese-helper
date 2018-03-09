@@ -64,7 +64,7 @@ public class InflectedToken extends Token {
 
 	@Override
 	public String toString() {
-		return super.toString() + "\t" + inflection + "\t" + lemmaToken;
+		return super.toString() + "\t" + inflection + "\t" + lemmaToken.getForm();
 	}
 
 	@Override

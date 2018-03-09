@@ -79,6 +79,7 @@ public class WiktionaryPreprocessor {
 				// if the POS is "SFX".
 				if (tok.getPos().equals("SFX")) {
 					processSFXToken(tok);
+					continue;
 				}
 
 				if ("です".equals(form) && "V".equals(pos)) {
@@ -91,16 +92,8 @@ public class WiktionaryPreprocessor {
 
 				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
-					case "?":
-						/*
-						 * Some of the adjectives have the inflection tag "?".
-						 * Our heuristic of deciding its inflection scheme based
-						 * on the final syllable should work correctly in most
-						 * cases.
-						 */
-						tok = new Token(form, pronunciation, (form.endsWith("い") ? "A[i]" : "A[na]"), translation);
-						break;
 					case "verbconj":
+					case "verbconj-auto":
 						switch (tok.getForm()) {
 						case "有る":
 						case "ある":
@@ -128,8 +121,8 @@ public class WiktionaryPreprocessor {
 						break;
 					case "na":
 						// The Wiktionary entries end with "(な)".
-						form = form.substring(0, form.length() - 3);
-						pronunciation = pronunciation.substring(0, pronunciation.length() - 3);
+						form = form.replaceAll("\\(な\\)", "");
+						pronunciation = pronunciation.replaceAll("\\(な\\)", "");
 						tok = new Token(form, pronunciation, pos, translation);
 						addToken(tok);
 					}
@@ -150,6 +143,11 @@ public class WiktionaryPreprocessor {
 	private void inflect(Token tok) {
 		String inflectionName = tok.getInflectionParadigm();
 		Map<Inflection, String> paradigm = inflections.get(inflectionName);
+
+		if (paradigm == null) {
+			logger.info("Could not find an inflection paradigm for \"" + inflectionName + "\".");
+			return;
+		}
 
 		for (Entry<Inflection, String> entry : paradigm.entrySet()) {
 			Inflection infl = entry.getKey();

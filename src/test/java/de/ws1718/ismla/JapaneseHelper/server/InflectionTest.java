@@ -75,15 +75,12 @@ public class InflectionTest {
 	private static final String KURERU_TOK = "くれる"; // verbconj
 	private static final String SURU_INDEP_TOK = "為る"; // verbconj
 	private static final String TARI_TOK = "惨憺";
-	// other special cases
-	private static final String QUESTION_MARK_I_TOK = "美しい";
-	private static final String QUESTION_MARK_NA_TOK = "様";
 
 	@BeforeClass
 	public static void readTokens() {
 		List<String> keys = new ArrayList<String>(Arrays.asList(I_TOK, NA_TOK, GO_BU_TOK, GO_RU_TOK, HONORIFIC_TOK,
 				ICHI_TOK, SURU_I_KU_TOK, SURU_TSU_TOK, SURU_TOK, ZURU_TOK, KURU_TOK, ARU_TOK, BESHI_TOK, KURERU_TOK,
-				SURU_INDEP_TOK, TARI_TOK, QUESTION_MARK_I_TOK, QUESTION_MARK_NA_TOK));
+				SURU_INDEP_TOK, TARI_TOK));
 
 		logger.info("reading tokens");
 		List<String> inflectionFiles = getFilesInDir(RESOURCES_PATH + LookupServiceImpl.INFLECTION_TEMPLATES_PATH);
@@ -338,7 +335,7 @@ public class InflectionTest {
 		assertNotNull(tokens);
 		assertEquals(13, tokens.size());
 		String pos = "V[beshi]";
-		String translation = "1) must, shall ####*####*##*";
+		String translation = "1) must, shall ###";
 		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "べから", "べから", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "べかる", "べかる", ATTRIBUTIVE2, lemma);
@@ -400,35 +397,4 @@ public class InflectionTest {
 		testInflection(tokens, pos, translation, "惨憺たる", "さんたんたる", ATTRIBUTIVE, lemma);
 	}
 
-	@Test
-	public void testQuestionMarkI() {
-		String lemmaForm = QUESTION_MARK_I_TOK;
-		List<InflectedToken> tokens = map.get(lemmaForm);
-		assertNotNull(tokens);
-		assertEquals(19, tokens.size());
-		String pos = "A[i]";
-		String translation = "1) beautiful [archaic]";
-		Token lemma = new Token(lemmaForm, "うつくしい", pos, translation);
-		testInflection(tokens, pos, translation, "美しかろ", "うつくしかろ", IMPERFECTIVE, lemma);
-		testInflection(tokens, pos, translation, "美しかれ", "うつくしかれ", IMPERATIVE, lemma);
-		testInflection(tokens, pos, translation, "美しかった", "うつくしかった", INFORMAL_PAST, lemma);
-		testInflection(tokens, pos, translation, "美しくないです", "うつくしくないです", FORMAL_NEGATIVE, lemma);
-		testInflection(tokens, pos, translation, "美しかったら", "うつくしかったら", PROVISIONAL, lemma);
-	}
-
-	@Test
-	public void testQuestionMarkNa() {
-		String lemmaForm = QUESTION_MARK_NA_TOK;
-		List<InflectedToken> tokens = map.get(lemmaForm);
-		assertNotNull(tokens);
-		assertEquals(24, tokens.size());
-		String pos = "A[na]";
-		String translation = "1) be like, look like, seem like, as if, having the likeness of";
-		Token lemma = new Token(lemmaForm, "よう", pos, translation);
-		testInflection(tokens, pos, translation, "様だろ", "ようだろ", IMPERFECTIVE, lemma);
-		testInflection(tokens, pos, translation, "様であれ", "ようであれ", IMPERATIVE, lemma);
-		testInflection(tokens, pos, translation, "様だった", "ようだった", INFORMAL_PAST, lemma);
-		testInflection(tokens, pos, translation, "様ではありません", "ようではありません", FORMAL_NEGATIVE, lemma);
-		testInflection(tokens, pos, translation, "様だったら", "ようだったら", PROVISIONAL, lemma);
-	}
 }
