@@ -2,6 +2,9 @@ package de.ws1718.ismla.JapaneseHelper.server;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -27,7 +30,8 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public static final String INFLECTION_TEMPLATES_PATH = "/WEB-INF/inflection-templates/";
 
 	public List<Token> lookup(String sentence) {
-		ListMultimap<String, Token> tokenMap = (ListMultimap<String, Token>) getServletContext().getAttribute("tokenMap");
+		ListMultimap<String, Token> tokenMap = (ListMultimap<String, Token>) getServletContext()
+				.getAttribute("tokenMap");
 		Tokenizer tokenizer = new Tokenizer();
 		// This is the Token defined by the Kuromoji parser.
 		List<com.atilika.kuromoji.ipadic.Token> ipaTokens = tokenizer.tokenize(sentence.trim());
@@ -38,82 +42,118 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		return results;
 	}
 
-    private List<Token> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens, ListMultimap<String, Token> tokenMap) {
+	private List<Token> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens,
+			ListMultimap<String, Token> tokenMap) {
 		List<Token> tokens = new ArrayList<>();
 
-		for (com.atilika.kuromoji.ipadic.Token t : ipaTokens) {
-			// TODO: See if the word is an inflected verb. If yes, try to lookup its full form instead of partial form.
-            String wiktionaryTag = convertPOSTag(t);
-            List<Token> dictTokens = tokenMap.get(t.getBaseForm());
-            // Try to search through the results if there are more than 1 matches.
-			if (dictTokens.size() > 1) {
-				String POS= convertPOSTag(t);
-				// "reading" is the official way something is read.
-				int conv_op_flags = KanaConverter.OP_ZEN_KATA_TO_ZEN_HIRA;
-				// Note that this is recorded in Katakana, while Wiktionary uses Hiragana. Seems some conversion will be needed.
-				String reading = KanaConverter.convertKana(t.getReading(), conv_op_flags);
+		for (com.atilika.kuromoji.ipadic.Token tok : ipaTokens) {
+			logger.info(tok.toString());
+			// TODO: See if the word is an inflected verb. If yes, try to lookup
+			// its full form instead of partial form.
+			String wiktionaryTag = convertPOSTag(tok);
+			List<Token> dictTokens = tokenMap.get(tok.getBaseForm());
+			// Sort the results if there are several matches.
+			dictTokens = sortTokens(tok, dictTokens);
 
-				Token tokenToReturn = dictTokens.get(0);
+			// TODO make it possible to show the alternatives (in order) as a
+			// pop-up? (issue #20)
+			tokens.add(dictTokens.get(0));
+		}
 
-				// Should we match against both pronunciation and POS and then gradually relaxing?
-				// It might be better to sort them first, indeed...
-				for (Token dictToken : dictTokens) {
-
-					// If both match we should be able to return this token pretty safely.
-					if (dictToken.getPronunciation().equals(reading) && dictToken.getPos().equals(POS)) {
-						logger.info("pronunciation from Wiktionary equals reading from Kuromoji");
-                        tokenToReturn = dictToken;
-                        break;
-					} else if (dictToken.getPronunciation().equals(reading) || dictToken.getPos().equals(POS)) { // Else, if one of the two criteria match, we keep the match but continue the search, since we might still encounter the perfect match later.
-						tokenToReturn = dictToken;
-					}
-				}
-
-				tokens.add(tokenToReturn);
-			} else if (dictTokens.size() == 1) {
-				tokens.add(dictTokens.get(0));
-			} else { // Encountered an out-of-dictionary entry.
-				tokens.add(new Token(t.getBaseForm(), t.getReading(), wiktionaryTag, "1) [out-of-vocabulary]"));
-			}
-        }
-
-        return tokens;
+		return tokens;
 	}
 
-	private String convertPOSTag(com.atilika.kuromoji.ipadic.Token t) {
+	/**
+	 * Sorts a list of Token instances by how closely they match the Kuromoji
+	 * token (descending order).
+	 * 
+	 * @param tokKuromoji
+	 *            the Kuromoji token
+	 * @param dictTokens
+	 *            the list of tokens (can be empty or null)
+	 * @return the sorted list
+	 */
+	// public for testing
+	public static List<Token> sortTokens(com.atilika.kuromoji.ipadic.Token tokKuromoji, List<Token> dictTokens) {
+		String posKuromoji = convertPOSTag(tokKuromoji);
+		String pronKuromoji = convertPronunciation(tokKuromoji.getReading());
+
+		if (dictTokens == null || dictTokens.isEmpty()) {
+			return Arrays
+					.asList(new Token(tokKuromoji.getBaseForm(), pronKuromoji, posKuromoji, "1) [out-of-vocabulary]"));
+		}
+
+		// primary sort order: POS tag
+		Comparator<Token> comp = Comparator.comparing(Token::getPos, (pos1, pos2) -> {
+			pos1 = convertPOSTag(pos1);
+			pos2 = convertPOSTag(pos2);
+			return pos1.equals(pos2) ? 0 : pos1.equals(posKuromoji) ? -1 : 1;
+		}).thenComparing(Token::getPronunciation, (pron1, pron2) -> {
+			// secondary sort order: pronunciation
+			pron1 = convertPronunciation(pron1);
+			pron2 = convertPronunciation(pron2);
+			return pron1.equals(pron2) ? 0 : pron1.equals(pronKuromoji) ? -1 : 1;
+		});
+
+		Collections.sort(dictTokens, comp);
+		return dictTokens;
+	}
+
+	private static String convertPOSTag(com.atilika.kuromoji.ipadic.Token t) {
 		String ipadicTag = t.getPartOfSpeechLevel1();
 		switch (ipadicTag) {
-			case "名詞":
-				// Several possibilities under this category.
-				return "N";
-			case "動詞":
-				// Apparently Wiktionary differentiates between transitive and intransitive verbs but it's not sure whether IPAdic offers such a distinction.
-				return "V";
-			case "形容詞":
-				return "A";
-			case "副詞":
-				return "ADV";
-			case "接続詞":
-				return "CNJ";
-			case "感動詞":
-				return "ITJ";
-			case "助詞":
-				return "PRT";
-			case "助動詞":
-				// This seems weird. Might need to confirm further.
-				return "SFX";
-			case "連体詞":
-				// Really? This also seems quite weird.
-				return "DET";
-			case "接頭詞":
-				// Can't find an example of such a word in the dump yet. Something wrong with the dump?
-				return "PRE";
-			default:
-				// The remaining top-class tags would be "記号", "フィラー" and "その他", which shouldn't be relevant?
-				return "";
+		case "名詞":
+			// Several possibilities under this category.
+			return "N";
+		case "動詞":
+			// Apparently Wiktionary differentiates between transitive and
+			// intransitive verbs but it's not sure whether IPAdic offers such a
+			// distinction.
+			return "V";
+		case "形容詞":
+			return "A";
+		case "副詞":
+			return "ADV";
+		case "接続詞":
+			return "CNJ";
+		case "感動詞":
+			return "ITJ";
+		case "助詞":
+			return "PRT";
+		case "助動詞":
+			// This seems weird. Might need to confirm further.
+			return "SFX";
+		case "連体詞":
+			// Really? This also seems quite weird.
+			return "DET";
+		case "接頭詞":
+			// Can't find an example of such a word in the dump yet. Something
+			// wrong with the dump?
+			return "PRE";
+		default:
+			// The remaining top-class tags would be "記号", "フィラー" and "その他",
+			// which shouldn't be relevant?
+			return "";
 		}
 	}
 
+	private static String convertPOSTag(String pos) {
+		if (pos.startsWith("V")) {
+			return "V";
+		}
+		// TODO: it might be necessary to expand this method (issue #3)
+		return pos;
+	}
+
+	private static String convertPronunciation(String pron) {
+		// Sometimes, the Wiktionary pronunciations include a period to denote
+		// kanji boundaries that occur in the middle of long vowels.
+		pron = pron.replaceAll("\\.", "");
+		// The Kuromoji pronunciations are in katakana; some of the Wiktionary
+		// ones are as well. If the pronunciation is already in hiragana, this
+		// does not change anything.
+		return KanaConverter.convertKana(pron, KanaConverter.OP_ZEN_KATA_TO_ZEN_HIRA);
+	}
 
 	private ListMultimap<String, Token> readTokens() {
 		List<String> inflectionFiles = new ArrayList<String>(
