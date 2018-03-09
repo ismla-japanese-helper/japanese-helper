@@ -2,8 +2,6 @@ package de.ws1718.ismla.JapaneseHelper.shared;
 
 import java.util.ArrayList;
 
-import de.ws1718.ismla.JapaneseHelper.server.Inflection;
-
 public class InflectedToken extends Token {
 
 	private static final long serialVersionUID = -8227675932132742011L;

@@ -1,7 +1,7 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.FORMAL_NEGATIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.FORMAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_NEGATIVE;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,6 +20,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
+import de.ws1718.ismla.JapaneseHelper.shared.Inflection;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 /**

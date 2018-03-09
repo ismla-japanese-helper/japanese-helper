@@ -1,21 +1,21 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.ATTRIBUTIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.ATTRIBUTIVE2;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.CAUSATIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.CONJUNCTIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.FORMAL;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.FORMAL_NEGATIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.IMPERATIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.IMPERFECTIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.IMPERFECTIVE2;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.INFORMAL_PAST;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.NEGATIVE_CONTINUATIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.PASSIVE;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.POTENTIAL;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.PROVISIONAL;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.TERMINAL;
-import static de.ws1718.ismla.JapaneseHelper.server.Inflection.VOLITIONAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.ATTRIBUTIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.ATTRIBUTIVE2;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.CAUSATIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.CONJUNCTIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_NEGATIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.IMPERATIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.IMPERFECTIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.IMPERFECTIVE2;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.INFORMAL_PAST;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.NEGATIVE_CONTINUATIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.PASSIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.POTENTIAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.PROVISIONAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.TERMINAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.VOLITIONAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -39,13 +39,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jetty.websocket.api.SuspendToken;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.common.collect.Multimap;
 
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
+import de.ws1718.ismla.JapaneseHelper.shared.Inflection;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 public class InflectionTest {

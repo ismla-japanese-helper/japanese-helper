@@ -1,6 +1,8 @@
-package de.ws1718.ismla.JapaneseHelper.server;
+package de.ws1718.ismla.JapaneseHelper.shared;
 
-public enum Inflection {
+import java.io.Serializable;
+
+public enum Inflection implements Serializable {
 
 	// stem forms
 	IMPERFECTIVE, CONTINUATIVE, TERMINAL, ATTRIBUTIVE, HYPOTHETICAL, IMPERATIVE,
