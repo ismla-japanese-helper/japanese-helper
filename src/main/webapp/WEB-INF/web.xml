@@ -5,6 +5,10 @@
 
 <web-app>
 
+  <listener>
+    <listener-class>de.ws1718.ismla.JapaneseHelper.server.Listener</listener-class>
+  </listener>
+
   <!-- Servlets -->
   <servlet>
     <servlet-name>de.ws1718.ismla.JapaneseHelper.JapaneseHelper LookupService</servlet-name>

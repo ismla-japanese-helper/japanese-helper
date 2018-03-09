@@ -27,7 +27,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public static final String INFLECTION_TEMPLATES_PATH = "/WEB-INF/inflection-templates/";
 
 	public List<Token> lookup(String sentence) {
-		ListMultimap<String, Token> tokenMap = readTokens();
+		ListMultimap<String, Token> tokenMap = (ListMultimap<String, Token>) getServletContext().getAttribute("tokenMap");
 		Tokenizer tokenizer = new Tokenizer();
 		// This is the Token defined by the Kuromoji parser.
 		List<com.atilika.kuromoji.ipadic.Token> ipaTokens = tokenizer.tokenize(sentence.trim());
