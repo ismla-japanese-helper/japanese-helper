@@ -1,21 +1,6 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.ATTRIBUTIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.ATTRIBUTIVE2;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.CAUSATIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.CONJUNCTIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_NEGATIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.IMPERATIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.IMPERFECTIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.IMPERFECTIVE2;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.INFORMAL_PAST;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.NEGATIVE_CONTINUATIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.PASSIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.POTENTIAL;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.PROVISIONAL;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.TERMINAL;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.VOLITIONAL;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -168,6 +153,8 @@ public class InflectionTest {
 		testInflection(tokens, pos, translation, "妙だった", "みょうだった", INFORMAL_PAST, lemma);
 		testInflection(tokens, pos, translation, "妙ではありません", "みょうではありません", FORMAL_NEGATIVE, lemma);
 		testInflection(tokens, pos, translation, "妙だったら", "みょうだったら", PROVISIONAL, lemma);
+		testInflection(tokens, pos, translation, "妙なら", "みょうなら", CONDITIONAL, lemma);
+		testInflection(tokens, pos, translation, "妙ならば", "みょうならば", CONDITIONAL, lemma);
 	}
 
 	@Test
@@ -317,7 +304,7 @@ public class InflectionTest {
 		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(19, tokens.size());
-		String pos = "V[aru]";
+		String pos = "VI1[aru]";
 		String translation = "1) to exist (''inanimate objects'') 2) to be (''inanimate objects'') 3) to have (''inanimate objects'') 4) (of an accident) to happen";
 		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "あら", "あら", IMPERFECTIVE, lemma);
@@ -358,7 +345,7 @@ public class InflectionTest {
 		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(21, tokens.size());
-		String pos = "V[kureru]";
+		String pos = "V2[kureru]";
 		String translation = "1) to give 2) to do for someone";
 		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "くれ", "くれ", IMPERFECTIVE, lemma);
@@ -374,7 +361,7 @@ public class InflectionTest {
 		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
 		assertEquals(19, tokens.size());
-		String pos = "V[suru-indep]";
+		String pos = "VT3[suru-indep]";
 		String translation = "1) . [rare]";
 		Token lemma = new Token(lemmaForm, "する", pos, translation);
 		testInflection(tokens, pos, translation, "為", "し", IMPERFECTIVE2, lemma);

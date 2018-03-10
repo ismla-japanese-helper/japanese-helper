@@ -70,64 +70,70 @@ public class WiktionaryPreprocessor {
 				}
 				String form = fields[0];
 				String pronunciation = fields[1];
-				String pos = fields[2];
+				String posAndInflection = fields[2];
 				String translation = fields[3];
-				Token tok = new Token(form, pronunciation, pos, translation);
-				addToken(tok);
+				Token tok = new Token(form, pronunciation, posAndInflection, translation);
 
-				// Add an additional entry with the dash removed,
-				// if the POS is "SFX".
-				if (tok.getPos().equals("SFX")) {
-					processSFXToken(tok);
-					continue;
+				// If the token is a verb or adjective,
+				// we might need to do some additional preprocessing:
+				if ("です".equals(form) && "V".equals(posAndInflection)) {
+					tok.setInflectionParadigm("desu");
+					// Also add the non-formal version.
+					// https://en.wiktionary.org/wiki/%E3%81%A0#Verb
+					inflect(new Token("だ", "だ", "V[da]", "Used when a sentence has a nominal as its predicate, "
+							+ "usually but not always equal to the English verb ''to be''."));
 				}
-
-				if ("です".equals(form) && "V".equals(pos)) {
-					// TODO check if です still doesn't have any inflection tag
-					// after the update of the Wiktionary dump
-					// if it does have one, move this new token assignment into
-					// the switch below
-					tok = new Token(form, pronunciation, "V[desu]", translation);
-				}
-
 				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
+					case "ichidan":
+						tok.setInflectionParadigm("ichi");
+						break;
+					case "ichi":
+						if (form.equals("居る")) {
+							// Add the (more common) kana version いる.
+							inflect(new Token(pronunciation, pronunciation, posAndInflection, translation));
+						}
+						break;
 					case "verbconj":
 					case "verbconj-auto":
-						switch (tok.getForm()) {
+						switch (form) {
 						case "有る":
 						case "ある":
-							tok = new Token(form, pronunciation, "V[aru]", translation);
+							tok.setInflectionParadigm("aru");
 							break;
 						case "する":
 						case "為る":
-							tok = new Token(form, pronunciation, "V[suru-indep]", translation);
+							tok.setInflectionParadigm("suru-indep");
 							break;
 						case "くれる":
 						case "呉れる":
-							tok = new Token(form, pronunciation, "V[kureru]", translation);
+							tok.setInflectionParadigm("kureru");
 							break;
 						case "べし":
+							tok.setInflectionParadigm("beshi");
 							// The pronunciation is listed as "suffix",
 							// so we re-use the kana from the form instead.
-							tok = new Token(form, form, "V[beshi]", translation);
+							tok.setPronunciation(form);
 							break;
 						case "だ":
 							// TODO issue #14
-							tok = new Token(form, form, "V[da]", translation);
+							tok.setInflectionParadigm("da");
 						default:
 							continue lines;
 						}
 						break;
 					case "na":
-						// The Wiktionary entries end with "(な)".
-						form = form.replaceAll("\\(な\\)", "");
-						pronunciation = pronunciation.replaceAll("\\(な\\)", "");
-						tok = new Token(form, pronunciation, pos, translation);
-						addToken(tok);
+						// Some of the Wiktionary entries end in "(な)".
+						tok.setForm(form.replaceAll("\\(な\\)", ""));
+						tok.setPronunciation(pronunciation.replaceAll("\\(な\\)", ""));
 					}
+
+					// Generate and add the inflections.
 					inflect(tok);
 				}
+
+				// And finally, add the actual token.
+				addToken(tok);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -137,7 +143,13 @@ public class WiktionaryPreprocessor {
 	}
 
 	private void addToken(Token tok) {
+		tok.setForm(cleanString(tok.getForm()));
+		tok.setPronunciation(cleanString(tok.getPronunciation()));
 		tokens.put(tok.getForm(), tok);
+	}
+
+	private String cleanString(String word) {
+		return word.replaceAll("[-\\.\\s+]", "");
 	}
 
 	private void inflect(Token tok) {
@@ -153,8 +165,8 @@ public class WiktionaryPreprocessor {
 			Inflection infl = entry.getKey();
 			String suffix = entry.getValue();
 
-			// some entries contain optional kana (e.g. "なら（ば）" in ja-na.txt)
-			// we create tokens for both versions (e.g. "ならば" and "なら")
+			// Some entries contain optional kana (e.g. "なら（ば）" in ja-na.txt).
+			// We create tokens for both versions (e.g. "ならば" and "なら"):
 			int parOpen = suffix.indexOf("（");
 			int parClose = suffix.indexOf("）");
 			if (parOpen != -1 && parClose != -1 && parClose > parOpen) {
@@ -231,6 +243,7 @@ public class WiktionaryPreprocessor {
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
 		case "na":
+		case "nari":
 		case "tari":
 			formInfl = form + suffix;
 			pronInfl = pron + suffix;
@@ -241,18 +254,7 @@ public class WiktionaryPreprocessor {
 			pronInfl = pron.substring(0, pron.length() - 1) + suffix;
 		}
 
-		formInfl = removeWhiteSpace(formInfl);
-		pronInfl = removeWhiteSpace(pronInfl);
 		addToken(new InflectedToken(tok, formInfl, pronInfl, inflection));
-	}
-
-	private void processSFXToken(Token t) {
-		addToken(new Token(t.getForm().replaceAll("-", ""), t.getPronunciation().replaceAll("-", ""), t.getPos(),
-				t.getInflectionParadigm(), t.getTranslations()));
-	}
-
-	private String removeWhiteSpace(String word) {
-		return word.replaceAll("\\s+", "");
 	}
 
 	private String aruKanjiToKana(String word) {
