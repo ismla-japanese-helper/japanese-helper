@@ -31,12 +31,13 @@ public class ResultsWidget extends Composite {
 	@UiHandler("clearButton")
 	void onClick(ClickEvent e) {
 		RootPanel.get("resultsContainer").clear();
+		RootPanel.get("inputContainer").clear();
 		RootPanel.get("inputContainer").add(new SentenceInputWidget());
 	}
 
 	public ResultsWidget(List<Token> sentence) {
 		initWidget(uiBinder.createAndBindUi(this));
-		clearButton.setText("Enter new text");
+		clearButton.setText("Clear and enter new text");
 		// Or maybe I can indeed append a class to this one after all. What's the issue with that anyways.
 		resultsContainer.addStyleName("container");
 		HTMLPanel results = generateResultsTable(sentence);

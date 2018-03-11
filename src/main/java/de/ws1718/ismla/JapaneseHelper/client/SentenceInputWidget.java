@@ -37,7 +37,12 @@ public class SentenceInputWidget extends Composite {
             @Override
             public void onSuccess(List<Token> results) {
                 ResultsWidget rw = new ResultsWidget(results);
-                RootPanel.get("inputContainer").clear();
+
+                // We want to show the original input at the same time.
+                // RootPanel.get("inputContainer").clear();
+
+                // Since we don't hide the input box at this time, we need to hide the Submit button.
+                submitButton.removeFromParent();
                 RootPanel.get("resultsContainer").add(rw);
             }
 
