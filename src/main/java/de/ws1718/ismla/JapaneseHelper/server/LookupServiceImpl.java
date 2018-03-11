@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.atilika.kuromoji.ipadic.Tokenizer;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -46,12 +47,42 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			ListMultimap<String, Token> tokenMap) {
 		List<Token> tokens = new ArrayList<>();
 
-		for (com.atilika.kuromoji.ipadic.Token tok : ipaTokens) {
+		for (int index = 0; index < ipaTokens.size(); index++) {
+			com.atilika.kuromoji.ipadic.Token tok = ipaTokens.get(index);
 			logger.info(tok.toString());
-			// TODO: See if the word is an inflected verb. If yes, try to lookup
-			// its full form instead of partial form.
+
 			List<Token> dictTokens = tokenMap.get(tok.getSurface());
+
+			// If the token is inflected, try to lookup the full inflection form instead of displaying several segmented tokens.
+			if (!tok.getConjugationForm().equals("*")) {
+				Joiner joiner = Joiner.on("");
+				ArrayList<String> multiToken = new ArrayList<>();
+				multiToken.add(tok.getSurface());
+				// Should look at the token immediately following it.
+				int curIndex = index + 1;
+				// If it's not out of bounds and it's also marked as an inflection form.
+				while (curIndex < ipaTokens.size() && !ipaTokens.get(curIndex).getConjugationForm().equals("*")) {
+					multiToken.add(ipaTokens.get(curIndex).getSurface());
+					curIndex++;
+				}
+
+				while (multiToken.size() > 1) {
+					List <Token> multiTokenEntry = tokenMap.get(joiner.join(multiToken));
+					if (multiTokenEntry != null && multiTokenEntry.size() > 0) {
+						dictTokens = multiTokenEntry;
+						// Skip all the consumed tokens from the Kuromoji outputs of course.
+						// -1 because the outer loop will still + 1
+						index = index + multiToken.size() - 1;
+						break;
+					}
+
+					// Else we try again with one less entry in the multiToken, i.e. we might have overreached in the search.
+					multiToken.remove(multiToken.size() - 1);
+				}
+			}
+
 			// Sort the results if there are several matches.
+			// Even if we got a multitok, we can still a kind of sort the entries by using the first token in the multitok, which is likely the base form.
 			dictTokens = sortTokens(tok, dictTokens);
 
 			// TODO make it possible to show the alternatives (in order) as a
