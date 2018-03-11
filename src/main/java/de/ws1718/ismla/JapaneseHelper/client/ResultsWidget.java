@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.List;
 
+import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 
@@ -75,6 +76,12 @@ public class ResultsWidget extends Composite {
 	}
 
 	private String generateOneWord(Token t) {
+		String inflectionInfo = "*";
+
+		if (t instanceof InflectedToken) {
+			inflectionInfo = t.getInflectionParadigm() + " (" + ((InflectedToken) t).getLemmaToken().getForm() + ")";
+		}
+
 		String representation = "";
 		representation += "<div class='col-xs-4 col-md-3 col-lg-2 mb-3'>";
 		// Needed to create a nested row within the outer column.
@@ -85,7 +92,7 @@ public class ResultsWidget extends Composite {
 		// Manually added <a> here.
 		representation += "<div class='col-12' title='Click for full list of glosses'><a>" + t.getTranslations().get(0) + "</a></div>";
 		representation += "<div class='col-12'>" + t.getPos() + "</div>";
-		representation += "<div class='col-12'>" + (t.getInflectionParadigm() != null ? t.getInflectionParadigm() : "*") + "</div>";
+		representation += "<div class='col-12'>" + inflectionInfo + "</div>";
 
 		representation += "</div>";
 		representation += "</div>";
