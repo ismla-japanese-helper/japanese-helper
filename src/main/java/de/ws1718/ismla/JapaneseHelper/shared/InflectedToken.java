@@ -61,13 +61,31 @@ public class InflectedToken extends Token {
 	public void setInflection(Inflection inflection) {
 		this.inflection = inflection;
 	}
-	
-	public String getInflectionInformation(){
-		return lemmaToken.getForm() + " (" + inflection.toString() + ")";
+
+	public String getInflectionInformation() {
+		return lemmaToken.getForm() + " (" + inflection + ")";
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public String toString() {
+		String infl = inflection.toString();
+		
+		if ("ichi".equals(getInflectionParadigm()) || "suru".equals(getInflectionParadigm())
+				|| "suru-indep".equals(getInflectionParadigm())) {
+			switch (inflection) {
+			case IMPERATIVE:
+				infl = "written " + infl;
+				break;
+			case IMPERATIVE2:
+				infl = "spoken " + infl;
+				break;
+			case POTENTIAL2:
+				// can only be the case if the inflection paradim is "ichi"
+				infl = "potential " + infl;
+			}
+		}
+		
 		return super.toString() + "\t" + inflection + "\t" + lemmaToken.getForm();
 	}
 
