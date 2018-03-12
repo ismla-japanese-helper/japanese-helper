@@ -49,7 +49,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 		for (int index = 0; index < ipaTokens.size(); index++) {
 			com.atilika.kuromoji.ipadic.Token tok = ipaTokens.get(index);
-			logger.info(tok.toString());
+			logger.info(tok.getSurface() + "\t" + tok.getAllFeatures());
 
 			List<Token> dictTokens = tokenMap.get(tok.getSurface());
 

@@ -236,7 +236,97 @@ public class Token implements Serializable {
 			pos = pos.substring(0, open);
 		}
 
+		pos = cleanPosTag(pos);
 		return new String[] { pos, inflectionParadigm };
+	}
+
+	private static String cleanPosTag(String pos) {
+		if (pos.startsWith("V") && pos.length() > 1) {
+			return cleanVerbPosTag(pos);
+		}
+
+		switch (pos) {
+		// sorted by frequency
+		case "V":
+			pos = "verb";
+		case "A":
+			pos = "adjective";
+			break;
+		case "N":
+			pos = "noun";
+			break;
+		case "NE":
+			pos = "named entity";
+			break;
+		case "ADV":
+			pos = "adverb";
+			break;
+		case "SFX":
+			pos = "suffix";
+			break;
+		case "ITJ":
+			pos = "interjection";
+			break;
+		case "PRN":
+			pos = "pronoun";
+			break;
+		case "CNT":
+			pos = "counter";
+			break;
+		case "PFX":
+			pos = "prefix";
+			break;
+		case "PRT":
+			pos = "particle";
+			break;
+		case "CNJ":
+			pos = "conjunction";
+			break;
+		case "NUM":
+			pos = "numeral";
+			break;
+		case "DET":
+			pos = "adnominal";
+			break;
+		case "PSP":
+			pos = "postposition";
+			break;
+		}
+
+		return pos;
+	}
+
+	private static String cleanVerbPosTag(String pos) {
+		String verbType = "";
+		if (pos.contains("1") || pos.contains("5") || pos.contains("godan")) {
+			// Most entries for godan verbs contain "1",
+			// but there are a few irregularities.
+			verbType = "godan ";
+		} else if (pos.contains("2")) {
+			verbType = "ichidan ";
+		} else if (pos.contains("3")) {
+			verbType = "irregular ";
+		} else if (pos.contains("yo")) {
+			verbType = "yodan ";
+		} else if (pos.contains("ni")) {
+			verbType = "nidan ";
+		}
+
+		String transitivity = "";
+		if (pos.contains("I")) {
+			transitivity = "intransitive ";
+		} else if (pos.contains("T")) {
+			transitivity = "transitive ";
+		} else if (pos.contains("B")) {
+			transitivity = "bitransitive ";
+		}
+
+		String inflectedForm = "";
+		if (pos.contains("form")) {
+			inflectedForm = " (infl.)";
+		}
+
+		return transitivity + verbType + "verb" + inflectedForm;
 	}
 
 	/**

@@ -61,6 +61,10 @@ public class InflectedToken extends Token {
 	public void setInflection(Inflection inflection) {
 		this.inflection = inflection;
 	}
+	
+	public String getInflectionInformation(){
+		return lemmaToken.getForm() + " (" + inflection.toString() + ")";
+	}
 
 	@Override
 	public String toString() {

@@ -116,7 +116,6 @@ public class WiktionaryPreprocessor {
 							tok.setPronunciation(form);
 							break;
 						case "だ":
-							// TODO issue #14
 							tok.setInflectionParadigm("da");
 						default:
 							continue lines;
