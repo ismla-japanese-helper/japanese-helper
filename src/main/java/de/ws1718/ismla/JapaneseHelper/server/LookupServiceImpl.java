@@ -1,6 +1,5 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,8 +11,8 @@ import com.atilika.kuromoji.ipadic.Tokenizer;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 import com.mariten.kanatools.KanaConverter;
+
 import de.ws1718.ismla.JapaneseHelper.client.LookupService;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
@@ -30,6 +29,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public static final String DICTIONARY_PATH = "/WEB-INF/dictionary/";
 	public static final String INFLECTION_TEMPLATES_PATH = "/WEB-INF/inflection-templates/";
 
+	@SuppressWarnings("unchecked")
 	public List<Token> lookup(String sentence) {
 		ListMultimap<String, Token> tokenMap = (ListMultimap<String, Token>) getServletContext()
 				.getAttribute("tokenMap");
@@ -53,36 +53,42 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 			List<Token> dictTokens = tokenMap.get(tok.getSurface());
 
-			// If the token is inflected, try to lookup the full inflection form instead of displaying several segmented tokens.
+			// If the token is inflected, try to lookup the full inflection form
+			// instead of displaying several segmented tokens.
 			if (!tok.getConjugationForm().equals("*")) {
 				Joiner joiner = Joiner.on("");
 				ArrayList<String> multiToken = new ArrayList<>();
 				multiToken.add(tok.getSurface());
 				// Should look at the token immediately following it.
 				int curIndex = index + 1;
-				// If it's not out of bounds and it's also marked as an inflection form.
+				// If it's not out of bounds and it's also marked as an
+				// inflection form.
 				while (curIndex < ipaTokens.size() && !ipaTokens.get(curIndex).getConjugationForm().equals("*")) {
 					multiToken.add(ipaTokens.get(curIndex).getSurface());
 					curIndex++;
 				}
 
 				while (multiToken.size() > 1) {
-					List <Token> multiTokenEntry = tokenMap.get(joiner.join(multiToken));
+					List<Token> multiTokenEntry = tokenMap.get(joiner.join(multiToken));
 					if (multiTokenEntry != null && multiTokenEntry.size() > 0) {
 						dictTokens = multiTokenEntry;
-						// Skip all the consumed tokens from the Kuromoji outputs of course.
+						// Skip all the consumed tokens from the Kuromoji
+						// outputs of course.
 						// -1 because the outer loop will still + 1
 						index = index + multiToken.size() - 1;
 						break;
 					}
 
-					// Else we try again with one less entry in the multiToken, i.e. we might have overreached in the search.
+					// Else we try again with one less entry in the multiToken,
+					// i.e. we might have overreached in the search.
 					multiToken.remove(multiToken.size() - 1);
 				}
 			}
 
 			// Sort the results if there are several matches.
-			// Even if we got a multitok, we can still a kind of sort the entries by using the first token in the multitok, which is likely the base form.
+			// Even if we got a multitok, we can still a kind of sort the
+			// entries by using the first token in the multitok, which is likely
+			// the base form.
 			dictTokens = sortTokens(tok, dictTokens);
 
 			// TODO make it possible to show the alternatives (in order) as a
@@ -110,8 +116,11 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		logger.info(posKuromoji + "\t" + pronKuromoji);
 
 		if (dictTokens == null || dictTokens.isEmpty()) {
-			return Arrays
-					.asList(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, "1) [out-of-vocabulary]"));
+			String meaning = "1) [out-of-vocabulary]";
+			if (posKuromoji.equals("PNC")) {
+				meaning = "1) [punctuation mark]";
+			}
+			return Arrays.asList(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning));
 		}
 
 		// primary sort order: POS tag
@@ -155,18 +164,19 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		case "助詞":
 			return "PRT";
 		case "助動詞":
-			// This seems weird. Might need to confirm further.
+			// TODO This seems weird. Might need to confirm further.
 			return "SFX";
 		case "連体詞":
-			// Really? This also seems quite weird.
+			// TODO Really? This also seems quite weird.
 			return "DET";
 		case "接頭詞":
-			// Can't find an example of such a word in the dump yet. Something
-			// wrong with the dump?
-			return "PRE";
+			return "PFX";
+		case "記号":
+			return "PNC";
 		default:
-			// The remaining top-class tags would be "記号", "フィラー" and "その他",
-			// which shouldn't be relevant?
+			// The remaining top-class tags would be
+			// "フィラー" ("filler") and "その他" ("etc."),
+			// which shouldn't be relevant.
 			return "";
 		}
 	}

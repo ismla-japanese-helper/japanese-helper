@@ -10,6 +10,7 @@ public class Token implements Serializable {
 	private String form;
 	private String pronunciation;
 	private String pos;
+	private String prettyPos;
 	private String inflectionParadigm;
 	// `Array`List because it needs to be serializable
 	private ArrayList<String> translations;
@@ -76,6 +77,7 @@ public class Token implements Serializable {
 		this.form = form;
 		this.pronunciation = pronunciation;
 		pos = posSimple;
+		prettyPos = cleanPosTag(posSimple);
 		this.inflectionParadigm = inflectionParadigm;
 		this.translations = translations;
 	}
@@ -123,6 +125,21 @@ public class Token implements Serializable {
 	 */
 	public void setPos(String pos) {
 		this.pos = pos;
+	}
+	
+	/**
+	 * @return the long version of the POS tag
+	 */
+	public String getPrettyPos() {
+		return prettyPos;
+	}
+
+	/**
+	 * @param prettyPos
+	 *            the long version of the POS tag
+	 */
+	public void setPrettyPos(String prettyPos) {
+		this.prettyPos = prettyPos;
 	}
 
 	/**
@@ -236,7 +253,6 @@ public class Token implements Serializable {
 			pos = pos.substring(0, open);
 		}
 
-		pos = cleanPosTag(pos);
 		return new String[] { pos, inflectionParadigm };
 	}
 
@@ -287,6 +303,9 @@ public class Token implements Serializable {
 			break;
 		case "DET":
 			pos = "adnominal";
+			break;
+		case "PNC":
+			pos = "punctuation";
 			break;
 		case "PSP":
 			pos = "postposition";

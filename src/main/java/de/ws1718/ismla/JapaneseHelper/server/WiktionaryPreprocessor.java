@@ -2,6 +2,8 @@ package de.ws1718.ismla.JapaneseHelper.server;
 
 import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL;
 import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_NEGATIVE;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_NEGATIVE_PAST;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_PAST;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -300,7 +302,6 @@ public class WiktionaryPreprocessor {
 					Inflection vf = Inflection.valueOf(key.trim().toUpperCase());
 					String ending = suffix.trim().replaceAll("\\. ", "");
 					inflectionParadigm.put(vf, ending);
-
 				} catch (IllegalArgumentException e) {
 					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
 							&& (!line.contains("note"))) {
@@ -315,11 +316,22 @@ public class WiktionaryPreprocessor {
 			e.printStackTrace();
 		}
 
-		// The formal negative inflection is missing from a lot of the verb
+		// Some formal inflections are missing from a lot of the verb
 		// inflection templates.
-		if (inflectionParadigm.containsKey(FORMAL) && !inflectionParadigm.containsKey(FORMAL_NEGATIVE)) {
-			String suffix = inflectionParadigm.get(FORMAL).replace("ます", "ません");
-			inflectionParadigm.put(FORMAL_NEGATIVE, suffix);
+		String formalSuffix = inflectionParadigm.get(FORMAL);
+		if (formalSuffix != null) {
+			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE)) {
+				String suffix = formalSuffix.replace("ます", "ません");
+				inflectionParadigm.put(FORMAL_NEGATIVE, suffix);
+			}
+			if (!inflectionParadigm.containsKey(FORMAL_PAST)) {
+				String suffix = formalSuffix.replace("ます", "ました");
+				inflectionParadigm.put(FORMAL_PAST, suffix);
+			}
+			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE_PAST)) {
+				String suffix = formalSuffix.replace("ます", "ませんでした");
+				inflectionParadigm.put(FORMAL_NEGATIVE_PAST, suffix);
+			}
 		}
 
 		inflections.put(getFileName(filename), inflectionParadigm);
