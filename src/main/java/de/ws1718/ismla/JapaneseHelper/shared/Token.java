@@ -126,7 +126,7 @@ public class Token implements Serializable {
 	public void setPos(String pos) {
 		this.pos = pos;
 	}
-	
+
 	/**
 	 * @return the long version of the POS tag
 	 */
@@ -348,17 +348,9 @@ public class Token implements Serializable {
 		return transitivity + verbType + "verb" + inflectedForm;
 	}
 
-	/**
-	 * Only for use in tester classes.
-	 * 
-	 * @param glosses
-	 * @return
-	 */
-	public ArrayList<String> processGlossesTester(String glosses) {
-		return processGlosses(glosses);
-	}
+	public static ArrayList<String> processGlosses(String glosses) {
+		glosses = cleanTranslation(glosses);
 
-	private static ArrayList<String> processGlosses(String glosses) {
 		ArrayList<String> results = new ArrayList<>();
 		// The position of the last index digit, e.g. '1' in "1) "
 		int lastIndexPos = 0;
@@ -366,36 +358,77 @@ public class Token implements Serializable {
 
 		for (int curPointer = 0; curPointer < glosses.length(); curPointer++) {
 			if (curPointer + 1 != glosses.length()) {
-				// Match an index term, e.g. 1)
+				// Match an index term, e.g. "1)"
 				if (Character.isDigit(glosses.charAt(curPointer)) && glosses.charAt(curPointer + 1) == ')') {
 					// If it's not the first gloss, we should have already
 					// recorded something previously
-					if (glosses.charAt(curPointer) != '1') {
-						// Maybe I should keep the index after all (instead of
-						// +3). Let's see how this works.
-						lastGloss = glosses.substring(lastIndexPos, curPointer - 1);
+					if (glosses.charAt(curPointer) != '1' && curPointer > lastIndexPos + 3) {
+						// Remove the index term from the translation entry.
+						lastGloss = glosses.substring(lastIndexPos + 3, curPointer - 1);
 					}
 					// Record the index position. This also works if it's the
 					// first gloss.
 					lastIndexPos = curPointer;
 				}
-			} else { // We've come to the end of the whole translations string
+			} else if (curPointer > lastIndexPos + 1) {
+				// We've come to the end of the whole translations string
 				// and we should record the last entry anyways.
 				// There is no extra space to deal with now. Need to stretch it
 				// to the end.
-				lastGloss = glosses.substring(lastIndexPos, curPointer + 1);
+				lastGloss = glosses.substring(lastIndexPos + 3, curPointer + 1);
 			}
 
 			// If we already got a gloss at the end of this step, we add it.
 			if (!lastGloss.isEmpty()) {
+				lastGloss = lastGloss.trim();
 				// A lot of entries are "?". We don't want to add such entries.
-				if (!lastGloss.equals("?")) {
+				if (!lastGloss.equals("?") && !lastGloss.isEmpty()) {
 					results.add(lastGloss);
 				}
 				lastGloss = "";
 			}
 		}
 		return results;
+	}
+
+	private static String cleanTranslation(String translation) {
+		translation = translation.trim();
+
+		// The escaped HTML sometimes include extra spaces
+		// or lack the final semicolon.
+		translation = translation.replaceAll("&amp;?", "&");
+		translation = translation.replaceAll("& ?lt;?", "<");
+		translation = translation.replaceAll("& ?gt;?", ">");
+		translation = translation.replaceAll("& ?quot;? ?", "\"");
+		translation = translation.replaceAll("& ?ndash;? ?", "–");
+		translation = translation.replaceAll("& ?mdash;? ?", "—");
+		translation = translation.replaceAll("& ?nbsp;? ?", "u\00A0");
+		translation = translation.replaceAll("& ?hellip;? ?", "u\2026");
+		translation = translation.replaceAll("& ?times;? ?", "×");
+		translation = translation.replaceAll("''", "\"");
+
+		// Remove HTML comments.
+		int commentStartIndex = translation.indexOf("< !--");
+		int commentEndIndex = translation.indexOf("-->");
+		while (commentStartIndex > -1) {
+			if (commentEndIndex == -1) {
+				translation = translation.substring(0, commentStartIndex);
+			} else {
+				translation = translation.substring(0, commentStartIndex) + translation.substring(commentEndIndex + 3);
+			}
+			commentStartIndex = translation.indexOf("< !--");
+			commentEndIndex = translation.indexOf("-->");
+		}
+
+		// Enumerations use sequences of hash signs in the Wiktionary dump.
+		translation = translation.replaceAll("#{2,} ", "•");
+		translation = translation.replaceAll("#+$", "");
+
+		// {{, }}
+		translation = translation.replaceAll("(\\{\\{)|(\\}\\})", "");
+
+		translation = translation.replaceAll("\\s+", " ");
+		return translation;
 	}
 
 	/**
