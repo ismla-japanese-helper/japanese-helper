@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SentenceInputWidget extends Composite {
@@ -32,10 +33,10 @@ public class SentenceInputWidget extends Composite {
 
     private void putResults() {
         String input = inputField.getText();
-        lookupService.lookup(input, new AsyncCallback<List<List<Token>>>() {
+        lookupService.lookup(input, new AsyncCallback<List<ArrayList<Token>>>() {
 
             @Override
-            public void onSuccess(List<List<Token>> results) {
+            public void onSuccess(List<ArrayList<Token>> results) {
                 ResultsWidget rw = new ResultsWidget(results);
 
                 // We want to show the original input at the same time.

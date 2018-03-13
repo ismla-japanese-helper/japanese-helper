@@ -30,7 +30,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public static final String INFLECTION_TEMPLATES_PATH = "/WEB-INF/inflection-templates/";
 
 	@SuppressWarnings("unchecked")
-	public List<List<Token>> lookup(String sentence) {
+	public List<ArrayList<Token>> lookup(String sentence) {
 		ListMultimap<String, Token> tokenMap = (ListMultimap<String, Token>) getServletContext()
 				.getAttribute("tokenMap");
 		Tokenizer tokenizer = new Tokenizer();
@@ -38,14 +38,14 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		List<com.atilika.kuromoji.ipadic.Token> ipaTokens = tokenizer.tokenize(sentence.trim());
 
 		// This is the Token defined by us.
-		List<List<Token>> results = convertTokens(ipaTokens, tokenMap);
+		List<ArrayList<Token>> results = convertTokens(ipaTokens, tokenMap);
 
 		return results;
 	}
 
-	private List<List<Token>> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens,
+	private List<ArrayList<Token>> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens,
 			ListMultimap<String, Token> tokenMap) {
-		List<List<Token>> tokens = new ArrayList<>();
+		List<ArrayList<Token>> tokens = new ArrayList<>();
 
 		for (int index = 0; index < ipaTokens.size(); index++) {
 			com.atilika.kuromoji.ipadic.Token tok = ipaTokens.get(index);
@@ -57,7 +57,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			// instead of displaying several segmented tokens.
 			if (!tok.getConjugationForm().equals("*")) {
 				Joiner joiner = Joiner.on("");
-				ArrayList<String> multiToken = new ArrayList<>();
+				List<String> multiToken = new ArrayList<>();
 				multiToken.add(tok.getSurface());
 				// Should look at the token immediately following it.
 				int curIndex = index + 1;
@@ -89,12 +89,11 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			// Even if we got a multitok, we can still a kind of sort the
 			// entries by using the first token in the multitok, which is likely
 			// the base form.
-			dictTokens = sortTokens(tok, dictTokens);
+			ArrayList<Token> sortedTokens = sortTokens(tok, dictTokens);
 
-			// TODO make it possible to show the alternatives (in order) as a
-			// pop-up? (issue #20)
-			// tokens.add(dictTokens.get(0));
-			tokens.add(dictTokens);
+			// make it possible to show the alternatives (in order) as a
+			// pop-up (issue #20)
+			tokens.add(sortedTokens);
 		}
 
 		return tokens;
@@ -111,7 +110,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	 * @return the sorted list
 	 */
 	// public for testing
-	public static List<Token> sortTokens(com.atilika.kuromoji.ipadic.Token tokKuromoji, List<Token> dictTokens) {
+	public static ArrayList<Token> sortTokens(com.atilika.kuromoji.ipadic.Token tokKuromoji, List<Token> dictTokens) {
 		String posKuromoji = convertPOSTag(tokKuromoji);
 		String pronKuromoji = convertPronunciation(tokKuromoji.getReading());
 		logger.info(posKuromoji + "\t" + pronKuromoji);
@@ -121,7 +120,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			if (posKuromoji.equals("PNC")) {
 				meaning = "1) [punctuation mark]";
 			}
-			return Arrays.asList(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning));
+			return (ArrayList<Token>) Arrays.asList(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning));
 		}
 
 		// primary sort order: POS tag
@@ -137,10 +136,13 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		});
 
 		Collections.sort(dictTokens, comp);
+		// Solved the serialization issue in #20 by manually construct an ArrayList to return. The type used by guava, com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList, is a subtype of Java List but is apparently incompatible with ArrayList, and could not be serialized here for whatever reason.
+		ArrayList<Token> sortedTokens = new ArrayList<>();
 		for (Token tok : dictTokens) {
 			logger.info("\t" + tok);
+			sortedTokens.add(tok);
 		}
-		return dictTokens;
+		return sortedTokens;
 	}
 
 	private static String convertPOSTag(com.atilika.kuromoji.ipadic.Token t) {

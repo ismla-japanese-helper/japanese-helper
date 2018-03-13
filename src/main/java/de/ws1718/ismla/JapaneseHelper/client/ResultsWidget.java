@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
@@ -35,7 +36,7 @@ public class ResultsWidget extends Composite {
 		RootPanel.get("inputContainer").add(new SentenceInputWidget());
 	}
 
-	public ResultsWidget(List<List<Token>> sentence) {
+	public ResultsWidget(List<ArrayList<Token>> sentence) {
 		initWidget(uiBinder.createAndBindUi(this));
 		clearButton.setText("Clear and enter new text");
 		// Or maybe I can indeed append a class to this one after all. What's the issue with that anyways.
@@ -61,7 +62,7 @@ public class ResultsWidget extends Composite {
 	}
 
 	// Not sure if this is the most elegant way to go. But we're generating HTML anyways, why bother with clumsy GWT classes?
-	private HTMLPanel generateResultsTable(List<List<Token>> sentence) {
+	private HTMLPanel generateResultsTable(List<ArrayList<Token>> sentence) {
 		String html = "";
 		Boolean multiEntries = false;
 		// This is the outer row for all the columns.
