@@ -35,7 +35,7 @@ public class ResultsWidget extends Composite {
 		RootPanel.get("inputContainer").add(new SentenceInputWidget());
 	}
 
-	public ResultsWidget(List<Token> sentence) {
+	public ResultsWidget(List<List<Token>> sentence) {
 		initWidget(uiBinder.createAndBindUi(this));
 		clearButton.setText("Clear and enter new text");
 		// Or maybe I can indeed append a class to this one after all. What's the issue with that anyways.
@@ -61,13 +61,14 @@ public class ResultsWidget extends Composite {
 	}
 
 	// Not sure if this is the most elegant way to go. But we're generating HTML anyways, why bother with clumsy GWT classes?
-	private HTMLPanel generateResultsTable(List<Token> sentence) {
+	private HTMLPanel generateResultsTable(List<List<Token>> sentence) {
 		String html = "";
+		Boolean multiEntries = false;
 		// This is the outer row for all the columns.
 		html += "<div class='row'>";
 
-		for (Token t : sentence) {
-			html += generateOneWord(t);
+		for (List<Token> list : sentence) {
+            html += generateOneWord(list.get(0));
 		}
 
 		html += "</div>";

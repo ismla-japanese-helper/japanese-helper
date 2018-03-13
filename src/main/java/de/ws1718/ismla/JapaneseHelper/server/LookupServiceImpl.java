@@ -30,7 +30,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public static final String INFLECTION_TEMPLATES_PATH = "/WEB-INF/inflection-templates/";
 
 	@SuppressWarnings("unchecked")
-	public List<Token> lookup(String sentence) {
+	public List<List<Token>> lookup(String sentence) {
 		ListMultimap<String, Token> tokenMap = (ListMultimap<String, Token>) getServletContext()
 				.getAttribute("tokenMap");
 		Tokenizer tokenizer = new Tokenizer();
@@ -38,14 +38,14 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		List<com.atilika.kuromoji.ipadic.Token> ipaTokens = tokenizer.tokenize(sentence.trim());
 
 		// This is the Token defined by us.
-		List<Token> results = convertTokens(ipaTokens, tokenMap);
+		List<List<Token>> results = convertTokens(ipaTokens, tokenMap);
 
 		return results;
 	}
 
-	private List<Token> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens,
+	private List<List<Token>> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens,
 			ListMultimap<String, Token> tokenMap) {
-		List<Token> tokens = new ArrayList<>();
+		List<List<Token>> tokens = new ArrayList<>();
 
 		for (int index = 0; index < ipaTokens.size(); index++) {
 			com.atilika.kuromoji.ipadic.Token tok = ipaTokens.get(index);
@@ -93,7 +93,8 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 			// TODO make it possible to show the alternatives (in order) as a
 			// pop-up? (issue #20)
-			tokens.add(dictTokens.get(0));
+			// tokens.add(dictTokens.get(0));
+			tokens.add(dictTokens);
 		}
 
 		return tokens;

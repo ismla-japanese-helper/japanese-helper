@@ -22,19 +22,29 @@ public class WordPopupWidget extends Composite {
 
     private static WordPopupWidgetUiBinder ourUiBinder = GWT.create(WordPopupWidgetUiBinder.class);
 
-    public WordPopupWidget(Token word) {
+    public WordPopupWidget(List<Token> tokens) {
         initWidget(ourUiBinder.createAndBindUi(this));
         glossesContainer.addStyleName("container");
-        HTML glossesList = generateGlossesList(word.getTranslations());
+        HTML glossesList = generateGlossesList(tokens);
         glossesContainer.add(glossesList);
     }
 
-    private HTML generateGlossesList(List<String> glosses) {
+    private HTML generateGlossesList(List<Token> tokens) {
         String html = "";
         html += "<ul class='list-group'>";
-
+        List<String> glosses = tokens.get(0).getTranslations();
         for (String gloss : glosses) {
             html += "<li class='list-group-item'>" + gloss + "</li>";
+        }
+
+        if (tokens.size() > 1) {
+            for (int index = 1; index < tokens.size(); index++) {
+                html += "<li class='list-group-item'>Potential alternative meanings:</li>";
+                glosses = tokens.get(index).getTranslations();
+                for (String gloss : glosses) {
+                    html += "<li class='list-group-item'>" + gloss + "</li>";
+                }
+            }
         }
 
         html += "</ul>";

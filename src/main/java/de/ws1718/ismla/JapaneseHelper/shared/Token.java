@@ -172,6 +172,10 @@ public class Token implements Serializable {
 		this.translations = translations;
 	}
 
+	// public void addTranslation(String translation) {
+	// 	this.translations.add(translation);
+	// }
+
 	/**
 	 * @return true if this token is associated with an inflection paradigm
 	 */

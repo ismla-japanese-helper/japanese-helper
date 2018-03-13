@@ -32,10 +32,10 @@ public class SentenceInputWidget extends Composite {
 
     private void putResults() {
         String input = inputField.getText();
-        lookupService.lookup(input, new AsyncCallback<List<Token>>() {
+        lookupService.lookup(input, new AsyncCallback<List<List<Token>>>() {
 
             @Override
-            public void onSuccess(List<Token> results) {
+            public void onSuccess(List<List<Token>> results) {
                 ResultsWidget rw = new ResultsWidget(results);
 
                 // We want to show the original input at the same time.
