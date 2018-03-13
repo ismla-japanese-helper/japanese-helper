@@ -39,8 +39,9 @@ public class WordPopupWidget extends Composite {
 
         if (tokens.size() > 1) {
             for (int index = 1; index < tokens.size(); index++) {
-                html += "<li class='list-group-item'>Potential alternative meanings:</li>";
-                glosses = tokens.get(index).getTranslations();
+                Token curToken = tokens.get(index);
+                html += "<li class='list-group-item'><b>Potential alternative meaning (" + curToken.getPrettyPos() +") :</b></li>";
+                glosses = curToken.getTranslations();
                 for (String gloss : glosses) {
                     html += "<li class='list-group-item'>" + gloss + "</li>";
                 }
