@@ -377,7 +377,7 @@ public class InflectionTest {
 		String lemmaForm = TARI_TOK;
 		List<InflectedToken> tokens = map.get(lemmaForm);
 		assertNotNull(tokens);
-		assertEquals(8, tokens.size());
+		assertEquals(2, tokens.size());
 		String pos = "A[tari]";
 		String translation = "1) wretched, miserable 2) terrible, extremely bad 3) going to great efforts";
 		Token lemma = new Token(lemmaForm, "さんたん", pos, translation);

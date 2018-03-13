@@ -1,13 +1,3 @@
-## Based on https://ja.wikipedia.org/wiki/%E5%BD%A2%E5%AE%B9%E5%8B%95%E8%A9%9E
-
-## section タルト型活用
-continuative=と
+## martin1975reference　p. 749, stalph2009grosses p. 20
 attributive=たる
-imperative=たれ
 adverbial=と
-
-## section タリ活用
-imperfective=たら
-continuative2=たり
-terminal=たり
-realis=たれ
