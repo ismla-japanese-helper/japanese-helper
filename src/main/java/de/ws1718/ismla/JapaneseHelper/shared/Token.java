@@ -69,7 +69,7 @@ public class Token implements Serializable {
 	 *            the POS tag
 	 * @param inflectionParadigm
 	 *            the inflection paradigm
-	 * @param translation
+	 * @param translations
 	 *            the list of translations
 	 */
 	public Token(String form, String pronunciation, String posSimple, String inflectionParadigm,
@@ -389,12 +389,25 @@ public class Token implements Serializable {
 			// If we already got a gloss at the end of this step, we add it.
 			if (!lastGloss.isEmpty()) {
 				// A lot of entries are "?". We don't want to add such entries.
-				if (!lastGloss.equals("?")) {
+				// Don't forget to take the substring now that we've also included the index number actually.
+				if (lastGloss.length() > 3 && !lastGloss.substring(3).equals("?")) {
 					results.add(lastGloss);
 				}
 				lastGloss = "";
 			}
 		}
+
+		// Add a check on whether the first meaning is archaic. If yes, move it to the end.
+		// Sometimes we have absolutely empty entries for some reason... So we'll have to check that first.
+		if (results.size() > 0) {
+			String firstEntry = results.get(0);
+			// if (firstEntry.length() > 9 && firstEntry.contains("[archaic]")) {
+			if (firstEntry.contains("[archaic]")) {
+				results.remove(0);
+				results.add(firstEntry);
+			}
+		}
+
 		return results;
 	}
 
