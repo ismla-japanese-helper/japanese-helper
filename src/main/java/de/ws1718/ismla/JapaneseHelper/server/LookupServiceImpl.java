@@ -1,7 +1,6 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -114,13 +113,15 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		String posKuromoji = convertPOSTag(tokKuromoji);
 		String pronKuromoji = convertPronunciation(tokKuromoji.getReading());
 		logger.info(posKuromoji + "\t" + pronKuromoji);
+		ArrayList<Token> sortedTokens = new ArrayList<>();
 
 		if (dictTokens == null || dictTokens.isEmpty()) {
 			String meaning = "1) [out-of-vocabulary]";
 			if (posKuromoji.equals("PNC")) {
 				meaning = "1) [punctuation mark]";
 			}
-			return (ArrayList<Token>) Arrays.asList(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning));
+			sortedTokens.add(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning));
+			return sortedTokens;
 		}
 
 		// primary sort order: POS tag
@@ -137,7 +138,6 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 		Collections.sort(dictTokens, comp);
 		// Solved the serialization issue in #20 by manually construct an ArrayList to return. The type used by guava, com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList, is a subtype of Java List but is apparently incompatible with ArrayList, and could not be serialized here for whatever reason.
-		ArrayList<Token> sortedTokens = new ArrayList<>();
 		for (Token tok : dictTokens) {
 			logger.info("\t" + tok);
 			sortedTokens.add(tok);
