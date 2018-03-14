@@ -69,7 +69,7 @@ public class Token implements Serializable {
 	 *            the POS tag
 	 * @param inflectionParadigm
 	 *            the inflection paradigm
-	 * @param translation
+	 * @param translations
 	 *            the list of translations
 	 */
 	public Token(String form, String pronunciation, String posSimple, String inflectionParadigm,
@@ -173,10 +173,6 @@ public class Token implements Serializable {
 	public void setTranslations(ArrayList<String> translations) {
 		this.translations = translations;
 	}
-
-	// public void addTranslation(String translation) {
-	// 	this.translations.add(translation);
-	// }
 
 	/**
 	 * @return true if this token is associated with an inflection paradigm
