@@ -47,13 +47,14 @@ public class ResultsWidget extends Composite {
 		// OK. So in our case the order of the anchors should correspond to the order in which the tokens are stored in the sentence.
 		NodeList<Element> anchors = results.getElement().getElementsByTagName("a");
 		for (int i = 0; i < anchors.getLength(); i++) {
-			Element origAnchor = anchors.getItem(i);
-			Anchor anchorWithLink = new Anchor(origAnchor.getInnerHTML());
 			final int finalI = i;
+			Element origAnchor = anchors.getItem(i);
+			List<Token> currentTokens = sentence.get(finalI);
+			Anchor anchorWithLink = new Anchor(currentTokens.get(0).getTranslations().get(0));
 			anchorWithLink.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent clickEvent) {
-					new wordPopup(new WordPopupWidget(sentence.get(finalI))).center();
+					new wordPopup(new WordPopupWidget(currentTokens)).center();
 				}
 			});
 			results.addAndReplaceElement(anchorWithLink, origAnchor);
