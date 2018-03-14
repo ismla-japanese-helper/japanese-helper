@@ -21,21 +21,8 @@ public class LookupServiceImplTest {
 
 	private void testPermutations(List<Token> expected, com.atilika.kuromoji.ipadic.Token tokKuromoji, Token tok1,
 			Token tok2, Token tok3) {
-		System.out.println("EXPECTED");
-		for (Token t : expected){
-			System.out.println(t);
-		}
-		System.out.println("-----\n");
 		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok1, tok2, tok3)));
-		for (Token t : LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok1, tok2, tok3))){
-			System.out.println(t);
-		}
-		System.out.println();
-		for (Token t : LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok1, tok3, tok2))){
-			System.out.println(t);
-		}
 		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok1, tok3, tok2)));
-		System.out.println();
 		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok2, tok1, tok3)));
 		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok2, tok3, tok1)));
 		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok3, tok2, tok1)));

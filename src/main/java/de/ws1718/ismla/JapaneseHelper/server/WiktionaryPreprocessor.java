@@ -119,7 +119,18 @@ public class WiktionaryPreprocessor {
 							break;
 						case "だ":
 							tok.setInflectionParadigm("da");
+							break;
+						case "行く":
+							tok.setInflectionParadigm("iku");
+							break;
+						case "や":
+							tok.setInflectionParadigm("ya");
+							break;
+						case "出来る":
+							tok.setInflectionParadigm("dekiru");
+							break;
 						default:
+							logger.warning("Could not assign a proper inflection paradigm to " + tok);
 							continue lines;
 						}
 						break;
@@ -158,7 +169,7 @@ public class WiktionaryPreprocessor {
 		Map<Inflection, String> paradigm = inflections.get(inflectionName);
 
 		if (paradigm == null) {
-			logger.info("Could not find an inflection paradigm for \"" + inflectionName + "\".");
+			logger.warning("Could not find an inflection paradigm for \"" + inflectionName + "\".");
 			return;
 		}
 
@@ -239,7 +250,7 @@ public class WiktionaryPreprocessor {
 		case "suru-tsu":
 		case "suru":
 		case "zuru":
-			// remove the final する to get the stem
+			// remove the final する/ずる to get the stem
 			formInfl = form.substring(0, form.length() - 2) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
@@ -304,7 +315,7 @@ public class WiktionaryPreprocessor {
 					inflectionParadigm.put(vf, ending);
 				} catch (IllegalArgumentException e) {
 					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
-							&& (!line.contains("note"))) {
+							&& (!line.contains("note")) && (!line.equals("suru=y"))) {
 						logger.warning("Could not parse the following line: " + line);
 					}
 					continue;

@@ -1,0 +1,19 @@
+## based on https://en.wiktionary.org/wiki/%E8%A1%8C%E3%81%8F
+## like go-ku, but with irregular perfective & conjunctive forms
+-->|imperfective=か<!--
+-->|continuative=き<!--
+-->|terminal=く<!--
+-->|attributive=く<!--
+-->|hypothetical=け<!--
+-->|imperative=け<!--
+-->|passive=かれる<!--
+-->|causative=かせる<!--
+-->|causative2=かす<!--
+-->|potential=ける<!--
+-->|volitional=こう<!--
+-->|negative=かない<!--
+-->|negative_continuative=かず<!--
+-->|formal=きます<!--
+-->|perfective=った<!--
+-->|conjunctive=って<!--
+-->|hypothetical_conditional=けば<!--

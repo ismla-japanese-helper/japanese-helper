@@ -67,27 +67,27 @@ public class GlossesTest {
 		s = "1) text1 &lt; !-- comment1 --&gt;  text2 &lt; !-- comment2 --&gt; text3 &lt; !-- comment3";
 		expected = Arrays.asList("text1 text2 text3");
 		assertEquals(expected, Token.processGlosses(s));
-		
+
 		s = "1) must, shall ###";
 		expected = Arrays.asList("must, shall");
 		assertEquals(expected, Token.processGlosses(s));
-		
+
 		s = "1) variant of 汀,: the water's edge: ## beach ## shore ## bank";
 		expected = Arrays.asList("variant of 汀,: the water's edge: •beach •shore •bank");
 		assertEquals(expected, Token.processGlosses(s));
-		
+
 		s = "1) to make thin sheets of something by spreading out pulp and drying: ## to make paper #";
 		expected = Arrays.asList("to make thin sheets of something by spreading out pulp and drying: •to make paper");
 		assertEquals(expected, Token.processGlosses(s));
-		
+
 		s = "1) [element in compounds, referring to things {{l]";
 		expected = Arrays.asList("[element in compounds, referring to things l]");
 		assertEquals(expected, Token.processGlosses(s));
-		
+
 		s = "1) coarse, rough, plain, poor, shabby 2) to neglect [{{lang, ja, 粗末にする}}]";
 		expected = Arrays.asList("coarse, rough, plain, poor, shabby", "to neglect [lang, ja, 粗末にする]");
 		assertEquals(expected, Token.processGlosses(s));
-		
+
 	}
 
 }

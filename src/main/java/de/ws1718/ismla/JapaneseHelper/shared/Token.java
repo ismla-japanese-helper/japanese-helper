@@ -69,7 +69,7 @@ public class Token implements Serializable {
 	 *            the POS tag
 	 * @param inflectionParadigm
 	 *            the inflection paradigm
-	 * @param translations
+	 * @param translation
 	 *            the list of translations
 	 */
 	public Token(String form, String pronunciation, String posSimple, String inflectionParadigm,
@@ -77,7 +77,7 @@ public class Token implements Serializable {
 		this.form = form;
 		this.pronunciation = pronunciation;
 		pos = posSimple;
-		prettyPos = cleanPosTag(posSimple);
+		prettyPos = cleanPosTag(pos, inflectionParadigm);
 		this.inflectionParadigm = inflectionParadigm;
 		this.translations = translations;
 	}
@@ -125,6 +125,7 @@ public class Token implements Serializable {
 	 */
 	public void setPos(String pos) {
 		this.pos = pos;
+		prettyPos = cleanPosTag(pos, inflectionParadigm);
 	}
 
 	/**
@@ -155,6 +156,7 @@ public class Token implements Serializable {
 	 */
 	public void setInflectionParadigm(String inflectionParadigm) {
 		this.inflectionParadigm = inflectionParadigm;
+		prettyPos = cleanPosTag(pos, inflectionParadigm);
 	}
 
 	/**
@@ -260,60 +262,65 @@ public class Token implements Serializable {
 		return new String[] { pos, inflectionParadigm };
 	}
 
-	private static String cleanPosTag(String pos) {
+	private static String cleanPosTag(String pos, String inflectionParadigm) {
 		if (pos.startsWith("V") && pos.length() > 1) {
-			return cleanVerbPosTag(pos);
+			pos = cleanVerbPosTag(pos);
+		} else {
+			switch (pos) {
+			// sorted by frequency
+			case "V":
+				pos = "verb";
+				break;
+			case "A":
+				pos = "adjective";
+				break;
+			case "N":
+				pos = "noun";
+				break;
+			case "NE":
+				pos = "named entity";
+				break;
+			case "ADV":
+				pos = "adverb";
+				break;
+			case "SFX":
+				pos = "suffix";
+				break;
+			case "ITJ":
+				pos = "interjection";
+				break;
+			case "PRN":
+				pos = "pronoun";
+				break;
+			case "CNT":
+				pos = "counter";
+				break;
+			case "PFX":
+				pos = "prefix";
+				break;
+			case "PRT":
+				pos = "particle";
+				break;
+			case "CNJ":
+				pos = "conjunction";
+				break;
+			case "NUM":
+				pos = "numeral";
+				break;
+			case "DET":
+				pos = "adnominal";
+				break;
+			case "PNC":
+				pos = "punctuation";
+				break;
+			case "PSP":
+				pos = "postposition";
+				break;
+			}
 		}
 
-		switch (pos) {
-		// sorted by frequency
-		case "V":
-			pos = "verb";
-		case "A":
-			pos = "adjective";
-			break;
-		case "N":
-			pos = "noun";
-			break;
-		case "NE":
-			pos = "named entity";
-			break;
-		case "ADV":
-			pos = "adverb";
-			break;
-		case "SFX":
-			pos = "suffix";
-			break;
-		case "ITJ":
-			pos = "interjection";
-			break;
-		case "PRN":
-			pos = "pronoun";
-			break;
-		case "CNT":
-			pos = "counter";
-			break;
-		case "PFX":
-			pos = "prefix";
-			break;
-		case "PRT":
-			pos = "particle";
-			break;
-		case "CNJ":
-			pos = "conjunction";
-			break;
-		case "NUM":
-			pos = "numeral";
-			break;
-		case "DET":
-			pos = "adnominal";
-			break;
-		case "PNC":
-			pos = "punctuation";
-			break;
-		case "PSP":
-			pos = "postposition";
-			break;
+		if (inflectionParadigm != null && !inflectionParadigm.trim().isEmpty()) {
+			pos += " (" + inflectionParadigm + " infl.)";
 		}
 
 		return pos;
@@ -365,29 +372,29 @@ public class Token implements Serializable {
 				// Match an index term, e.g. "1)"
 				if (Character.isDigit(glosses.charAt(curPointer)) && glosses.charAt(curPointer + 1) == ')') {
 					// If it's not the first gloss, we should have already
-					// recorded something previously
-					if (glosses.charAt(curPointer) != '1' && curPointer > lastIndexPos + 3) {
-						// Remove the index term from the translation entry.
-						lastGloss = glosses.substring(lastIndexPos + 3, curPointer - 1);
+					// recorded something previously.
+					if (glosses.charAt(curPointer) != '1'){
+						lastGloss = glosses.substring(lastIndexPos, curPointer - 1);
 					}
 					// Record the index position. This also works if it's the
 					// first gloss.
 					lastIndexPos = curPointer;
 				}
-			} else if (curPointer >= lastIndexPos + 3) { // There are some totally empty entries. Need to check against that.
+			} else {
 				// We've come to the end of the whole translations string
 				// and we should record the last entry anyways.
 				// There is no extra space to deal with now. Need to stretch it
 				// to the end.
-				lastGloss = glosses.substring(lastIndexPos + 3, curPointer + 1);
+				lastGloss = glosses.substring(lastIndexPos, curPointer + 1);
 			}
 
 			// If we already got a gloss at the end of this step, we add it.
 			if (!lastGloss.isEmpty()) {
 				lastGloss = lastGloss.trim();
+				// Remove the enumeration marker (e.g. "1)")
+				lastGloss = lastGloss.replaceAll("^\\d+\\)\\s*", "");
 				// A lot of entries are "?". We don't want to add such entries.
-				// Don't forget to take the substring now that we've also included the index number actually.
-				if (!lastGloss.equals("?")) {
+				if (!lastGloss.equals("?") && !lastGloss.isEmpty()) {
 					results.add(lastGloss);
 				}
 				lastGloss = "";
@@ -397,8 +404,8 @@ public class Token implements Serializable {
 		// Add a check on whether the first meaning is archaic. If yes, move it to the end.
 		// Sometimes we have absolutely empty entries for some reason... So we'll have to check that first.
 		if (results.size() > 1) {
+			// TODO there might be more than 1 archaic entry. and there are tags like [obsolete]
 			String firstEntry = results.get(0);
-			// if (firstEntry.length() > 9 && firstEntry.contains("[archaic]")) {
 			if (firstEntry.contains("[archaic]")) {
 				results.remove(0);
 				results.add(firstEntry);
@@ -407,7 +414,7 @@ public class Token implements Serializable {
 
 		// Sometimes the whole thing is empty... In this case we'll have to return something anyways.
 		if (results.size() == 0) {
-			results.add("[out-of-vocabulary]");
+			results.add("[no translation given]");
 		}
 
 		return results;
@@ -430,6 +437,7 @@ public class Token implements Serializable {
 		translation = translation.replaceAll("''", "\"");
 
 		// Remove HTML comments.
+		// Again, they contain some extra whitespace.
 		int commentStartIndex = translation.indexOf("< !--");
 		int commentEndIndex = translation.indexOf("-->");
 		while (commentStartIndex > -1) {
@@ -448,6 +456,8 @@ public class Token implements Serializable {
 
 		// {{, }}
 		translation = translation.replaceAll("(\\{\\{)|(\\}\\})", "");
+		// ()
+		translation = translation.replaceAll("\\(\\)", "");
 
 		translation = translation.replaceAll("\\s+", " ");
 		return translation;

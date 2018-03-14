@@ -1,6 +1,7 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -55,6 +56,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			// If the token is inflected, try to lookup the full inflection form
 			// instead of displaying several segmented tokens.
 			if (!tok.getConjugationForm().equals("*")) {
+				logger.info("Attempting to get inflection suffixes for " + tok.getSurface());
 				Joiner joiner = Joiner.on("");
 				List<String> multiToken = new ArrayList<>();
 				multiToken.add(tok.getSurface());
@@ -120,8 +122,9 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			if (posKuromoji.equals("PNC")) {
 				meaning = "1) [punctuation mark]";
 			}
-			sortedTokens.add(new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning));
-			return sortedTokens;
+			Token tok = new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning);
+			logger.info("no matches, created token: " + tok);
+			return new ArrayList<Token>(Arrays.asList(tok));
 		}
 
 		// primary sort order: POS tag
@@ -137,7 +140,11 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		});
 
 		Collections.sort(dictTokens, comp);
-		// Solved the serialization issue in #20 by manually construct an ArrayList to return. The type used by guava, com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList, is a subtype of Java List but is apparently incompatible with ArrayList, and could not be serialized here for whatever reason.
+		// Solved the serialization issue in #20 by manually construct an
+		// ArrayList to return. The type used by guava,
+		// com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList,
+		// is a subtype of Java List but is apparently incompatible with
+		// ArrayList, and could not be serialized here for whatever reason.
 		for (Token tok : dictTokens) {
 			logger.info("\t" + tok);
 			sortedTokens.add(tok);

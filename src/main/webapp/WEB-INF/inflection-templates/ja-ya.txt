@@ -1,0 +1,22 @@
+## https://en.wiktionary.org/wiki/%E3%82%84
+## These entries replace the dictionary form.
+imperfective=や
+continuative=で
+terminal=や
+attributive=である
+hypothetical=なら
+hypothetical2=であれ
+volitional=やろう
+volitional2=やろ
+negative=やない
+negative_continuative=やのうて
+negative_continuative2=やなくて
+formal=です
+formal2=だす
+formal3=どす
+perfective=やった
+conjunctive=で
+conjunctive2=やって
+hypothetical_conditional=ならば
+hypothetical_conditional2=であれば
+hypothetical_conditional3=やったら

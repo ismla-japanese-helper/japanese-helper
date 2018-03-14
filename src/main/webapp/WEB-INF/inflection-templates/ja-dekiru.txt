@@ -1,0 +1,18 @@
+## https://en.wiktionary.org/wiki/%E5%87%BA%E6%9D%A5%E3%82%8B
+## Similar to ja-ichi, but without passive/causative/potential forms.
+-->|imperfective=<!--
+-->|continuative=<!--
+-->|terminal=る<!--
+-->|attributive=る<!--
+-->|hypothetical=れ<!--
+-->|imperative=よ<!--
+-->|imperative2=ろ<!--
+-->|volitional=よう<!--
+-->|negative=ない<!--
+-->|negative2=ぬ<!--
+-->|negative3=ん<!--
+-->|negative_continuative=ず<!--
+-->|formal=ます<!--
+-->|perfective=た<!--
+-->|conjunctive=て<!--
+-->|hypothetical_conditional=れば<!--

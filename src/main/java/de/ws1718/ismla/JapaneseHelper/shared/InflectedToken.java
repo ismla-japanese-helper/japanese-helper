@@ -70,9 +70,9 @@ public class InflectedToken extends Token {
 	@Override
 	public String toString() {
 		String infl = inflection.toString();
-		
-		if ("ichi".equals(getInflectionParadigm()) || "suru".equals(getInflectionParadigm())
-				|| "suru-indep".equals(getInflectionParadigm())) {
+
+		if ("ichi".equals(getInflectionParadigm()) || "dekiru".equals(getInflectionParadigm())
+				|| "suru".equals(getInflectionParadigm()) || "suru-indep".equals(getInflectionParadigm())) {
 			switch (inflection) {
 			case IMPERATIVE:
 				infl = "written " + infl;
@@ -80,12 +80,18 @@ public class InflectedToken extends Token {
 			case IMPERATIVE2:
 				infl = "spoken " + infl;
 				break;
+			case NEGATIVE3:
+				if ("dekiru".equals(getInflectionParadigm())) {
+					infl = "colloquial " + infl;
+				}
+				break;
 			case POTENTIAL2:
 				// can only be the case if the inflection paradim is "ichi"
-				infl = "potential " + infl;
+				infl = "colloquial " + infl;
+				break;
 			}
 		}
-		
+
 		return super.toString() + "\t" + inflection + "\t" + lemmaToken.getForm();
 	}
 
