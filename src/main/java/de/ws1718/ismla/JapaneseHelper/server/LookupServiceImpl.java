@@ -49,7 +49,10 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 		for (int index = 0; index < ipaTokens.size(); index++) {
 			com.atilika.kuromoji.ipadic.Token tok = ipaTokens.get(index);
-			logger.info(tok.getSurface() + "\t" + tok.getAllFeatures());
+			String form = tok.getSurface();
+			String pos = tok.getPartOfSpeechLevel1();
+			String pron = tok.getReading();
+			logger.info(form + "\t" + tok.getAllFeatures());
 
 			List<Token> dictTokens = tokenMap.get(tok.getSurface());
 
@@ -58,42 +61,45 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			if (!tok.getConjugationForm().equals("*")) {
 				logger.info("Attempting to get inflection suffixes for " + tok.getSurface());
 				Joiner joiner = Joiner.on("");
-				List<String> multiToken = new ArrayList<>();
-				multiToken.add(tok.getSurface());
+				List<String> multiTokenForm = new ArrayList<>();
+				multiTokenForm.add(tok.getSurface());
+				List<String> multiTokenPron = new ArrayList<>();
+				multiTokenPron.add(tok.getReading());
 				// Should look at the token immediately following it.
 				int curIndex = index + 1;
 				// If it's not out of bounds and it's also marked as an
 				// inflection form.
 				while (curIndex < ipaTokens.size() && !ipaTokens.get(curIndex).getConjugationForm().equals("*")) {
-					multiToken.add(ipaTokens.get(curIndex).getSurface());
+					multiTokenForm.add(ipaTokens.get(curIndex).getSurface());
+					multiTokenPron.add(ipaTokens.get(curIndex).getReading());
 					curIndex++;
 				}
 
-				while (multiToken.size() > 1) {
-					List<Token> multiTokenEntry = tokenMap.get(joiner.join(multiToken));
+				while (multiTokenForm.size() > 1) {
+					List<Token> multiTokenEntry = tokenMap.get(joiner.join(multiTokenForm));
 					if (multiTokenEntry != null && multiTokenEntry.size() > 0) {
 						dictTokens = multiTokenEntry;
 						// Skip all the consumed tokens from the Kuromoji
 						// outputs of course.
 						// -1 because the outer loop will still + 1
-						index = index + multiToken.size() - 1;
+						index = index + multiTokenForm.size() - 1;
 						break;
 					}
 
 					// Else we try again with one less entry in the multiToken,
 					// i.e. we might have overreached in the search.
-					multiToken.remove(multiToken.size() - 1);
+					multiTokenForm.remove(multiTokenForm.size() - 1);
+					multiTokenPron.remove(multiTokenPron.size() - 1);
 				}
+
+				form = joiner.join(multiTokenForm);
+				pron = joiner.join(multiTokenPron);
+				logger.info("Continuing with " + form);
 			}
 
 			// Sort the results if there are several matches.
-			// Even if we got a multitok, we can still a kind of sort the
-			// entries by using the first token in the multitok, which is likely
-			// the base form.
-			ArrayList<Token> sortedTokens = sortTokens(tok, dictTokens);
+			ArrayList<Token> sortedTokens = sortTokens(form, pos, pron, dictTokens);
 
-			// make it possible to show the alternatives (in order) as a
-			// pop-up (issue #20)
 			tokens.add(sortedTokens);
 		}
 
@@ -104,47 +110,51 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	 * Sorts a list of Token instances by how closely they match the Kuromoji
 	 * token (descending order).
 	 * 
-	 * @param tokKuromoji
-	 *            the Kuromoji token
+	 * @param form
+	 *            the surface form of the token
+	 * @param posKuromoji
+	 *            the IPAdic POS tag belonging to the token
+	 * @param pronKuromoji
+	 *            the reading associated with the token
 	 * @param dictTokens
-	 *            the list of tokens (can be empty or null)
+	 *            the list of Wiktionary tokens (can be empty or null)
 	 * @return the sorted list
 	 */
 	// public for testing
-	public static ArrayList<Token> sortTokens(com.atilika.kuromoji.ipadic.Token tokKuromoji, List<Token> dictTokens) {
-		String posKuromoji = convertPOSTag(tokKuromoji);
-		String pronKuromoji = convertPronunciation(tokKuromoji.getReading());
-		logger.info(posKuromoji + "\t" + pronKuromoji);
+	public static ArrayList<Token> sortTokens(String form, String posKuromoji, String pronKuromoji,
+			List<Token> dictTokens) {
+		// We need to create new variables, otherwise the compiler won't pick up
+		// on the fact that the conversion methods are static too, and the
+		// Comparator does not compile.
+		String posK = convertIPADicPOSTag(posKuromoji);
+		String pronK = convertPronunciation(pronKuromoji);
+
+		logger.info(posK + "\t" + pronK);
 		ArrayList<Token> sortedTokens = new ArrayList<>();
 
 		if (dictTokens == null || dictTokens.isEmpty()) {
 			String meaning = "1) [out-of-vocabulary]";
-			if (posKuromoji.equals("PNC")) {
+			if (posK.equals("PNC")) {
 				meaning = "1) [punctuation mark]";
 			}
-			Token tok = new Token(tokKuromoji.getSurface(), pronKuromoji, posKuromoji, meaning);
+			Token tok = new Token(form, pronK, posK, meaning);
 			logger.info("no matches, created token: " + tok);
 			return new ArrayList<Token>(Arrays.asList(tok));
 		}
 
 		// primary sort order: POS tag
 		Comparator<Token> comp = Comparator.comparing(Token::getPos, (pos1, pos2) -> {
-			pos1 = convertPOSTag(pos1);
-			pos2 = convertPOSTag(pos2);
-			return pos1.equals(pos2) ? 0 : pos1.equals(posKuromoji) ? -1 : 1;
+			pos1 = convertWiktionaryPOSTag(pos1);
+			pos2 = convertWiktionaryPOSTag(pos2);
+			return pos1.equals(pos2) ? 0 : pos1.equals(posK) ? -1 : 1;
 		}).thenComparing(Token::getPronunciation, (pron1, pron2) -> {
 			// secondary sort order: pronunciation
 			pron1 = convertPronunciation(pron1);
 			pron2 = convertPronunciation(pron2);
-			return pron1.equals(pron2) ? 0 : pron1.equals(pronKuromoji) ? -1 : 1;
+			return pron1.equals(pron2) ? 0 : pron1.equals(pronK) ? -1 : 1;
 		});
 
 		Collections.sort(dictTokens, comp);
-		// Solved the serialization issue in #20 by manually construct an
-		// ArrayList to return. The type used by guava,
-		// com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList,
-		// is a subtype of Java List but is apparently incompatible with
-		// ArrayList, and could not be serialized here for whatever reason.
 		for (Token tok : dictTokens) {
 			logger.info("\t" + tok);
 			sortedTokens.add(tok);
@@ -152,8 +162,8 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		return sortedTokens;
 	}
 
-	private static String convertPOSTag(com.atilika.kuromoji.ipadic.Token t) {
-		String ipadicTag = t.getPartOfSpeechLevel1();
+	// String ipadicTag = t.getPartOfSpeechLevel1();
+	private static String convertIPADicPOSTag(String ipadicTag) {
 		switch (ipadicTag) {
 		case "名詞":
 			// Several possibilities under this category.
@@ -191,7 +201,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		}
 	}
 
-	private static String convertPOSTag(String pos) {
+	private static String convertWiktionaryPOSTag(String pos) {
 		if (pos.startsWith("V")) {
 			return "V";
 		}

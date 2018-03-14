@@ -21,12 +21,15 @@ public class LookupServiceImplTest {
 
 	private void testPermutations(List<Token> expected, com.atilika.kuromoji.ipadic.Token tokKuromoji, Token tok1,
 			Token tok2, Token tok3) {
-		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok1, tok2, tok3)));
-		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok1, tok3, tok2)));
-		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok2, tok1, tok3)));
-		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok2, tok3, tok1)));
-		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok3, tok2, tok1)));
-		assertEquals(expected, LookupServiceImpl.sortTokens(tokKuromoji, Arrays.asList(tok3, tok1, tok2)));
+		String pos = tokKuromoji.getPartOfSpeechLevel1();
+		String pron = tokKuromoji.getPronunciation();
+		String form = tokKuromoji.getSurface();
+		assertEquals(expected, LookupServiceImpl.sortTokens(form, pos, pron, Arrays.asList(tok1, tok2, tok3)));
+		assertEquals(expected, LookupServiceImpl.sortTokens(form, pos, pron, Arrays.asList(tok1, tok3, tok2)));
+		assertEquals(expected, LookupServiceImpl.sortTokens(form, pos, pron, Arrays.asList(tok2, tok1, tok3)));
+		assertEquals(expected, LookupServiceImpl.sortTokens(form, pos, pron, Arrays.asList(tok2, tok3, tok1)));
+		assertEquals(expected, LookupServiceImpl.sortTokens(form, pos, pron, Arrays.asList(tok3, tok2, tok1)));
+		assertEquals(expected, LookupServiceImpl.sortTokens(form, pos, pron, Arrays.asList(tok3, tok1, tok2)));
 	}
 
 	@Test
@@ -37,7 +40,7 @@ public class LookupServiceImplTest {
 		List<Token> expected = Arrays.asList(tok1, tok2, tok3);
 		testPermutations(expected, tokKuromoji, tok1, tok2, tok3);
 	}
-	
+
 	@Test
 	public void testSortTokens2() {
 		// reading: イノチ = いのち; pos: 名詞 = N
