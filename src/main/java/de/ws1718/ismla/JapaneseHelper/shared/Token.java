@@ -374,7 +374,7 @@ public class Token implements Serializable {
 					// first gloss.
 					lastIndexPos = curPointer;
 				}
-			} else if (curPointer > lastIndexPos + 1) {
+			} else if (curPointer >= lastIndexPos + 3) { // There are some totally empty entries. Need to check against that.
 				// We've come to the end of the whole translations string
 				// and we should record the last entry anyways.
 				// There is no extra space to deal with now. Need to stretch it
@@ -387,7 +387,7 @@ public class Token implements Serializable {
 				lastGloss = lastGloss.trim();
 				// A lot of entries are "?". We don't want to add such entries.
 				// Don't forget to take the substring now that we've also included the index number actually.
-				if (lastGloss.length() > 3 && !lastGloss.substring(3).equals("?")) {
+				if (!lastGloss.equals("?")) {
 					results.add(lastGloss);
 				}
 				lastGloss = "";
@@ -396,13 +396,18 @@ public class Token implements Serializable {
 
 		// Add a check on whether the first meaning is archaic. If yes, move it to the end.
 		// Sometimes we have absolutely empty entries for some reason... So we'll have to check that first.
-		if (results.size() > 0) {
+		if (results.size() > 1) {
 			String firstEntry = results.get(0);
 			// if (firstEntry.length() > 9 && firstEntry.contains("[archaic]")) {
 			if (firstEntry.contains("[archaic]")) {
 				results.remove(0);
 				results.add(firstEntry);
 			}
+		}
+
+		// Sometimes the whole thing is empty... In this case we'll have to return something anyways.
+		if (results.size() == 0) {
+			results.add("[out-of-vocabulary]");
 		}
 
 		return results;
