@@ -1,9 +1,6 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_NEGATIVE;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_NEGATIVE_PAST;
-import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.FORMAL_PAST;
+import static de.ws1718.ismla.JapaneseHelper.shared.Inflection.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -335,13 +332,14 @@ public class WiktionaryPreprocessor {
 				String suffix = formalSuffix.replace("ます", "ません");
 				inflectionParadigm.put(FORMAL_NEGATIVE, suffix);
 			}
-			if (!inflectionParadigm.containsKey(FORMAL_PAST)) {
+			if (!inflectionParadigm.containsKey(FORMAL_PERFECTIVE) && !inflectionParadigm.containsKey(FORMAL_PAST)) {
 				String suffix = formalSuffix.replace("ます", "ました");
-				inflectionParadigm.put(FORMAL_PAST, suffix);
+				inflectionParadigm.put(FORMAL_PERFECTIVE, suffix);
 			}
-			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE_PAST)) {
+			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE_PERFECTIVE)
+					&& !inflectionParadigm.containsKey(FORMAL_NEGATIVE_PAST)) {
 				String suffix = formalSuffix.replace("ます", "ませんでした");
-				inflectionParadigm.put(FORMAL_NEGATIVE_PAST, suffix);
+				inflectionParadigm.put(FORMAL_NEGATIVE_PERFECTIVE, suffix);
 			}
 		}
 

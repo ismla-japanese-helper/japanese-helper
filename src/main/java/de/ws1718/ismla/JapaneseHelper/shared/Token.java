@@ -344,12 +344,12 @@ public class Token implements Serializable {
 		} else if (pos.contains("T")) {
 			transitivity = "transitive ";
 		} else if (pos.contains("B")) {
-			transitivity = "bitransitive ";
+			transitivity = "ambitransitive ";
 		}
 
 		String inflectedForm = "";
 		if (pos.contains("form")) {
-			inflectedForm = " (infl.)";
+			inflectedForm = " (inflected)";
 		}
 
 		return transitivity + verbType + "verb" + inflectedForm;
