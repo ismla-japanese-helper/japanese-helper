@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import de.ws1718.ismla.JapaneseHelper.shared.InflectableToken;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Inflection;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
@@ -79,8 +80,9 @@ public class WiktionaryPreprocessor {
 					tok.setInflectionParadigm("desu");
 					// Also add the non-formal version.
 					// https://en.wiktionary.org/wiki/%E3%81%A0#Verb
-					inflect(new Token("だ", "だ", "V[da]", "Used when a sentence has a nominal as its predicate, "
-							+ "usually but not always equal to the English verb ''to be''."));
+					inflect(new InflectableToken("だ", "だ", "V[da]",
+							"Used when a sentence has a nominal as its predicate, "
+									+ "usually but not always equal to the English verb ''to be''."));
 				}
 				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
@@ -90,7 +92,7 @@ public class WiktionaryPreprocessor {
 					case "ichi":
 						if (form.equals("居る")) {
 							// Add the (more common) kana version いる.
-							inflect(new Token(pronunciation, pronunciation, posAndInflection, translation));
+							inflect(new InflectableToken(pronunciation, pronunciation, posAndInflection, translation));
 						}
 						break;
 					case "verbconj":
@@ -138,11 +140,14 @@ public class WiktionaryPreprocessor {
 					}
 
 					// Generate and add the inflections.
-					inflect(tok);
-				}
+					InflectableToken tokInfl = new InflectableToken(tok);
+					inflect(tokInfl);
+					addToken(tokInfl);
+				} else {
 
-				// And finally, add the actual token.
-				addToken(tok);
+					// And finally, add the actual token.
+					addToken(tok);
+				}
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -161,7 +166,7 @@ public class WiktionaryPreprocessor {
 		return word.replaceAll("[-\\.\\s+]", "");
 	}
 
-	private void inflect(Token tok) {
+	private void inflect(InflectableToken tok) {
 		String inflectionName = tok.getInflectionParadigm();
 		Map<Inflection, String> paradigm = inflections.get(inflectionName);
 
@@ -191,7 +196,7 @@ public class WiktionaryPreprocessor {
 		}
 	}
 
-	private void inflect(Token tok, String suffix, Inflection inflection, String inflectionName) {
+	private void inflect(InflectableToken tok, String suffix, Inflection inflection, String inflectionName) {
 		String form = tok.getForm();
 		String pron = tok.getPronunciation();
 		String formInfl = "";
@@ -263,7 +268,9 @@ public class WiktionaryPreprocessor {
 			pronInfl = pron.substring(0, pron.length() - 1) + suffix;
 		}
 
-		addToken(new InflectedToken(tok, formInfl, pronInfl, inflection));
+		InflectedToken inflTok = new InflectedToken(tok, formInfl, pronInfl, inflection);
+		tok.addInflectedForm(inflTok);
+		addToken(inflTok);
 	}
 
 	private String aruKanjiToKana(String word) {

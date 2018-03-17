@@ -14,6 +14,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.mariten.kanatools.KanaConverter;
 
 import de.ws1718.ismla.JapaneseHelper.client.LookupService;
+import de.ws1718.ismla.JapaneseHelper.shared.InflectableToken;
+import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 // First try to look up the base form of the word in the hashmap
@@ -99,8 +101,17 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 			// Sort the results if there are several matches.
 			ArrayList<Token> sortedTokens = sortTokens(form, pos, pron, dictTokens);
-
 			tokens.add(sortedTokens);
+			
+			// Example for getting the inflection table.
+			// TODO delete this and implement the actual table
+			if (sortedTokens.get(0) instanceof InflectedToken){
+				InflectedToken inflTok = (InflectedToken) sortedTokens.get(0);
+				InflectableToken lemma = inflTok.getLemmaToken();
+				for (InflectedToken inflForm : lemma.getInflectedForms()){
+					logger.info(inflForm.getInflection() + "\t" + inflForm.getForm());
+				}
+			}
 		}
 
 		return tokens;

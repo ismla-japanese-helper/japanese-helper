@@ -1,15 +1,13 @@
 package de.ws1718.ismla.JapaneseHelper.shared;
 
-import java.util.ArrayList;
-
 public class InflectedToken extends Token {
 
 	private static final long serialVersionUID = -8227675932132742011L;
-	private Token lemmaToken;
+	private InflectableToken lemmaToken;
 	private Inflection inflection;
 
 	public InflectedToken() {
-		this(new Token("", "", "", "", new ArrayList<String>()), "", "", null);
+		this(new InflectableToken(), "", "", null);
 	}
 
 	/**
@@ -25,7 +23,7 @@ public class InflectedToken extends Token {
 	 *            the aspect/tense/voice/politeness/negation according to which
 	 *            this token is inflected
 	 */
-	public InflectedToken(Token lemmaToken, String form, String pronunciation, Inflection inflection) {
+	public InflectedToken(InflectableToken lemmaToken, String form, String pronunciation, Inflection inflection) {
 		super(form, pronunciation, lemmaToken.getPos(), lemmaToken.getInflectionParadigm(),
 				lemmaToken.getTranslations());
 		this.lemmaToken = lemmaToken;
@@ -35,7 +33,7 @@ public class InflectedToken extends Token {
 	/**
 	 * @return the lemma token
 	 */
-	public Token getLemmaToken() {
+	public InflectableToken getLemmaToken() {
 		return lemmaToken;
 	}
 
@@ -43,7 +41,7 @@ public class InflectedToken extends Token {
 	 * @param lemmaToken
 	 *            the lemma token to set
 	 */
-	public void setLemmaToken(Token lemmaToken) {
+	public void setLemmaToken(InflectableToken lemmaToken) {
 		this.lemmaToken = lemmaToken;
 	}
 

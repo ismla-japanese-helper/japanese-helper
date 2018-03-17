@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Multimap;
 
+import de.ws1718.ismla.JapaneseHelper.shared.InflectableToken;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Inflection;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
@@ -119,7 +120,7 @@ public class InflectionTest {
 	}
 
 	private void testInflection(List<InflectedToken> tokens, String pos, String translation, String form,
-			String pronunciation, Inflection inflection, Token lemma) {
+			String pronunciation, Inflection inflection, InflectableToken lemma) {
 		assertTrue(tokens.contains(new InflectedToken(lemma, form, pronunciation, inflection)));
 	}
 
@@ -131,7 +132,7 @@ public class InflectionTest {
 		assertEquals(19, tokens.size());
 		String pos = "A[i]";
 		String translation = "1) bright, light, luminous 2) merry, cheerful";
-		Token lemma = new Token(lemmaForm, "あかるい", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "あかるい", pos, translation);
 		testInflection(tokens, pos, translation, "明るかろ", "あかるかろ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "明るかれ", "あかるかれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "明るかった", "あかるかった", INFORMAL_PAST, lemma);
@@ -147,7 +148,7 @@ public class InflectionTest {
 		assertEquals(24, tokens.size());
 		String pos = "A[na]";
 		String translation = "1) strange 2) excellent";
-		Token lemma = new Token(lemmaForm, "みょう", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "みょう", pos, translation);
 		testInflection(tokens, pos, translation, "妙だろ", "みょうだろ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "妙であれ", "みょうであれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "妙だった", "みょうだった", INFORMAL_PAST, lemma);
@@ -165,7 +166,7 @@ public class InflectionTest {
 		assertEquals(20, tokens.size());
 		String pos = "V1[go-bu]";
 		String translation = "1) to fly 2) to jump 3) to go quickly 4) to splash, splatter";
-		Token lemma = new Token(lemmaForm, "とぶ", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "とぶ", pos, translation);
 		testInflection(tokens, pos, translation, "飛ば", "とば", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "飛べ", "とべ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "飛ばせる", "とばせる", CAUSATIVE, lemma);
@@ -182,7 +183,7 @@ public class InflectionTest {
 		assertEquals(20, tokens.size());
 		String pos = "VI1[go-ru]";
 		String translation = "1) to be conveyed, to be communicated";
-		Token lemma = new Token(lemmaForm, "つたわる", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "つたわる", pos, translation);
 		testInflection(tokens, pos, translation, "伝わる", "つたわる", TERMINAL, lemma);
 	}
 
@@ -194,7 +195,7 @@ public class InflectionTest {
 		assertEquals(21, tokens.size());
 		String pos = "V1[honorific]";
 		String translation = "1) give";
-		Token lemma = new Token(lemmaForm, "くださる", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "くださる", pos, translation);
 		testInflection(tokens, pos, translation, "下さら", "くださら", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "下さい", "ください", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "下さらせる", "くださらせる", CAUSATIVE, lemma);
@@ -210,7 +211,7 @@ public class InflectionTest {
 		assertEquals(24, tokens.size());
 		String pos = "VT2[ichi]";
 		String translation = "1) come about, occur, arise 2) result from, be caused by";
-		Token lemma = new Token(lemmaForm, "しょうじる", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "しょうじる", pos, translation);
 		testInflection(tokens, pos, translation, "生じ", "しょうじ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "生じよ", "しょうじよ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "生じさせる", "しょうじさせる", CAUSATIVE, lemma);
@@ -226,7 +227,7 @@ public class InflectionTest {
 		assertEquals(26, tokens.size());
 		String pos = "V3[suru-i-ku]";
 		String translation = "1) face each other 2) be in response to, be against";
-		Token lemma = new Token(lemmaForm, "たいする", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "たいする", pos, translation);
 		testInflection(tokens, pos, translation, "対さ", "たいさ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "対せ", "たいせ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "対させる", "たいさせる", CAUSATIVE, lemma);
@@ -242,7 +243,7 @@ public class InflectionTest {
 		assertEquals(23, tokens.size());
 		String pos = "V3[suru-tsu]";
 		String translation = "1) guess, presume, sense";
-		Token lemma = new Token(lemmaForm, "さっする", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "さっする", pos, translation);
 		testInflection(tokens, pos, translation, "察せ", "さっせ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "察しろ", "さっしろ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "察しさせる", "さっしさせる", CAUSATIVE, lemma);
@@ -258,7 +259,7 @@ public class InflectionTest {
 		assertEquals(21, tokens.size());
 		String pos = "VB3[suru]";
 		String translation = "1) meet, assemble, gather 2) mediate";
-		Token lemma = new Token(lemmaForm, "かいする", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "かいする", pos, translation);
 		testInflection(tokens, pos, translation, "会し", "かいし", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "会せよ", "かいせよ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "会させる", "かいさせる", CAUSATIVE, lemma);
@@ -274,7 +275,7 @@ public class InflectionTest {
 		assertEquals(19, tokens.size());
 		String pos = "VT3[zuru]";
 		String translation = "1) believe, put trust in";
-		Token lemma = new Token(lemmaForm, "しんずる", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "しんずる", pos, translation);
 		testInflection(tokens, pos, translation, "信じ", "しんじ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "信じろ", "しんじろ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "信じさせる", "しんじさせる", CAUSATIVE, lemma);
@@ -290,7 +291,7 @@ public class InflectionTest {
 		assertEquals(20, tokens.size());
 		String pos = "VI1[kuru]";
 		String translation = "1) bring (someone to a personplace)";
-		Token lemma = new Token(lemmaForm, "つれてくる", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "つれてくる", pos, translation);
 		testInflection(tokens, pos, translation, "連れて来", "つれてこ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "連れて来い", "つれてこい", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "連れて来させる", "つれてこさせる", CAUSATIVE, lemma);
@@ -306,7 +307,7 @@ public class InflectionTest {
 		assertEquals(21, tokens.size());
 		String pos = "VI1[aru]";
 		String translation = "1) to exist (''inanimate objects'') 2) to be (''inanimate objects'') 3) to have (''inanimate objects'') 4) (of an accident) to happen";
-		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "あら", "あら", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "あれ", "あれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "あらせる", "あらせる", CAUSATIVE, lemma);
@@ -323,7 +324,7 @@ public class InflectionTest {
 		assertEquals(13, tokens.size());
 		String pos = "V[beshi]";
 		String translation = "1) must, shall ###";
-		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "べから", "べから", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "べかる", "べかる", ATTRIBUTIVE2, lemma);
 		testInflection(tokens, pos, translation, "べからず", "べからず", NEGATIVE_CONTINUATIVE, lemma);
@@ -347,7 +348,7 @@ public class InflectionTest {
 		assertEquals(23, tokens.size());
 		String pos = "V2[kureru]";
 		String translation = "1) to give 2) to do for someone";
-		Token lemma = new Token(lemmaForm, lemmaForm, pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, lemmaForm, pos, translation);
 		testInflection(tokens, pos, translation, "くれ", "くれ", IMPERFECTIVE, lemma);
 		testInflection(tokens, pos, translation, "くれ", "くれ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "くれさせる", "くれさせる", CAUSATIVE, lemma);
@@ -363,7 +364,7 @@ public class InflectionTest {
 		assertEquals(21, tokens.size());
 		String pos = "VT3[suru-indep]";
 		String translation = "1) . [rare]";
-		Token lemma = new Token(lemmaForm, "する", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "する", pos, translation);
 		testInflection(tokens, pos, translation, "為", "し", IMPERFECTIVE2, lemma);
 		testInflection(tokens, pos, translation, "為よ", "せよ", IMPERATIVE, lemma);
 		testInflection(tokens, pos, translation, "為せる", "させる", CAUSATIVE, lemma);
@@ -380,7 +381,7 @@ public class InflectionTest {
 		assertEquals(2, tokens.size());
 		String pos = "A[tari]";
 		String translation = "1) wretched, miserable 2) terrible, extremely bad 3) going to great efforts";
-		Token lemma = new Token(lemmaForm, "さんたん", pos, translation);
+		InflectableToken lemma = new InflectableToken(lemmaForm, "さんたん", pos, translation);
 		testInflection(tokens, pos, translation, "惨憺たる", "さんたんたる", ATTRIBUTIVE, lemma);
 	}
 
