@@ -71,7 +71,7 @@ public class ResultsWidget extends Composite {
 				InflectableToken lemmaToken = ((InflectedToken) firstToken).getLemmaToken();
 				anchorIndex++;
 				Element inflectionTableAnchor = anchors.getItem(anchorIndex);
-				Anchor inflectionTableAnchorWithLink = new Anchor(((InflectedToken) firstToken).getInflectionInformation());
+				Anchor inflectionTableAnchorWithLink = new Anchor(((InflectedToken) firstToken).getLemmaAndInflectionInformation());
 				inflectionTableAnchorWithLink.addClickHandler(new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
@@ -115,7 +115,7 @@ public class ResultsWidget extends Composite {
 		representation += "<div class='col-12'>" + t.getPrettyPos() + "</div>";
 
 		if (t instanceof InflectedToken) {
-			String inflectionInfo = ((InflectedToken) t).getInflectionInformation();
+			String inflectionInfo = ((InflectedToken) t).getLemmaAndInflectionInformation();
 			representation += "<div class='col-12' title='Click for full list of inflections'><a>" + inflectionInfo + "</a></div>";
 		} else {
 			representation += "<div class='col-12'>" + "*" + "</div>";

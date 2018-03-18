@@ -37,9 +37,10 @@ public class InflectionTableWidget extends Composite {
 
         ArrayList<InflectedToken> inflectedForms = token.getInflectedForms();
 
-        for (int i = 0; i < inflectedForms.size(); i++) {
-            html += "<tr><th scope='row'>" + (i + 1) + "</th>" + "<td>" + inflectedForms.get(i).getForm() + "</td>" + "<td>" + inflectedForms.get(i).getInflection() + "</td>" + "</tr>";
-        }
+		for (int i = 0; i < inflectedForms.size(); i++) {
+			html += "<tr><th scope='row'>" + (i + 1) + "</th>" + "<td>" + inflectedForms.get(i).getForm() + "</td>"
+					+ "<td>" + inflectedForms.get(i).getInflectionInformation() + "</td>" + "</tr>";
+		}
 
         html += "</tbody>" + "</table>";
 

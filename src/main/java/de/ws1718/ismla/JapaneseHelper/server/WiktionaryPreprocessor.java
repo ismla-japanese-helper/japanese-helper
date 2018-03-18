@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,7 @@ public class WiktionaryPreprocessor {
 
 	private static final Logger logger = Logger.getLogger(WiktionaryPreprocessor.class.getSimpleName());
 
-	private Map<String, Map<Inflection, String>> inflections;
+	private Map<String, List<Entry<Inflection, String>>> inflections;
 	private ListMultimap<String, Token> tokens;
 
 	public WiktionaryPreprocessor(List<String> inflectionFilenames, List<InputStream> inflectionStreams,
@@ -168,14 +170,14 @@ public class WiktionaryPreprocessor {
 
 	private void inflect(InflectableToken tok) {
 		String inflectionName = tok.getInflectionParadigm();
-		Map<Inflection, String> paradigm = inflections.get(inflectionName);
+		List<Entry<Inflection, String>> paradigm = inflections.get(inflectionName);
 
 		if (paradigm == null) {
 			logger.warning("Could not find an inflection paradigm for \"" + inflectionName + "\".");
 			return;
 		}
 
-		for (Entry<Inflection, String> entry : paradigm.entrySet()) {
+		for (Entry<Inflection, String> entry : paradigm) {
 			Inflection infl = entry.getKey();
 			String suffix = entry.getValue();
 
@@ -287,13 +289,15 @@ public class WiktionaryPreprocessor {
 		}
 
 		logger.fine("Read the following " + inflections.size() + " inflection maps:");
-		for (Entry<String, Map<Inflection, String>> entry : inflections.entrySet()) {
+		for (Entry<String, List<Entry<Inflection, String>>> entry : inflections.entrySet()) {
 			logger.fine(entry.getKey() + "-->" + entry.getValue());
 		}
 	}
 
 	private void setUpTemplate(String filename, InputStream is) {
-		Map<Inflection, String> inflectionParadigm = new HashMap<>();
+		// We use a list to retain the order of the inflections, as given in the
+		// templates. This makes the inflection tables in the UI look neater.
+		List<Entry<Inflection, String>> inflectionParadigm = new ArrayList<>();
 		String line;
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
@@ -316,7 +320,7 @@ public class WiktionaryPreprocessor {
 				try {
 					Inflection vf = Inflection.valueOf(key.trim().toUpperCase());
 					String ending = suffix.trim().replaceAll("\\. ", "");
-					inflectionParadigm.put(vf, ending);
+					inflectionParadigm.add(new SimpleEntry<Inflection, String>(vf, ending));
 				} catch (IllegalArgumentException e) {
 					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
 							&& (!line.contains("note")) && (!line.equals("suru=y"))) {
@@ -331,22 +335,36 @@ public class WiktionaryPreprocessor {
 			e.printStackTrace();
 		}
 
-		// Some formal inflections are missing from a lot of the verb
-		// inflection templates.
-		String formalSuffix = inflectionParadigm.get(FORMAL);
+		// Some formal inflections are missing from a lot of the
+		// verb inflection table templates.
+		// If the template includes a "formal" inflection...
+		String formalSuffix = inflectionParadigm.stream().filter(entry -> FORMAL.equals(entry.getKey()))
+				.map(Entry::getValue).findAny().orElse(null);
 		if (formalSuffix != null) {
-			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE)) {
+			// ...but no "formal negative" inflection...
+			boolean containsFormalNeg = inflectionParadigm.stream()
+					.anyMatch(entry -> FORMAL_NEGATIVE.equals(entry.getKey()));
+			if (!containsFormalNeg) {
+				// ...use the formal affirmative suffix
+				// to infer and add the formal negative one
 				String suffix = formalSuffix.replace("ます", "ません");
-				inflectionParadigm.put(FORMAL_NEGATIVE, suffix);
+				inflectionParadigm.add(new SimpleEntry<Inflection, String>(FORMAL_NEGATIVE, suffix));
 			}
-			if (!inflectionParadigm.containsKey(FORMAL_PERFECTIVE) && !inflectionParadigm.containsKey(FORMAL_PAST)) {
+
+			// Similarly for "formal perfective"...
+			boolean containsFormalPerf = inflectionParadigm.stream()
+					.anyMatch(entry -> FORMAL_PERFECTIVE.equals(entry.getKey()) || FORMAL_PAST.equals(entry.getKey()));
+			if (!containsFormalPerf) {
 				String suffix = formalSuffix.replace("ます", "ました");
-				inflectionParadigm.put(FORMAL_PERFECTIVE, suffix);
+				inflectionParadigm.add(new SimpleEntry<Inflection, String>(FORMAL_PERFECTIVE, suffix));
 			}
-			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE_PERFECTIVE)
-					&& !inflectionParadigm.containsKey(FORMAL_NEGATIVE_PAST)) {
+			// ...and "formal negative perfective".
+			boolean containsFormalNegPerf = inflectionParadigm.stream()
+					.anyMatch(entry -> FORMAL_NEGATIVE_PERFECTIVE.equals(entry.getKey())
+							|| FORMAL_NEGATIVE_PAST.equals(entry.getKey()));
+			if (!containsFormalNegPerf) {
 				String suffix = formalSuffix.replace("ます", "ませんでした");
-				inflectionParadigm.put(FORMAL_NEGATIVE_PERFECTIVE, suffix);
+				inflectionParadigm.add(new SimpleEntry<Inflection, String>(FORMAL_NEGATIVE_PERFECTIVE, suffix));
 			}
 		}
 

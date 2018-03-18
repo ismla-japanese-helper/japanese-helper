@@ -14,13 +14,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.mariten.kanatools.KanaConverter;
 
 import de.ws1718.ismla.JapaneseHelper.client.LookupService;
-import de.ws1718.ismla.JapaneseHelper.shared.InflectableToken;
-import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
-// First try to look up the base form of the word in the hashmap
-// If multiple entries, try POS tags
-// Also should try to combine the word with the word after it to see if it forms some inflection form.
 public class LookupServiceImpl extends RemoteServiceServlet implements LookupService {
 	private static final long serialVersionUID = 568570423376066244L;
 
