@@ -33,6 +33,12 @@ public class SentenceInputWidget extends Composite {
 
     private void putResults() {
         String input = inputField.getText();
+
+        if (input.isEmpty()) {
+            Window.alert("Please input the sentence");
+            return;
+        }
+
         lookupService.lookup(input, new AsyncCallback<List<ArrayList<Token>>>() {
 
             @Override
