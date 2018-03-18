@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ws1718.ismla.JapaneseHelper.shared.InflectableToken;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
@@ -46,19 +47,43 @@ public class ResultsWidget extends Composite {
 		// See https://stackoverflow.com/questions/7465988/how-to-capture-a-click-event-on-a-link-inside-a-html-widget-in-gwt
 		// OK. So in our case the order of the anchors should correspond to the order in which the tokens are stored in the sentence.
 		NodeList<Element> anchors = results.getElement().getElementsByTagName("a");
-		for (int i = 0; i < anchors.getLength(); i++) {
+		int anchorIndex = 0;
+
+		// This should work, though a bit ugly.
+		// Now we have one more anchor for the inflection table.
+		for (int i = 0; i < sentence.size(); i++) {
 			final int finalI = i;
-			Element origAnchor = anchors.getItem(i);
 			List<Token> currentTokens = sentence.get(finalI);
-			Anchor anchorWithLink = new Anchor(currentTokens.get(0).getTranslations().get(0));
-			anchorWithLink.addClickHandler(new ClickHandler() {
+			Token firstToken = currentTokens.get(0);
+
+			// First the popup about glosses.
+			Element glossesAnchor = anchors.getItem(anchorIndex);
+			Anchor glossAnchorWithLink = new Anchor(firstToken.getTranslations().get(0));
+			glossAnchorWithLink.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent clickEvent) {
-					new wordPopup(new WordPopupWidget(currentTokens)).center();
+					new Popup(new WordPopupWidget(currentTokens)).center();
 				}
 			});
-			results.addAndReplaceElement(anchorWithLink, origAnchor);
+			results.addAndReplaceElement(glossAnchorWithLink, glossesAnchor);
+
+			if (firstToken instanceof InflectedToken) {
+				InflectableToken lemmaToken = ((InflectedToken) firstToken).getLemmaToken();
+				anchorIndex++;
+				Element inflectionTableAnchor = anchors.getItem(anchorIndex);
+				Anchor inflectionTableAnchorWithLink = new Anchor(((InflectedToken) firstToken).getInflectionInformation());
+				inflectionTableAnchorWithLink.addClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						new Popup(new InflectionTableWidget(lemmaToken)).center();
+					}
+				});
+				results.addAndReplaceElement(inflectionTableAnchorWithLink, inflectionTableAnchor);
+			}
+
+			anchorIndex++;
 		}
+
 		resultsContainer.add(results);
 	}
 
@@ -78,12 +103,6 @@ public class ResultsWidget extends Composite {
 	}
 
 	private String generateOneWord(Token t) {
-		String inflectionInfo = "*";
-
-		if (t instanceof InflectedToken) {
-			inflectionInfo = ((InflectedToken) t).getInflectionInformation();
-		}
-
 		String representation = "";
 		representation += "<div class='col-xs-4 col-md-3 col-lg-2 mb-3'>";
 		// Needed to create a nested row within the outer column.
@@ -94,7 +113,13 @@ public class ResultsWidget extends Composite {
 		// Manually added <a> here.
 		representation += "<div class='col-12' title='Click for full list of glosses'><a>" + t.getTranslations().get(0) + "</a></div>";
 		representation += "<div class='col-12'>" + t.getPrettyPos() + "</div>";
-		representation += "<div class='col-12'>" + inflectionInfo + "</div>";
+
+		if (t instanceof InflectedToken) {
+			String inflectionInfo = ((InflectedToken) t).getInflectionInformation();
+			representation += "<div class='col-12' title='Click for full list of inflections'><a>" + inflectionInfo + "</a></div>";
+		} else {
+			representation += "<div class='col-12'>" + "*" + "</div>";
+		}
 
 		representation += "</div>";
 		representation += "</div>";
@@ -103,8 +128,8 @@ public class ResultsWidget extends Composite {
 	}
 
 
-	private static class wordPopup extends PopupPanel {
-		public wordPopup(WordPopupWidget popupWidget) {
+	private static class Popup extends PopupPanel {
+		public Popup(Widget popupWidget) {
 			// "autoHide: true" means that if the user clicks on anywhere outside of the popup, it will automatically close.
 			super(true);
 			setWidget(popupWidget);

@@ -102,16 +102,6 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			// Sort the results if there are several matches.
 			ArrayList<Token> sortedTokens = sortTokens(form, pos, pron, dictTokens);
 			tokens.add(sortedTokens);
-			
-			// Example for getting the inflection table.
-			// TODO delete this and implement the actual table
-			if (sortedTokens.get(0) instanceof InflectedToken){
-				InflectedToken inflTok = (InflectedToken) sortedTokens.get(0);
-				InflectableToken lemma = inflTok.getLemmaToken();
-				for (InflectedToken inflForm : lemma.getInflectedForms()){
-					logger.info(inflForm.getInflection() + "\t" + inflForm.getForm());
-				}
-			}
 		}
 
 		return tokens;
