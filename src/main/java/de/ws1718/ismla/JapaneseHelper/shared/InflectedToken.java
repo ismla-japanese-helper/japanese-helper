@@ -61,7 +61,7 @@ public class InflectedToken extends Token {
 	}
 
 	public String getLemmaAndInflectionInformation() {
-		return lemmaToken.getForm() + " (" + getInflectionInformation() + ")";
+		return getInflectionInformation() + " form of " + lemmaToken.getForm();
 	}
 	
 	@SuppressWarnings("incomplete-switch")

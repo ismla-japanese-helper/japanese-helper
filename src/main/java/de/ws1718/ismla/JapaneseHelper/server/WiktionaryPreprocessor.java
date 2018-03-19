@@ -76,11 +76,17 @@ public class WiktionaryPreprocessor {
 				String translation = fields[3];
 				Token tok = new Token(form, pronunciation, posAndInflection, translation);
 
+				if (posAndInflection.startsWith("V") && !tok.inflects()) {
+					tok.setInflectionParadigm(inferVerbInflectionParadigm(tok));
+				}
+				
+				if (form.equals("辞する") || form.equals("贖う")){
+					logger.warning(tok.toString());
+					logger.warning("" + tok.inflects());
+				}
+
 				// If the token is a verb or adjective,
 				// we might need to do some additional preprocessing:
-				if ("です".equals(form) && "V".equals(posAndInflection)) {
-					tok.setInflectionParadigm("desu");
-				}
 				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
 					case "ichidan":
@@ -99,7 +105,6 @@ public class WiktionaryPreprocessor {
 						case "ある":
 							tok.setInflectionParadigm("aru");
 							break;
-						case "くれる":
 						case "べし":
 							tok.setInflectionParadigm("beshi");
 							// The pronunciation is listed as "suffix",
@@ -116,6 +121,7 @@ public class WiktionaryPreprocessor {
 							tok.setInflectionParadigm("iku");
 							break;
 						case "呉れる":
+						case "くれる":
 							tok.setInflectionParadigm("kureru");
 							break;
 						case "や":
@@ -163,8 +169,131 @@ public class WiktionaryPreprocessor {
 		return word.replaceAll("[-\\.\\s+]", "");
 	}
 
+	private static String inferVerbInflectionParadigm(Token tok) {
+		String pos = tok.getPos();
+		String form = tok.getForm();
+		String pronunciation = tok.getPronunciation();
+
+		if (pos.contains("form")) {
+			// The token is already an inflected form.
+			return null;
+		}
+
+		// Sometimes the POS tag contains the inflection information
+		// and it's just not also given additionally.
+		if (pos.contains("1")) {
+			return godanInflection(pronunciation);
+		}
+		if (pos.contains("2")) {
+			if (canBeIchidanVerb(pronunciation)) {
+				return "probably ichi";
+			}
+			return null;
+		}
+		if (pos.contains("3")) {
+			if (form.endsWith("っする")) {
+				return "probably suru-tsu";
+			}
+			if (form.endsWith("ずる")) {
+				return "probably zuru";
+			}
+			if (form.endsWith("する")) {
+				return "probably suru";
+			}
+			return null;
+		}
+
+		if (!canBeIchidanVerb(pronunciation) && (!form.endsWith("する")) && !form.endsWith("ずる")) {
+			return godanInflection(pronunciation);
+		}
+
+		// We don't know and don't assign it an inflection paradigm because we
+		// want to avoid wrong information.
+		return null;
+	}
+
+	private static String godanInflection(String pronunciation) {
+		String infl = "probably go-";
+		char lastSyllable = pronunciation.charAt(pronunciation.length() - 1);
+		// Unfortunately, romanization is not covered by
+		// com.mariten.kanatools.KanaConverter
+		switch (lastSyllable) {
+		case 'う':
+			return infl + "u";
+		case 'く':
+			return infl + "ku";
+		case 'ぐ':
+			return infl + "gu";
+		case 'す':
+			return infl + "su";
+		case 'つ':
+			return infl + "tsu";
+		case 'ぬ':
+			return infl + "nu";
+		case 'ぶ':
+			return infl + "bu";
+		case 'む':
+			return infl + "mu";
+		case 'る':
+			return infl + "ru";
+		default:
+			// go-ou is special and rare.
+			// We don't have templates for other "go-...u" cases.
+			// If it doesn't end in an う/u-row syllable,
+			// it's not an (uninflected) godan verb.
+			return null;
+		}
+	}
+
+	private static boolean canBeIchidanVerb(String pronunciation) {
+		// Ichidan verbs have the final syllable る/ru
+		// and the vowel of their penultimate syllable is "i" or "e".
+		int len = pronunciation.length();
+		if (len < 2) {
+			return false;
+		}
+		if (!pronunciation.endsWith("る")) {
+			return false;
+		}
+		switch (pronunciation.charAt(len - 2)) {
+		// い/i-row syllables
+		case 'い':
+		case 'き':
+		case 'ぎ':
+		case 'し':
+		case 'じ':
+		case 'ち':
+		case 'に':
+		case 'ひ':
+		case 'び':
+		case 'ぴ':
+		case 'み':
+		case 'り':
+			// え/e-row syllables
+		case 'え':
+		case 'け':
+		case 'げ':
+		case 'せ':
+		case 'ぜ':
+		case 'て':
+		case 'で':
+		case 'ね':
+		case 'へ':
+		case 'べ':
+		case 'ぺ':
+		case 'め':
+		case 'れ':
+			// It _might_ be an ichidan verb.
+			return true;
+		default:
+			return false;
+		}
+
+	}
+
 	private void inflect(InflectableToken tok) {
 		String inflectionName = tok.getInflectionParadigm();
+		inflectionName = inflectionName.replace("probably ", "");
 		List<Entry<Inflection, String>> paradigm = inflections.get(inflectionName);
 
 		if (paradigm == null) {
@@ -272,7 +401,7 @@ public class WiktionaryPreprocessor {
 		addToken(inflTok);
 	}
 
-	private String aruKanjiToKana(String word) {
+	private static String aruKanjiToKana(String word) {
 		return word.replace('有', 'あ').replace('無', 'な');
 	}
 
@@ -368,7 +497,7 @@ public class WiktionaryPreprocessor {
 		inflections.put(getFileName(filename), inflectionParadigm);
 	}
 
-	private String getFileName(String filename) {
+	private static String getFileName(String filename) {
 		return new File(filename).getName().replaceAll("(ja-)|(\\.txt)", "");
 	}
 
