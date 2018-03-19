@@ -60,13 +60,14 @@ public class InflectionTest {
 	private static final String BESHI_TOK = "べし"; // verbconj
 	private static final String KURERU_TOK = "くれる"; // verbconj
 	private static final String SURU_INDEP_TOK = "為る"; // verbconj
+	private static final String DA_TOK = "だ";
 	private static final String TARI_TOK = "惨憺";
 
 	@BeforeClass
 	public static void readTokens() {
 		List<String> keys = new ArrayList<String>(Arrays.asList(I_TOK, NA_TOK, GO_BU_TOK, GO_RU_TOK, HONORIFIC_TOK,
 				ICHI_TOK, SURU_I_KU_TOK, SURU_TSU_TOK, SURU_TOK, ZURU_TOK, KURU_TOK, ARU_TOK, BESHI_TOK, KURERU_TOK,
-				SURU_INDEP_TOK, TARI_TOK));
+				SURU_INDEP_TOK, DA_TOK, TARI_TOK));
 
 		logger.info("reading tokens");
 		List<String> inflectionFiles = getFilesInDir(RESOURCES_PATH + LookupServiceImpl.INFLECTION_TEMPLATES_PATH);
@@ -371,6 +372,26 @@ public class InflectionTest {
 		testInflection(tokens, pos, translation, "為ず", "せず", NEGATIVE_CONTINUATIVE, lemma);
 		testInflection(tokens, pos, translation, "為て", "して", CONJUNCTIVE, lemma);
 		testInflection(tokens, pos, translation, "為ません", "しません", FORMAL_NEGATIVE, lemma);
+	}
+
+	@Test
+	public void testDa() {
+		String lemmaForm = DA_TOK;
+		List<InflectedToken> tokens = map.get(lemmaForm);
+		assertNotNull(tokens);
+		tokens.stream().forEach(System.out::println);
+		assertEquals(16, tokens.size());
+		String pos = "V[da]";
+		String translation = "1) [A particle used when a sentence has a nominal as its predicate, "
+				+ "usually but not always equal to the English verb \"to be\".]";
+		InflectableToken lemma = new InflectableToken(lemmaForm, lemmaForm, pos, translation);
+		testInflection(tokens, pos, translation, "では", "では", IMPERFECTIVE, lemma);
+		// Make sure the list only contains one formal inflection, です.
+		// Addtional formal [negative and/or perfective] inflections should not
+		// have been added.
+		testInflection(tokens, pos, translation, "です", "です", FORMAL, lemma);
+		long numTokensFormal = tokens.stream().filter(tok -> tok.getInflectionInformation().contains("formal")).count();
+		assertEquals(1, numTokensFormal);
 	}
 
 	@Test

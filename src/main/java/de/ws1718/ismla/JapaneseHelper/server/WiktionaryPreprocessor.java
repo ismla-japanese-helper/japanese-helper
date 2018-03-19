@@ -80,11 +80,6 @@ public class WiktionaryPreprocessor {
 				// we might need to do some additional preprocessing:
 				if ("です".equals(form) && "V".equals(posAndInflection)) {
 					tok.setInflectionParadigm("desu");
-					// Also add the non-formal version.
-					// https://en.wiktionary.org/wiki/%E3%81%A0#Verb
-					inflect(new InflectableToken("だ", "だ", "V[da]",
-							"Used when a sentence has a nominal as its predicate, "
-									+ "usually but not always equal to the English verb ''to be''."));
 				}
 				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
@@ -104,14 +99,7 @@ public class WiktionaryPreprocessor {
 						case "ある":
 							tok.setInflectionParadigm("aru");
 							break;
-						case "する":
-						case "為る":
-							tok.setInflectionParadigm("suru-indep");
-							break;
 						case "くれる":
-						case "呉れる":
-							tok.setInflectionParadigm("kureru");
-							break;
 						case "べし":
 							tok.setInflectionParadigm("beshi");
 							// The pronunciation is listed as "suffix",
@@ -121,14 +109,21 @@ public class WiktionaryPreprocessor {
 						case "だ":
 							tok.setInflectionParadigm("da");
 							break;
+						case "出来る":
+							tok.setInflectionParadigm("dekiru");
+							break;
 						case "行く":
 							tok.setInflectionParadigm("iku");
+							break;
+						case "呉れる":
+							tok.setInflectionParadigm("kureru");
 							break;
 						case "や":
 							tok.setInflectionParadigm("ya");
 							break;
-						case "出来る":
-							tok.setInflectionParadigm("dekiru");
+						case "する":
+						case "為る":
+							tok.setInflectionParadigm("suru-indep");
 							break;
 						default:
 							logger.warning("Could not assign a proper inflection paradigm to " + tok);
@@ -204,10 +199,10 @@ public class WiktionaryPreprocessor {
 		String formInfl = "";
 		String pronInfl = "";
 
-		// get the stem of the predicate and add the inflectional suffix
+		// Get the stem of the predicate and add the inflectional suffix.
 		switch (inflectionName) {
 		case "aru":
-			// the template ja-aru includes the stem because it is irregular
+			// The template ja-aru includes the stem because it is irregular.
 			if ("有る".equals(form)) {
 				formInfl = suffix;
 			} else {
@@ -216,17 +211,17 @@ public class WiktionaryPreprocessor {
 			pronInfl = aruKanjiToKana(suffix);
 			break;
 		case "suru-indep":
-			// the template ja-suru-indep includes the stem
-			// because it is irregular
+			// The template ja-suru-indep includes the stem
+			// because it is irregular.
 			formInfl = suffix;
 			pronInfl = suffix;
+			// Turn the pure-kana forms into forms containing kanji.
 			if ("為る".equals(form)) {
-				// there seems to be only one reading for the
-				// imperfective inflection of the kanji version
+				// There seems to be only one reading for the
+				// imperfective inflection of the kanji version.
 				if (Inflection.IMPERFECTIVE.equals(inflection) || Inflection.IMPERFECTIVE3.equals(inflection)) {
 					return;
 				}
-				// turn the pure-kana forms into forms containing kanji
 				if (suffix.startsWith("で")) {
 					formInfl = "出" + suffix.substring(1);
 				} else {
@@ -244,28 +239,30 @@ public class WiktionaryPreprocessor {
 			 * need to avoid including this syllable twice now.
 			 */
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
-			if ("連れて来る".equals(form)) {
+			if (form.endsWith("来る")) {
+				// Keep the kanji character.
 				formInfl = form.substring(0, form.length() - 1) + suffix.substring(1);
 			} else {
-				formInfl = pronInfl;
+				formInfl = form.substring(0, pron.length() - 2) + suffix;
 			}
 			break;
 		case "suru-i-ku":
 		case "suru-tsu":
 		case "suru":
 		case "zuru":
-			// remove the final する/ずる to get the stem
+			// Remove the final する/ずる to get the root/stem.
 			formInfl = form.substring(0, form.length() - 2) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
 		case "na":
 		case "nari":
 		case "tari":
+			// Nothing to remove.
 			formInfl = form + suffix;
 			pronInfl = pron + suffix;
 			break;
 		default:
-			// remove the final syllable to get the stem
+			// Remove the final syllable to get the root/stem.
 			formInfl = form.substring(0, form.length() - 1) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 1) + suffix;
 		}
@@ -337,9 +334,9 @@ public class WiktionaryPreprocessor {
 
 		// Some formal inflections are missing from a lot of the
 		// verb inflection table templates.
-		// If the template includes a "formal" inflection...
+		// If the template includes a regular "formal" inflection...
 		String formalSuffix = inflectionParadigm.stream().filter(entry -> FORMAL.equals(entry.getKey()))
-				.map(Entry::getValue).findAny().orElse(null);
+				.map(Entry::getValue).filter(suffix -> suffix.endsWith("ます")).findAny().orElse(null);
 		if (formalSuffix != null) {
 			// ...but no "formal negative" inflection...
 			boolean containsFormalNeg = inflectionParadigm.stream()
