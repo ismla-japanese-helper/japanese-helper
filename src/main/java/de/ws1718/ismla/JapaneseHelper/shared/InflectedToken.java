@@ -60,13 +60,12 @@ public class InflectedToken extends Token {
 		this.inflection = inflection;
 	}
 
-	public String getInflectionInformation() {
-		return lemmaToken.getForm() + " (" + inflection + ")";
+	public String getLemmaAndInflectionInformation() {
+		return getInflectionInformation() + " form of " + lemmaToken.getForm();
 	}
-
+	
 	@SuppressWarnings("incomplete-switch")
-	@Override
-	public String toString() {
+	public String getInflectionInformation() {
 		String infl = inflection.toString();
 
 		if ("ichi".equals(getInflectionParadigm()) || "dekiru".equals(getInflectionParadigm())
@@ -89,8 +88,13 @@ public class InflectedToken extends Token {
 				break;
 			}
 		}
+		
+		return infl;
+	}
 
-		return super.toString() + "\t" + inflection + "\t" + lemmaToken.getForm();
+	@Override
+	public String toString() {
+		return super.toString() + "\t" + getInflectionInformation() + "\t" + lemmaToken.getForm();
 	}
 
 	@Override

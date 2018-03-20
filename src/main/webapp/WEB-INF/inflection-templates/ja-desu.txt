@@ -1,4 +1,0 @@
-## Based on: https://en.wiktionary.org/wiki/%E3%81%A7%E3%81%99
-perfective=でした
-volitional=でしょう
-conjunctive=でして

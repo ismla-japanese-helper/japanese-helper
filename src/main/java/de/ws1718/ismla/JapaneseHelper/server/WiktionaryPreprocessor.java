@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,7 @@ public class WiktionaryPreprocessor {
 
 	private static final Logger logger = Logger.getLogger(WiktionaryPreprocessor.class.getSimpleName());
 
-	private Map<String, Map<Inflection, String>> inflections;
+	private Map<String, List<Entry<Inflection, String>>> inflections;
 	private ListMultimap<String, Token> tokens;
 
 	public WiktionaryPreprocessor(List<String> inflectionFilenames, List<InputStream> inflectionStreams,
@@ -74,16 +76,17 @@ public class WiktionaryPreprocessor {
 				String translation = fields[3];
 				Token tok = new Token(form, pronunciation, posAndInflection, translation);
 
+				if (posAndInflection.startsWith("V") && !tok.inflects()) {
+					tok.setInflectionParadigm(inferVerbInflectionParadigm(tok));
+				}
+				
+				if (form.equals("辞する") || form.equals("贖う")){
+					logger.warning(tok.toString());
+					logger.warning("" + tok.inflects());
+				}
+
 				// If the token is a verb or adjective,
 				// we might need to do some additional preprocessing:
-				if ("です".equals(form) && "V".equals(posAndInflection)) {
-					tok.setInflectionParadigm("desu");
-					// Also add the non-formal version.
-					// https://en.wiktionary.org/wiki/%E3%81%A0#Verb
-					inflect(new InflectableToken("だ", "だ", "V[da]",
-							"Used when a sentence has a nominal as its predicate, "
-									+ "usually but not always equal to the English verb ''to be''."));
-				}
 				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
 					case "ichidan":
@@ -102,14 +105,6 @@ public class WiktionaryPreprocessor {
 						case "ある":
 							tok.setInflectionParadigm("aru");
 							break;
-						case "する":
-						case "為る":
-							tok.setInflectionParadigm("suru-indep");
-							break;
-						case "くれる":
-						case "呉れる":
-							tok.setInflectionParadigm("kureru");
-							break;
 						case "べし":
 							tok.setInflectionParadigm("beshi");
 							// The pronunciation is listed as "suffix",
@@ -119,14 +114,22 @@ public class WiktionaryPreprocessor {
 						case "だ":
 							tok.setInflectionParadigm("da");
 							break;
+						case "出来る":
+							tok.setInflectionParadigm("dekiru");
+							break;
 						case "行く":
 							tok.setInflectionParadigm("iku");
+							break;
+						case "呉れる":
+						case "くれる":
+							tok.setInflectionParadigm("kureru");
 							break;
 						case "や":
 							tok.setInflectionParadigm("ya");
 							break;
-						case "出来る":
-							tok.setInflectionParadigm("dekiru");
+						case "する":
+						case "為る":
+							tok.setInflectionParadigm("suru-indep");
 							break;
 						default:
 							logger.warning("Could not assign a proper inflection paradigm to " + tok);
@@ -166,16 +169,139 @@ public class WiktionaryPreprocessor {
 		return word.replaceAll("[-\\.\\s+]", "");
 	}
 
+	private static String inferVerbInflectionParadigm(Token tok) {
+		String pos = tok.getPos();
+		String form = tok.getForm();
+		String pronunciation = tok.getPronunciation();
+
+		if (pos.contains("form")) {
+			// The token is already an inflected form.
+			return null;
+		}
+
+		// Sometimes the POS tag contains the inflection information
+		// and it's just not also given additionally.
+		if (pos.contains("1")) {
+			return godanInflection(pronunciation);
+		}
+		if (pos.contains("2")) {
+			if (canBeIchidanVerb(pronunciation)) {
+				return "probably ichi";
+			}
+			return null;
+		}
+		if (pos.contains("3")) {
+			if (form.endsWith("っする")) {
+				return "probably suru-tsu";
+			}
+			if (form.endsWith("ずる")) {
+				return "probably zuru";
+			}
+			if (form.endsWith("する")) {
+				return "probably suru";
+			}
+			return null;
+		}
+
+		if (!canBeIchidanVerb(pronunciation) && (!form.endsWith("する")) && !form.endsWith("ずる")) {
+			return godanInflection(pronunciation);
+		}
+
+		// We don't know and don't assign it an inflection paradigm because we
+		// want to avoid wrong information.
+		return null;
+	}
+
+	private static String godanInflection(String pronunciation) {
+		String infl = "probably go-";
+		char lastSyllable = pronunciation.charAt(pronunciation.length() - 1);
+		// Unfortunately, romanization is not covered by
+		// com.mariten.kanatools.KanaConverter
+		switch (lastSyllable) {
+		case 'う':
+			return infl + "u";
+		case 'く':
+			return infl + "ku";
+		case 'ぐ':
+			return infl + "gu";
+		case 'す':
+			return infl + "su";
+		case 'つ':
+			return infl + "tsu";
+		case 'ぬ':
+			return infl + "nu";
+		case 'ぶ':
+			return infl + "bu";
+		case 'む':
+			return infl + "mu";
+		case 'る':
+			return infl + "ru";
+		default:
+			// go-ou is special and rare.
+			// We don't have templates for other "go-...u" cases.
+			// If it doesn't end in an う/u-row syllable,
+			// it's not an (uninflected) godan verb.
+			return null;
+		}
+	}
+
+	private static boolean canBeIchidanVerb(String pronunciation) {
+		// Ichidan verbs have the final syllable る/ru
+		// and the vowel of their penultimate syllable is "i" or "e".
+		int len = pronunciation.length();
+		if (len < 2) {
+			return false;
+		}
+		if (!pronunciation.endsWith("る")) {
+			return false;
+		}
+		switch (pronunciation.charAt(len - 2)) {
+		// い/i-row syllables
+		case 'い':
+		case 'き':
+		case 'ぎ':
+		case 'し':
+		case 'じ':
+		case 'ち':
+		case 'に':
+		case 'ひ':
+		case 'び':
+		case 'ぴ':
+		case 'み':
+		case 'り':
+			// え/e-row syllables
+		case 'え':
+		case 'け':
+		case 'げ':
+		case 'せ':
+		case 'ぜ':
+		case 'て':
+		case 'で':
+		case 'ね':
+		case 'へ':
+		case 'べ':
+		case 'ぺ':
+		case 'め':
+		case 'れ':
+			// It _might_ be an ichidan verb.
+			return true;
+		default:
+			return false;
+		}
+
+	}
+
 	private void inflect(InflectableToken tok) {
 		String inflectionName = tok.getInflectionParadigm();
-		Map<Inflection, String> paradigm = inflections.get(inflectionName);
+		inflectionName = inflectionName.replace("probably ", "");
+		List<Entry<Inflection, String>> paradigm = inflections.get(inflectionName);
 
 		if (paradigm == null) {
 			logger.warning("Could not find an inflection paradigm for \"" + inflectionName + "\".");
 			return;
 		}
 
-		for (Entry<Inflection, String> entry : paradigm.entrySet()) {
+		for (Entry<Inflection, String> entry : paradigm) {
 			Inflection infl = entry.getKey();
 			String suffix = entry.getValue();
 
@@ -202,10 +328,10 @@ public class WiktionaryPreprocessor {
 		String formInfl = "";
 		String pronInfl = "";
 
-		// get the stem of the predicate and add the inflectional suffix
+		// Get the stem of the predicate and add the inflectional suffix.
 		switch (inflectionName) {
 		case "aru":
-			// the template ja-aru includes the stem because it is irregular
+			// The template ja-aru includes the stem because it is irregular.
 			if ("有る".equals(form)) {
 				formInfl = suffix;
 			} else {
@@ -214,17 +340,17 @@ public class WiktionaryPreprocessor {
 			pronInfl = aruKanjiToKana(suffix);
 			break;
 		case "suru-indep":
-			// the template ja-suru-indep includes the stem
-			// because it is irregular
+			// The template ja-suru-indep includes the stem
+			// because it is irregular.
 			formInfl = suffix;
 			pronInfl = suffix;
+			// Turn the pure-kana forms into forms containing kanji.
 			if ("為る".equals(form)) {
-				// there seems to be only one reading for the
-				// imperfective inflection of the kanji version
+				// There seems to be only one reading for the
+				// imperfective inflection of the kanji version.
 				if (Inflection.IMPERFECTIVE.equals(inflection) || Inflection.IMPERFECTIVE3.equals(inflection)) {
 					return;
 				}
-				// turn the pure-kana forms into forms containing kanji
 				if (suffix.startsWith("で")) {
 					formInfl = "出" + suffix.substring(1);
 				} else {
@@ -242,28 +368,30 @@ public class WiktionaryPreprocessor {
 			 * need to avoid including this syllable twice now.
 			 */
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
-			if ("連れて来る".equals(form)) {
+			if (form.endsWith("来る")) {
+				// Keep the kanji character.
 				formInfl = form.substring(0, form.length() - 1) + suffix.substring(1);
 			} else {
-				formInfl = pronInfl;
+				formInfl = form.substring(0, pron.length() - 2) + suffix;
 			}
 			break;
 		case "suru-i-ku":
 		case "suru-tsu":
 		case "suru":
 		case "zuru":
-			// remove the final する/ずる to get the stem
+			// Remove the final する/ずる to get the root/stem.
 			formInfl = form.substring(0, form.length() - 2) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
 		case "na":
 		case "nari":
 		case "tari":
+			// Nothing to remove.
 			formInfl = form + suffix;
 			pronInfl = pron + suffix;
 			break;
 		default:
-			// remove the final syllable to get the stem
+			// Remove the final syllable to get the root/stem.
 			formInfl = form.substring(0, form.length() - 1) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 1) + suffix;
 		}
@@ -273,7 +401,7 @@ public class WiktionaryPreprocessor {
 		addToken(inflTok);
 	}
 
-	private String aruKanjiToKana(String word) {
+	private static String aruKanjiToKana(String word) {
 		return word.replace('有', 'あ').replace('無', 'な');
 	}
 
@@ -287,13 +415,15 @@ public class WiktionaryPreprocessor {
 		}
 
 		logger.fine("Read the following " + inflections.size() + " inflection maps:");
-		for (Entry<String, Map<Inflection, String>> entry : inflections.entrySet()) {
+		for (Entry<String, List<Entry<Inflection, String>>> entry : inflections.entrySet()) {
 			logger.fine(entry.getKey() + "-->" + entry.getValue());
 		}
 	}
 
 	private void setUpTemplate(String filename, InputStream is) {
-		Map<Inflection, String> inflectionParadigm = new HashMap<>();
+		// We use a list to retain the order of the inflections, as given in the
+		// templates. This makes the inflection tables in the UI look neater.
+		List<Entry<Inflection, String>> inflectionParadigm = new ArrayList<>();
 		String line;
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
@@ -316,7 +446,7 @@ public class WiktionaryPreprocessor {
 				try {
 					Inflection vf = Inflection.valueOf(key.trim().toUpperCase());
 					String ending = suffix.trim().replaceAll("\\. ", "");
-					inflectionParadigm.put(vf, ending);
+					inflectionParadigm.add(new SimpleEntry<Inflection, String>(vf, ending));
 				} catch (IllegalArgumentException e) {
 					if (!line.contains("include") && !line.contains("lemma") && !line.contains("kana")
 							&& (!line.contains("note")) && (!line.equals("suru=y"))) {
@@ -331,29 +461,43 @@ public class WiktionaryPreprocessor {
 			e.printStackTrace();
 		}
 
-		// Some formal inflections are missing from a lot of the verb
-		// inflection templates.
-		String formalSuffix = inflectionParadigm.get(FORMAL);
+		// Some formal inflections are missing from a lot of the
+		// verb inflection table templates.
+		// If the template includes a regular "formal" inflection...
+		String formalSuffix = inflectionParadigm.stream().filter(entry -> FORMAL.equals(entry.getKey()))
+				.map(Entry::getValue).filter(suffix -> suffix.endsWith("ます")).findAny().orElse(null);
 		if (formalSuffix != null) {
-			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE)) {
+			// ...but no "formal negative" inflection...
+			boolean containsFormalNeg = inflectionParadigm.stream()
+					.anyMatch(entry -> FORMAL_NEGATIVE.equals(entry.getKey()));
+			if (!containsFormalNeg) {
+				// ...use the formal affirmative suffix
+				// to infer and add the formal negative one
 				String suffix = formalSuffix.replace("ます", "ません");
-				inflectionParadigm.put(FORMAL_NEGATIVE, suffix);
+				inflectionParadigm.add(new SimpleEntry<Inflection, String>(FORMAL_NEGATIVE, suffix));
 			}
-			if (!inflectionParadigm.containsKey(FORMAL_PERFECTIVE) && !inflectionParadigm.containsKey(FORMAL_PAST)) {
+
+			// Similarly for "formal perfective"...
+			boolean containsFormalPerf = inflectionParadigm.stream()
+					.anyMatch(entry -> FORMAL_PERFECTIVE.equals(entry.getKey()) || FORMAL_PAST.equals(entry.getKey()));
+			if (!containsFormalPerf) {
 				String suffix = formalSuffix.replace("ます", "ました");
-				inflectionParadigm.put(FORMAL_PERFECTIVE, suffix);
+				inflectionParadigm.add(new SimpleEntry<Inflection, String>(FORMAL_PERFECTIVE, suffix));
 			}
-			if (!inflectionParadigm.containsKey(FORMAL_NEGATIVE_PERFECTIVE)
-					&& !inflectionParadigm.containsKey(FORMAL_NEGATIVE_PAST)) {
+			// ...and "formal negative perfective".
+			boolean containsFormalNegPerf = inflectionParadigm.stream()
+					.anyMatch(entry -> FORMAL_NEGATIVE_PERFECTIVE.equals(entry.getKey())
+							|| FORMAL_NEGATIVE_PAST.equals(entry.getKey()));
+			if (!containsFormalNegPerf) {
 				String suffix = formalSuffix.replace("ます", "ませんでした");
-				inflectionParadigm.put(FORMAL_NEGATIVE_PERFECTIVE, suffix);
+				inflectionParadigm.add(new SimpleEntry<Inflection, String>(FORMAL_NEGATIVE_PERFECTIVE, suffix));
 			}
 		}
 
 		inflections.put(getFileName(filename), inflectionParadigm);
 	}
 
-	private String getFileName(String filename) {
+	private static String getFileName(String filename) {
 		return new File(filename).getName().replaceAll("(ja-)|(\\.txt)", "");
 	}
 

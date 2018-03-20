@@ -14,13 +14,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.mariten.kanatools.KanaConverter;
 
 import de.ws1718.ismla.JapaneseHelper.client.LookupService;
-import de.ws1718.ismla.JapaneseHelper.shared.InflectableToken;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
-// First try to look up the base form of the word in the hashmap
-// If multiple entries, try POS tags
-// Also should try to combine the word with the word after it to see if it forms some inflection form.
 public class LookupServiceImpl extends RemoteServiceServlet implements LookupService {
 	private static final long serialVersionUID = 568570423376066244L;
 
@@ -143,16 +139,22 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			return new ArrayList<Token>(Arrays.asList(tok));
 		}
 
-		// primary sort order: POS tag
+		// primary sort order: 
+		// Try to match the POS tag with that of the Kuromoji token.
 		Comparator<Token> comp = Comparator.comparing(Token::getPos, (pos1, pos2) -> {
 			pos1 = convertWiktionaryPOSTag(pos1);
 			pos2 = convertWiktionaryPOSTag(pos2);
 			return pos1.equals(pos2) ? 0 : pos1.equals(posK) ? -1 : 1;
 		}).thenComparing(Token::getPronunciation, (pron1, pron2) -> {
-			// secondary sort order: pronunciation
+			// secondary sort order: 
+			// Try to match the pronunciation with that of the Kuromoji token.
 			pron1 = convertPronunciation(pron1);
 			pron2 = convertPronunciation(pron2);
 			return pron1.equals(pron2) ? 0 : pron1.equals(pronK) ? -1 : 1;
+		}).thenComparing(Token::getClass, (class1, class2) -> {
+			// tertiary sort order:
+			// Prefer inflected tokens over uninflected ones.
+			return class1.equals(class2) ? 0 : class1.equals(InflectedToken.class) ? -1 : 1;
 		});
 
 		Collections.sort(dictTokens, comp);

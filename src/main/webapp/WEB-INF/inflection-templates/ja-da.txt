@@ -15,3 +15,7 @@ perfective=だった
 conjunctive=で
 hypothetical_conditional=ならば
 hypothetical_conditional2=であれば
+## Based on: https://en.wiktionary.org/wiki/%E3%81%A7%E3%81%99
+formal_perfective=でした
+formal_volitional=でしょう
+formal_conjunctive=でして

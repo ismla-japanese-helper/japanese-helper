@@ -155,6 +155,9 @@ public class Token implements Serializable {
 	 *            the inflection paradigm to set
 	 */
 	public void setInflectionParadigm(String inflectionParadigm) {
+		if (inflectionParadigm == null) {
+			inflectionParadigm = "";
+		}
 		this.inflectionParadigm = inflectionParadigm;
 		prettyPos = cleanPosTag(pos, inflectionParadigm);
 	}
@@ -247,7 +250,7 @@ public class Token implements Serializable {
 			return new String[] { "", null };
 		}
 
-		String inflectionParadigm = null;
+		String inflectionParadigm = "";
 		int open = pos.indexOf("[");
 		int close = pos.indexOf("]");
 		if (open != -1 && close != -1 && open < close) {
@@ -369,7 +372,7 @@ public class Token implements Serializable {
 				if (Character.isDigit(glosses.charAt(curPointer)) && glosses.charAt(curPointer + 1) == ')') {
 					// If it's not the first gloss, we should have already
 					// recorded something previously.
-					if (glosses.charAt(curPointer) != '1'){
+					if (glosses.charAt(curPointer) != '1') {
 						lastGloss = glosses.substring(lastIndexPos, curPointer - 1);
 					}
 					// Record the index position. This also works if it's the
@@ -397,18 +400,22 @@ public class Token implements Serializable {
 			}
 		}
 
-		// Add a check on whether the first meaning is archaic. If yes, move it to the end.
-		// Sometimes we have absolutely empty entries for some reason... So we'll have to check that first.
-		if (results.size() > 1) {
-			// TODO there might be more than 1 archaic entry. and there are tags like [obsolete]
-			String firstEntry = results.get(0);
-			if (firstEntry.contains("[archaic]")) {
-				results.remove(0);
-				results.add(firstEntry);
+		// Add a check on whether the first meaning is archaic.
+		// If yes, move it to the end.
+		int len = results.size();
+		if (len > 1) {
+			int count = 0;
+			while ((results.get(0).contains("[archaic]") || results.get(0).contains("[obsolete]")) && count < len) {
+				// Move the archaic/obsolete entry to the end of the list.
+				results.add(results.remove(0));
+				// Keep track of the number of entries moved
+				// in case all entries are archaic/obsolete.
+				count++;
 			}
 		}
 
-		// Sometimes the whole thing is empty... In this case we'll have to return something anyways.
+		// Sometimes the whole list is empty... In this case we'll have to
+		// return something anyways.
 		if (results.size() == 0) {
 			results.add("[no translation given]");
 		}
@@ -419,7 +426,7 @@ public class Token implements Serializable {
 	private static String cleanTranslation(String translation) {
 		translation = translation.trim();
 
-		// The escaped HTML sometimes include extra spaces
+		// The escaped HTML sometimes include extra whitespace
 		// or lack the final semicolon.
 		translation = translation.replaceAll("&amp;?", "&");
 		translation = translation.replaceAll("& ?lt;?", "<");
