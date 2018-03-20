@@ -28,6 +28,7 @@ public class SentenceInputWidget extends Composite {
 
     @UiHandler("submitButton")
     void onClick(ClickEvent e) {
+        RootPanel.get("resultsContainer").clear();
         putResults();
     }
 
@@ -48,8 +49,6 @@ public class SentenceInputWidget extends Composite {
                 // We want to show the original input at the same time.
                 // RootPanel.get("inputContainer").clear();
 
-                // Since we don't hide the input box at this time, we need to hide the Submit button.
-                submitButton.removeFromParent();
                 RootPanel.get("resultsContainer").add(rw);
             }
 
