@@ -79,11 +79,6 @@ public class WiktionaryPreprocessor {
 				if (posAndInflection.startsWith("V") && !tok.inflects()) {
 					tok.setInflectionParadigm(inferVerbInflectionParadigm(tok));
 				}
-				
-				if (form.equals("辞する") || form.equals("贖う")){
-					logger.warning(tok.toString());
-					logger.warning("" + tok.inflects());
-				}
 
 				// If the token is a verb or adjective,
 				// we might need to do some additional preprocessing:
@@ -181,7 +176,7 @@ public class WiktionaryPreprocessor {
 
 		// Sometimes the POS tag contains the inflection information
 		// and it's just not also given additionally.
-		if (pos.contains("1")) {
+		if (pos.contains("1") || pos.contains("5") || pos.contains("godan")) {
 			return godanInflection(pronunciation);
 		}
 		if (pos.contains("2")) {
@@ -190,20 +185,13 @@ public class WiktionaryPreprocessor {
 			}
 			return null;
 		}
-		if (pos.contains("3")) {
-			if (form.endsWith("っする")) {
-				return "probably suru-tsu";
-			}
-			if (form.endsWith("ずる")) {
-				return "probably zuru";
-			}
-			if (form.endsWith("する")) {
-				return "probably suru";
-			}
-			return null;
+		if (pos.contains("3") || form.endsWith("する") || form.endsWith("ずる")) {
+			return suruInflection(form, pronunciation);
 		}
+		// We ignore nidan and yodan verbs since their inflections are archaic
+		// and we do not have templates for them.
 
-		if (!canBeIchidanVerb(pronunciation) && (!form.endsWith("する")) && !form.endsWith("ずる")) {
+		if (!canBeIchidanVerb(pronunciation)) {
 			return godanInflection(pronunciation);
 		}
 
@@ -289,6 +277,22 @@ public class WiktionaryPreprocessor {
 			return false;
 		}
 
+	}
+
+	private static String suruInflection(String form, String pronunciation) {
+		if (form.endsWith("ずる")) {
+			return "probably zuru";
+		}
+		if (form.length() == 3) {
+			if (pronunciation.endsWith("っする")) {
+				return "probably suru-tsu";
+			}
+			return "probably suru-i-ku";
+		}
+		if (form.endsWith("する")) {
+			return "probably suru";
+		}
+		return null;
 	}
 
 	private void inflect(InflectableToken tok) {
