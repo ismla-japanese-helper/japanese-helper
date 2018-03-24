@@ -14,6 +14,7 @@ public class Token implements Serializable {
 	private String inflectionParadigm;
 	// `Array`List because it needs to be serializable
 	private ArrayList<String> translations;
+	private String difficultyRating;
 
 	/**
 	 * Default constructor.
@@ -175,6 +176,18 @@ public class Token implements Serializable {
 	 */
 	public void setTranslations(ArrayList<String> translations) {
 		this.translations = translations;
+	}
+
+	public String getDifficultyRating() {
+		// Sometimes it isn't set on out-of-vocab tokens etc.
+		if (difficultyRating == null) {
+			difficultyRating = "*";
+		}
+		return difficultyRating;
+	}
+
+	public void setDifficultyRating(String difficultyRating) {
+		this.difficultyRating = difficultyRating;
 	}
 
 	/**

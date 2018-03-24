@@ -66,18 +66,22 @@ public class InflectionTest {
 	private static final String NO_INFL_GO_U_TOK = "贖う";
 
 	@BeforeClass
-	public static void readTokens() {
+	public static void readTokens() throws FileNotFoundException {
 		List<String> keys = new ArrayList<String>(Arrays.asList(I_TOK, NA_TOK, GO_BU_TOK, GO_RU_TOK, HONORIFIC_TOK,
 				ICHI_TOK, SURU_I_KU_TOK, SURU_TSU_TOK, SURU_TOK, ZURU_TOK, KURU_TOK, ARU_TOK, BESHI_TOK, KURERU_TOK,
 				SURU_INDEP_TOK, DA_TOK, TARI_TOK, NO_INFL_SURU_TOK, NO_INFL_GO_U_TOK));
 
 		logger.info("reading tokens");
-		List<String> inflectionFiles = getFilesInDir(RESOURCES_PATH + LookupServiceImpl.INFLECTION_TEMPLATES_PATH);
+		List<String> inflectionFiles = getFilesInDir(RESOURCES_PATH + Listener.INFLECTION_TEMPLATES_PATH);
 		List<InputStream> inflectionStreams = toStreams(inflectionFiles);
-		List<String> dictionaryFiles = getFilesInDir(RESOURCES_PATH + LookupServiceImpl.DICTIONARY_PATH);
+		List<String> dictionaryFiles = getFilesInDir(RESOURCES_PATH + Listener.DICTIONARY_PATH);
 		List<InputStream> dictionaryStreams = toStreams(dictionaryFiles);
 
-		WiktionaryPreprocessor wp = new WiktionaryPreprocessor(inflectionFiles, inflectionStreams, dictionaryStreams);
+
+		InputStream difficultyRatingStream = new FileInputStream(RESOURCES_PATH + Listener.DIFFICULTY_RATING_PATH);
+		HashMap<String, String> difficultyRatings = Listener.readDifficultyRatings(difficultyRatingStream);
+
+		WiktionaryPreprocessor wp = new WiktionaryPreprocessor(inflectionFiles, inflectionStreams, dictionaryStreams, difficultyRatings);
 		Multimap<String, Token> tokenMap = wp.getTokens();
 
 		logger.info("updating map");

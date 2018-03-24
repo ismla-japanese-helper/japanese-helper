@@ -40,11 +40,13 @@ public class WiktionaryPreprocessor {
 
 	private Map<String, List<Entry<Inflection, String>>> inflections;
 	private ListMultimap<String, Token> tokens;
+	private HashMap<String, String> difficultyRatings;
 
 	public WiktionaryPreprocessor(List<String> inflectionFilenames, List<InputStream> inflectionStreams,
-			List<InputStream> dictionaryStreams) {
+								  List<InputStream> dictionaryStreams, HashMap<String, String> difficultyRatings) {
 		inflections = new HashMap<>();
 		tokens = ArrayListMultimap.create();
+		this.difficultyRatings = difficultyRatings;
 
 		setUpInflectionTemplates(inflectionFilenames, inflectionStreams);
 		for (InputStream dictionaryStream : dictionaryStreams) {
@@ -157,6 +159,22 @@ public class WiktionaryPreprocessor {
 	private void addToken(Token tok) {
 		tok.setForm(cleanString(tok.getForm()));
 		tok.setPronunciation(cleanString(tok.getPronunciation()));
+
+		// Set the difficulty ratings for its characters.
+		StringBuilder difficultyRating = new StringBuilder();
+		for (int i = 0; i < tok.getForm().length(); i++) {
+			char curChar = tok.getForm().charAt(i);
+			String rating = difficultyRatings.get(Character.toString(curChar));
+
+			if (rating == null || rating.isEmpty()) {
+				rating = "*";
+			}
+			difficultyRating.append(rating);
+			difficultyRating.append("-");
+		}
+		difficultyRating.setLength(difficultyRating.length() - 1);
+		tok.setDifficultyRating(difficultyRating.toString());
+
 		tokens.put(tok.getForm(), tok);
 	}
 

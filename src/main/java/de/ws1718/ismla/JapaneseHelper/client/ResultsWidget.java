@@ -109,6 +109,7 @@ public class ResultsWidget extends Composite {
 		} else {
 			representation += "<div class='col-12'>" + "*" + "</div>";
 		}
+		representation += "<div class='col-12'>" + t.getDifficultyRating() + "</div>";
 
 		representation += "</div>";
 		representation += "</div>";
