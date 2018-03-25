@@ -409,9 +409,7 @@ public class Token implements Serializable {
 				}
 			} else {
 				// We've come to the end of the whole translations string
-				// and we should record the last entry anyways.
-				// There is no extra space to deal with now. Need to stretch it
-				// to the end.
+				// and we should record the last entry.
 				lastGloss = glosses.substring(lastIndexPos, curPointer + 1);
 			}
 

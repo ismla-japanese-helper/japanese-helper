@@ -31,7 +31,7 @@ public class ResultsWidget extends Composite {
 
 	/**
 	 * A widget for displaying details about the tokens contained in a sentence.
-	 * 
+	 *
 	 * @param sentence
 	 *            the sentence
 	 */
@@ -88,7 +88,7 @@ public class ResultsWidget extends Composite {
 	/**
 	 * Generates a table that gives details about the tokens contained in a
 	 * sentence.
-	 * 
+	 *
 	 * @param sentence
 	 *            the sentence
 	 * @return the table
@@ -109,7 +109,7 @@ public class ResultsWidget extends Composite {
 	/**
 	 * Generates a table (1 column, 5 rows) that contains details about the
 	 * given token.
-	 * 
+	 *
 	 * @param t
 	 *            the token
 	 * @return the table in HTML format
@@ -120,6 +120,9 @@ public class ResultsWidget extends Composite {
 		// Needed to create a nested row within the outer column.
 		representation += "<div class='row'>";
 
+		// Each row of the output table is actually achieved via a full-width
+		// "column" in Bootstrap. In this way, the next "column" will be
+		// automatically pushed to the next row in the final display.
 		representation += "<div class='col-12'>" + t.getForm() + "</div>";
 		representation += "<div class='col-12'>" + t.getPronunciation() + "</div>";
 		// Manually added <a> here.

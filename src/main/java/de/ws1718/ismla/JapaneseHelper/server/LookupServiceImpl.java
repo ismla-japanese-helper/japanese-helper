@@ -160,7 +160,6 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		return sortedTokens;
 	}
 
-	// String ipadicTag = t.getPartOfSpeechLevel1();
 	private static String convertIPADicPOSTag(String ipadicTag) {
 		switch (ipadicTag) {
 		case "名詞":

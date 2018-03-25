@@ -12,9 +12,6 @@ import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 import java.util.List;
 
-// It will be fed a list of glosses. It should display all of them in a list.
-// What do we show? The full list of glosses definitely one of them. Should we also show the inflection and any special note maybe? I can leave space for those for sure.
-// Let me first show the glosses anyways.
 public class WordPopupWidget extends Composite {
 	@UiField
 	HTMLPanel glossesContainer;

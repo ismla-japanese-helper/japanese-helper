@@ -20,8 +20,8 @@ import com.opencsv.CSVReader;
 
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
-// Doesn't work with GWT it seems. Had to manually add it to web.xml
-//@WebListener()
+// This annotation doesn't work with GWT it seems. Had to manually add it to web.xml
+// @WebListener()
 public class Listener implements ServletContextListener, HttpSessionListener, HttpSessionAttributeListener {
 
 	// GWT looks for this inside src/main/webapp
@@ -50,6 +50,7 @@ public class Listener implements ServletContextListener, HttpSessionListener, Ht
 
 		// Then the Wiktionary dump.
 		ListMultimap<String, Token> tokenMap = readTokens(sce, difficultyRatings);
+		// Store the Wiktionary dump in ServletContext so that we don't need to initialize it afterwards.
 		sce.getServletContext().setAttribute("tokenMap", tokenMap);
 	}
 
@@ -131,10 +132,9 @@ public class Listener implements ServletContextListener, HttpSessionListener, Ht
 	public static HashMap<String, String> readDifficultyRatings(InputStream difficultyRatingStream) {
 		HashMap<String, String> difficultyRatings = new HashMap<>();
 
-		CSVIterator iterator = null;
 		try (InputStreamReader isr = new InputStreamReader(difficultyRatingStream);
 				CSVReader reader = new CSVReader(isr)) {
-			iterator = new CSVIterator(reader);
+			CSVIterator iterator = new CSVIterator(reader);
 
 			for (CSVIterator it = iterator; it.hasNext();) {
 				String[] line = it.next();

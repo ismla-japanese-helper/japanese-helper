@@ -46,9 +46,6 @@ public class SentenceInputWidget extends Composite {
             public void onSuccess(List<ArrayList<Token>> results) {
                 ResultsWidget rw = new ResultsWidget(results);
 
-                // We want to show the original input at the same time.
-                // RootPanel.get("inputContainer").clear();
-
                 RootPanel.get("resultsContainer").add(rw);
             }
 
