@@ -126,10 +126,13 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 		if (dictTokens == null || dictTokens.isEmpty()) {
 			String meaning = "1) [out-of-vocabulary]";
+			String difficultyRating  = "N/A";
 			if (posK.equals("PNC")) {
 				meaning = "1) [punctuation mark]";
+				difficultyRating  = "*";
 			}
 			Token tok = new Token(form, pronK, posK, meaning);
+			tok.setDifficultyRating(difficultyRating);
 			logger.info("no matches, created token: " + tok);
 			return new ArrayList<Token>(Arrays.asList(tok));
 		}

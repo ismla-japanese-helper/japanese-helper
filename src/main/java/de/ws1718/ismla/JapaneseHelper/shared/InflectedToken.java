@@ -6,6 +6,9 @@ public class InflectedToken extends Token {
 	private InflectableToken lemmaToken;
 	private Inflection inflection;
 
+	/**
+	 * Constructs a dummy InflectedToken.
+	 */
 	public InflectedToken() {
 		this(new InflectableToken(), "", "", null);
 	}
@@ -60,14 +63,22 @@ public class InflectedToken extends Token {
 		this.inflection = inflection;
 	}
 
+	/**
+	 * @return the inflection information and lemma, as to be presented in the
+	 *         GUI
+	 */
 	public String getLemmaAndInflectionInformation() {
 		return getInflectionInformation() + " form of " + lemmaToken.getForm();
 	}
-	
+
+	/**
+	 * @return the inflection information
+	 */
 	@SuppressWarnings("incomplete-switch")
 	public String getInflectionInformation() {
 		String infl = inflection.toString();
 
+		// With some of the inflection groups, we can give more details.
 		if ("ichi".equals(getInflectionParadigm()) || "dekiru".equals(getInflectionParadigm())
 				|| "suru".equals(getInflectionParadigm()) || "suru-indep".equals(getInflectionParadigm())) {
 			switch (inflection) {
@@ -88,7 +99,7 @@ public class InflectedToken extends Token {
 				break;
 			}
 		}
-		
+
 		return infl;
 	}
 
