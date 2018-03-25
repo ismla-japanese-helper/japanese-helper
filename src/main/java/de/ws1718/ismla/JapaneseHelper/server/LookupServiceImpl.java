@@ -182,10 +182,8 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		case "助詞":
 			return "PRT";
 		case "助動詞":
-			// TODO This seems weird. Might need to confirm further.
 			return "SFX";
 		case "連体詞":
-			// TODO Really? This also seems quite weird.
 			return "DET";
 		case "接頭詞":
 			return "PFX";
@@ -203,7 +201,6 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		if (pos.startsWith("V")) {
 			return "V";
 		}
-		// TODO: it might be necessary to expand this method (issue #3)
 		return pos;
 	}
 

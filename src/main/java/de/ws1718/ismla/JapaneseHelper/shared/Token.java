@@ -81,9 +81,14 @@ public class Token implements Serializable {
 		prettyPos = cleanPosTag(pos, inflectionParadigm);
 		this.inflectionParadigm = inflectionParadigm;
 		this.translations = translations;
+		this.difficultyRating = "";
 	}
 
 	/**
+	 * Update the form of the token. Note that this does NOT also update the
+	 * difficulty rating. You need to do this separately with
+	 * {@link #setDifficultyRating(String) setDifficultyRating}.
+	 * 
 	 * @return the form
 	 */
 	public String getForm() {
@@ -200,23 +205,26 @@ public class Token implements Serializable {
 	@Override
 	public String toString() {
 		return form + "\t" + pronunciation + "\t" + pos + (inflects() ? "[" + inflectionParadigm + "]" : "") + "\t"
-				+ translations;
+				+ translations + "\t" + difficultyRating;
 	}
 
 	@Override
 	public int hashCode() {
+		// Does not consider prettyPos since it directly depends on pos.
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((difficultyRating == null) ? 0 : difficultyRating.hashCode());
 		result = prime * result + ((form == null) ? 0 : form.hashCode());
-		result = prime * result + ((translations == null) ? 0 : translations.hashCode());
 		result = prime * result + ((inflectionParadigm == null) ? 0 : inflectionParadigm.hashCode());
 		result = prime * result + ((pos == null) ? 0 : pos.hashCode());
 		result = prime * result + ((pronunciation == null) ? 0 : pronunciation.hashCode());
+		result = prime * result + ((translations == null) ? 0 : translations.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
+		// Does not consider prettyPos since it directly depends on pos.
 		if (this == obj) {
 			return true;
 		}
@@ -224,18 +232,18 @@ public class Token implements Serializable {
 			return false;
 		}
 		Token other = (Token) obj;
+		if (difficultyRating == null) {
+			if (other.difficultyRating != null) {
+				return false;
+			}
+		} else if (!difficultyRating.equals(other.difficultyRating)) {
+			return false;
+		}
 		if (form == null) {
 			if (other.form != null) {
 				return false;
 			}
 		} else if (!form.equals(other.form)) {
-			return false;
-		}
-		if (translations == null) {
-			if (other.translations != null) {
-				return false;
-			}
-		} else if (!translations.equals(other.translations)) {
 			return false;
 		}
 		if (inflectionParadigm == null) {
@@ -253,9 +261,16 @@ public class Token implements Serializable {
 			return false;
 		}
 		if (pronunciation == null) {
-			return other.pronunciation == null;
+			if (other.pronunciation != null) {
+				return false;
+			}
+		} else if (!pronunciation.equals(other.pronunciation)) {
+			return false;
 		}
-		return pronunciation.equals(other.pronunciation);
+		if (translations == null) {
+			return other.translations == null;
+		}
+		return translations.equals(other.translations);
 	}
 
 	private static String[] processPosAndInflection(String pos) {

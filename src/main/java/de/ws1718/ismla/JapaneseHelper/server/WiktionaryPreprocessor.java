@@ -26,13 +26,9 @@ import de.ws1718.ismla.JapaneseHelper.shared.Inflection;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
 /**
- * Preprocessing: generate and add the inflections for verbs and adjectives.
- * Needs only to be performed whenever the dictionary dump is updated.
- * 
- * This preprocessing class is separate from the GWT structure and cannot be run
- * be the user of the final application. It is separate because it needs to have
- * write-access to the WEB-INF folder, and because the preprocessing should be
- * done before the user uses the application.
+ * Preprocessing: convert the Wiktionary dump into Token objects and generate
+ * and add the inflections for verbs and adjectives. Needs only to be performed
+ * on server start-up.
  */
 public class WiktionaryPreprocessor {
 
@@ -42,8 +38,22 @@ public class WiktionaryPreprocessor {
 	private ListMultimap<String, Token> tokens;
 	private HashMap<String, String> difficultyRatings;
 
+	/**
+	 * Preprocess the Wiktionary dump by converting it into Token objects and
+	 * generating the inflections for verbs and adjectives. Get the results via
+	 * {@link #getTokens() getTokens}.
+	 * 
+	 * @param inflectionFilenames
+	 *            the file names of the inflection table templates
+	 * @param inflectionStreams
+	 *            the input streams corresponding to inflectionFilenames
+	 * @param dictionaryStreams
+	 *            the input streams belonging to the Wiktionary dump(s)
+	 * @param difficultyRatings
+	 *            a map from kanji characters to difficulty ratings
+	 */
 	public WiktionaryPreprocessor(List<String> inflectionFilenames, List<InputStream> inflectionStreams,
-								  List<InputStream> dictionaryStreams, HashMap<String, String> difficultyRatings) {
+			List<InputStream> dictionaryStreams, HashMap<String, String> difficultyRatings) {
 		inflections = new HashMap<>();
 		tokens = ArrayListMultimap.create();
 		this.difficultyRatings = difficultyRatings;
@@ -55,17 +65,31 @@ public class WiktionaryPreprocessor {
 		logger.info("read (and generated) " + tokens.size() + " tokens");
 	}
 
+	/**
+	 * @return the tokens from the Wiktionary dump and, if applicable, their
+	 *         inflected forms. The map points from token forms to individual
+	 *         {@link Token Token} objects or lists thereof.
+	 */
 	public ListMultimap<String, Token> getTokens() {
 		return tokens;
 	}
 
+	/**
+	 * Converts the Wiktionary dump entries into {@link Token Tokens} and, when
+	 * applicable, calls the inflection methods.
+	 * 
+	 * @param is
+	 *            the input stream of a Wiktionary dump (a TSV file with the
+	 *            fields (in order) form, pronunciation, part of speech,
+	 *            translation).
+	 */
 	private void readDictionary(InputStream is) {
 		String line;
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
+		try (InputStreamReader isr = new InputStreamReader(is, "UTF-8"); BufferedReader br = new BufferedReader(isr)) {
 			lines: while ((line = br.readLine()) != null) {
 				line = line.trim();
 				if (line.startsWith("﻿##") || line.startsWith("##")) {
-					// the first version contains control characters
+					// The first version contains control characters.
 					continue;
 				}
 				String[] fields = line.split("\t");
@@ -78,11 +102,13 @@ public class WiktionaryPreprocessor {
 				String translation = fields[3];
 				Token tok = new Token(form, pronunciation, posAndInflection, translation);
 
+				// If the token is a verb without inflection information,
+				// we try to infer it.
 				if (posAndInflection.startsWith("V") && !tok.inflects()) {
 					tok.setInflectionParadigm(inferVerbInflectionParadigm(tok));
 				}
 
-				// If the token is a verb or adjective,
+				// If the token can be inflected,
 				// we might need to do some additional preprocessing:
 				if (tok.inflects()) {
 					switch (tok.getInflectionParadigm()) {
@@ -90,13 +116,17 @@ public class WiktionaryPreprocessor {
 						tok.setInflectionParadigm("ichi");
 						break;
 					case "ichi":
-						if (form.equals("居る")) {
+						if (form.equals("居る")) { // ("to be, exist" (animate
+													// arguments))
 							// Add the (more common) kana version いる.
 							inflect(new InflectableToken(pronunciation, pronunciation, posAndInflection, translation));
 						}
 						break;
 					case "verbconj":
 					case "verbconj-auto":
+						// These are irregular verbs.
+						// Use our own inflection table templates to inflect
+						// them.
 						switch (form) {
 						case "有る":
 						case "ある":
@@ -134,7 +164,12 @@ public class WiktionaryPreprocessor {
 						}
 						break;
 					case "na":
-						// Some of the Wiktionary entries end in "(な)".
+						/*
+						 * Some of the Wiktionary entries end in "(な)". Since
+						 * not all na-adjective entries do, we remove it when
+						 * applicable. (We do not need it for generating
+						 * inflections.)
+						 */
 						tok.setForm(form.replaceAll("\\(な\\)", ""));
 						tok.setPronunciation(pronunciation.replaceAll("\\(な\\)", ""));
 					}
@@ -143,9 +178,8 @@ public class WiktionaryPreprocessor {
 					InflectableToken tokInfl = new InflectableToken(tok);
 					inflect(tokInfl);
 					addToken(tokInfl);
-				} else {
-
-					// And finally, add the actual token.
+				} else { // non-inflectable
+					// Finally, add the actual token.
 					addToken(tok);
 				}
 			}
@@ -156,7 +190,14 @@ public class WiktionaryPreprocessor {
 		}
 	}
 
+	/**
+	 * Clean the token, add its difficulty rating(s), and add it to the map.
+	 * 
+	 * @param tok
+	 *            the token
+	 */
 	private void addToken(Token tok) {
+		// Remove whitespace and punctuation from the form and pronunciation.
 		tok.setForm(cleanString(tok.getForm()));
 		tok.setPronunciation(cleanString(tok.getPronunciation()));
 
@@ -182,6 +223,14 @@ public class WiktionaryPreprocessor {
 		return word.replaceAll("[-\\.\\s+]", "");
 	}
 
+	/**
+	 * If a verb is not already associated with an inflection class, we try to
+	 * infer that from the verb's POS tag and ending.
+	 * 
+	 * @param tok
+	 *            the verb
+	 * @return the inflection paradigm or, if we could not infer it, null
+	 */
 	private static String inferVerbInflectionParadigm(Token tok) {
 		String pos = tok.getPos();
 		String form = tok.getForm();
@@ -218,6 +267,15 @@ public class WiktionaryPreprocessor {
 		return null;
 	}
 
+	/**
+	 * Get the sub-class of the godan inflection group by translitering tis
+	 * final syllable.
+	 * 
+	 * @param pronunciation
+	 *            the verb's pronunciation
+	 * @return the inflection paradigm or, if it is not a godan inflection
+	 *         paradigm, null
+	 */
 	private static String godanInflection(String pronunciation) {
 		String infl = "probably go-";
 		char lastSyllable = pronunciation.charAt(pronunciation.length() - 1);
@@ -251,6 +309,15 @@ public class WiktionaryPreprocessor {
 		}
 	}
 
+	/**
+	 * Checks whether a verb can belong to the ichidan inflection class. Note
+	 * that even if this method returns true, the verb might be a godan verb
+	 * instead.
+	 * 
+	 * @param pronunciation
+	 *            the verb's pronunciation
+	 * @return true if it can be an ichidan verb, false otherwise
+	 */
 	private static boolean canBeIchidanVerb(String pronunciation) {
 		// Ichidan verbs have the final syllable る/ru
 		// and the vowel of their penultimate syllable is "i" or "e".
@@ -262,7 +329,7 @@ public class WiktionaryPreprocessor {
 			return false;
 		}
 		switch (pronunciation.charAt(len - 2)) {
-		// い/i-row syllables
+		// い/i-syllable syllables
 		case 'い':
 		case 'き':
 		case 'ぎ':
@@ -275,7 +342,7 @@ public class WiktionaryPreprocessor {
 		case 'ぴ':
 		case 'み':
 		case 'り':
-			// え/e-row syllables
+			// え/e-syllable syllables
 		case 'え':
 		case 'け':
 		case 'げ':
@@ -297,11 +364,23 @@ public class WiktionaryPreprocessor {
 
 	}
 
+	/**
+	 * Get the sub-class of the type-III inflection group.
+	 * 
+	 * @param form
+	 *            the lemma
+	 * @param pronunciation
+	 *            the verb's pronunciation
+	 * @return the inflection paradigm or, if it is not a type-III inflection
+	 *         paradigm, null
+	 */
 	private static String suruInflection(String form, String pronunciation) {
 		if (form.endsWith("ずる")) {
 			return "probably zuru";
 		}
 		if (form.length() == 3) {
+			// Typically, verbs that consist of a single kanji followed by する
+			// have different inflection paradigms than the standard "suru" one.
 			if (pronunciation.endsWith("っする")) {
 				return "probably suru-tsu";
 			}
@@ -313,13 +392,22 @@ public class WiktionaryPreprocessor {
 		return null;
 	}
 
+	/**
+	 * Generate inflected forms of the given token and add them to the map.
+	 * 
+	 * @param tok
+	 *            the token
+	 */
 	private void inflect(InflectableToken tok) {
-		String inflectionName = tok.getInflectionParadigm();
-		inflectionName = inflectionName.replace("probably ", "");
-		List<Entry<Inflection, String>> paradigm = inflections.get(inflectionName);
+		String inflectionParadigm = tok.getInflectionParadigm();
+		// If the inflection group was inferred with
+		// inferVerbInflectionParadigm, we need to remove the "probably". We
+		// only want to use that information in the UI.
+		inflectionParadigm = inflectionParadigm.replace("probably ", "");
+		List<Entry<Inflection, String>> paradigm = inflections.get(inflectionParadigm);
 
 		if (paradigm == null) {
-			logger.warning("Could not find an inflection paradigm for \"" + inflectionName + "\".");
+			logger.warning("Could not find an inflection table template for \"" + inflectionParadigm + "\".");
 			return;
 		}
 
@@ -333,27 +421,40 @@ public class WiktionaryPreprocessor {
 			int parClose = suffix.indexOf("）");
 			if (parOpen != -1 && parClose != -1 && parClose > parOpen) {
 				// without optional kana
-				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parClose + 1), infl, inflectionName);
+				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parClose + 1), infl, inflectionParadigm);
 				// with optional kana
 				inflect(tok, suffix.substring(0, parOpen) + suffix.substring(parOpen + 1, parClose)
-						+ suffix.substring(parClose + 1), infl, inflectionName);
+						+ suffix.substring(parClose + 1), infl, inflectionParadigm);
 			} else {
 				// regular entries
-				inflect(tok, suffix, infl, inflectionName);
+				inflect(tok, suffix, infl, inflectionParadigm);
 			}
 		}
 	}
 
-	private void inflect(InflectableToken tok, String suffix, Inflection inflection, String inflectionName) {
+	/**
+	 * Inflect the token by extracting its root, adding a suffix and adding it
+	 * as an {@link InflectedToken InflectedToken}.
+	 * 
+	 * @param tok
+	 *            the lemma token
+	 * @param suffix
+	 *            the inflection suffix
+	 * @param inflection
+	 *            the inflection
+	 * @param inflectionParadigm
+	 *            the name of the inflection paradigm
+	 */
+	private void inflect(InflectableToken tok, String suffix, Inflection inflection, String inflectionParadigm) {
 		String form = tok.getForm();
 		String pron = tok.getPronunciation();
 		String formInfl = "";
 		String pronInfl = "";
 
-		// Get the stem of the predicate and add the inflectional suffix.
-		switch (inflectionName) {
+		// Get the root of the predicate and add the inflectional suffix.
+		switch (inflectionParadigm) {
 		case "aru":
-			// The template ja-aru includes the stem because it is irregular.
+			// The template 'aru' includes the root because it is irregular.
 			if ("有る".equals(form)) {
 				formInfl = suffix;
 			} else {
@@ -362,7 +463,7 @@ public class WiktionaryPreprocessor {
 			pronInfl = aruKanjiToKana(suffix);
 			break;
 		case "suru-indep":
-			// The template ja-suru-indep includes the stem
+			// The template 'suru-indep' includes the root
 			// because it is irregular.
 			formInfl = suffix;
 			pronInfl = suffix;
@@ -383,7 +484,7 @@ public class WiktionaryPreprocessor {
 		case "kuru":
 			/*
 			 * A special property of the verb with this inflection scheme is
-			 * that the vowel quality of final syllable of its stem (来) changes
+			 * that the vowel quality of final syllable of its root (来) changes
 			 * for some of the inflections--this kanji is represented by
 			 * different kana when transcribing its pronunciation. Therefore, we
 			 * included the kana versions of this syllable in the template and
@@ -401,7 +502,7 @@ public class WiktionaryPreprocessor {
 		case "suru-tsu":
 		case "suru":
 		case "zuru":
-			// Remove the final する/ずる to get the root/stem.
+			// Remove the final する/ずる to get the root.
 			formInfl = form.substring(0, form.length() - 2) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 2) + suffix;
 			break;
@@ -413,7 +514,7 @@ public class WiktionaryPreprocessor {
 			pronInfl = pron + suffix;
 			break;
 		default:
-			// Remove the final syllable to get the root/stem.
+			// Remove the final syllable to get the root.
 			formInfl = form.substring(0, form.length() - 1) + suffix;
 			pronInfl = pron.substring(0, pron.length() - 1) + suffix;
 		}
@@ -427,6 +528,16 @@ public class WiktionaryPreprocessor {
 		return word.replace('有', 'あ').replace('無', 'な');
 	}
 
+	/**
+	 * Reads the inflection table templates and saves them in a map from
+	 * inflection paradigm names to lists of entries from {@link Inflection
+	 * Inflections} to inflection suffixes.
+	 * 
+	 * @param inflectionFilenames
+	 *            the file names of the inflection table templates
+	 * @param inflectionStreams
+	 *            the input streams corresponding to inflectionFilenames
+	 */
 	private void setUpInflectionTemplates(List<String> inflectionFilenames, List<InputStream> inflectionStreams) {
 		logger.info("Found the following " + inflectionFilenames.size() + " inflection templates:");
 		logger.info(inflectionFilenames.stream().map(file -> new File(file).getName()).collect(Collectors.toList())
@@ -442,6 +553,16 @@ public class WiktionaryPreprocessor {
 		}
 	}
 
+	/**
+	 * Reads the inflection table template and saves it in the map from
+	 * inflection paradigm names to lists of entries from {@link Inflection
+	 * Inflections} to inflection suffixes.
+	 * 
+	 * @param filename
+	 *            the file name of the inflection table template
+	 * @param is
+	 *            the corresponding input stream
+	 */
 	private void setUpTemplate(String filename, InputStream is) {
 		// We use a list to retain the order of the inflections, as given in the
 		// templates. This makes the inflection tables in the UI look neater.
@@ -516,10 +637,10 @@ public class WiktionaryPreprocessor {
 			}
 		}
 
-		inflections.put(getFileName(filename), inflectionParadigm);
+		inflections.put(getInflectionGroupFromFileName(filename), inflectionParadigm);
 	}
 
-	private static String getFileName(String filename) {
+	private static String getInflectionGroupFromFileName(String filename) {
 		return new File(filename).getName().replaceAll("(ja-)|(\\.txt)", "");
 	}
 
