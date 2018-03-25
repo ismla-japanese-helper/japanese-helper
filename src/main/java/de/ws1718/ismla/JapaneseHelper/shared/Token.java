@@ -81,7 +81,7 @@ public class Token implements Serializable {
 		prettyPos = cleanPosTag(pos, inflectionParadigm);
 		this.inflectionParadigm = inflectionParadigm;
 		this.translations = translations;
-		this.difficultyRating = "";
+		this.difficultyRating = "*";
 	}
 
 	/**
@@ -184,10 +184,6 @@ public class Token implements Serializable {
 	}
 
 	public String getDifficultyRating() {
-		// Sometimes it isn't set on out-of-vocab tokens etc.
-		if (difficultyRating == null) {
-			difficultyRating = "*";
-		}
 		return difficultyRating;
 	}
 
