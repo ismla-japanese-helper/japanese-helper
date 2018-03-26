@@ -4,4 +4,4 @@ Semester project for the course "Industrial Strength Multilingual Analysis" at U
 
 You can import it as a Maven project in Eclipse/IntelliJ IDEA and launch it as a GWT application, after having installed [the GWT plugin](http://gwt-plugins.github.io/documentation/gwt-eclipse-plugin/Download.html). Remember to check whether the resources folder is excluded from the Build Path. If so, un-exclude it before building and launching the project.
 
-For detailed documentation, refer to the PDF report in the `/doc` folder.
+For detailed documentation, refer to [the report](Report.pdf).
