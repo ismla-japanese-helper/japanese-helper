@@ -1,5 +1,8 @@
 package de.ws1718.ismla.JapaneseHelper.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -7,57 +10,64 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
+
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class SentenceInputWidget extends Composite {
-    private final LookupServiceAsync lookupService = LookupService.App.getInstance();
-    interface SentenceInputWidgetUiBinder extends UiBinder<Widget, SentenceInputWidget> {
-    }
+	private final LookupServiceAsync lookupService = LookupService.App.getInstance();
 
-    private static SentenceInputWidgetUiBinder uiBinder = GWT.create(SentenceInputWidgetUiBinder.class);
+	interface SentenceInputWidgetUiBinder extends UiBinder<Widget, SentenceInputWidget> {
+	}
 
-    @UiField
-    TextArea inputField;
+	private static SentenceInputWidgetUiBinder uiBinder = GWT.create(SentenceInputWidgetUiBinder.class);
 
-    @UiField
-    Button submitButton;
+	@UiField
+	TextArea inputField;
 
-    @UiHandler("submitButton")
-    void onClick(ClickEvent e) {
-        RootPanel.get("resultsContainer").clear();
-        putResults();
-    }
+	@UiField
+	Button submitButton;
 
-    private void putResults() {
-        String input = inputField.getText();
+	/**
+	 * A widget where users can enter text and submit it.
+	 */
+	public SentenceInputWidget() {
+		initWidget(uiBinder.createAndBindUi(this));
+		submitButton.setText("Submit");
+	}
 
-        if (input.isEmpty()) {
-            Window.alert("Please input the sentence");
-            return;
-        }
+	@UiHandler("submitButton")
+	void onClick(ClickEvent e) {
+		RootPanel.get("resultsContainer").clear();
+		putResults();
+	}
 
-        lookupService.lookup(input, new AsyncCallback<List<ArrayList<Token>>>() {
+	private void putResults() {
+		String input = inputField.getText();
 
-            @Override
-            public void onSuccess(List<ArrayList<Token>> results) {
-                ResultsWidget rw = new ResultsWidget(results);
+		if (input.isEmpty()) {
+			Window.alert("Please input the sentence");
+			return;
+		}
 
-                RootPanel.get("resultsContainer").add(rw);
-            }
+		lookupService.lookup(input, new AsyncCallback<List<ArrayList<Token>>>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-        });
-    }
+			@Override
+			public void onSuccess(List<ArrayList<Token>> results) {
+				ResultsWidget rw = new ResultsWidget(results);
 
-    public SentenceInputWidget() {
-        initWidget(uiBinder.createAndBindUi(this));
-        submitButton.setText("Submit");
-    }
+				RootPanel.get("resultsContainer").add(rw);
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert(caught.getMessage());
+			}
+		});
+	}
+
 }

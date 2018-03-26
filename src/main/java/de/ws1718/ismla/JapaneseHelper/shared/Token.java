@@ -183,16 +183,24 @@ public class Token implements Serializable {
 		this.translations = translations;
 	}
 
+	/**
+	 * @return the difficulty rating
+	 */
 	public String getDifficultyRating() {
 		return difficultyRating;
 	}
 
+	/**
+	 * @param difficultyRating
+	 *            the difficultyRating to set
+	 */
 	public void setDifficultyRating(String difficultyRating) {
 		this.difficultyRating = difficultyRating;
 	}
 
 	/**
-	 * @return true if this token is associated with an inflection paradigm
+	 * @return true if this token is associated with an inflection paradigm,
+	 *         false otherwise
 	 */
 	public boolean inflects() {
 		return !(inflectionParadigm == null || inflectionParadigm.isEmpty());
@@ -382,6 +390,15 @@ public class Token implements Serializable {
 		return transitivity + verbType + "verb" + inflectedForm;
 	}
 
+	/**
+	 * Turns an enumeration of translations into an ArrayList. Also removes
+	 * extraneous markup and re-orders the list, if necessary.
+	 * 
+	 * @param glosses
+	 *            the translation(s).
+	 * @return the list of translations
+	 */
+	// public for testing
 	public static ArrayList<String> processGlosses(String glosses) {
 		glosses = cleanTranslation(glosses);
 
@@ -445,6 +462,13 @@ public class Token implements Serializable {
 		return results;
 	}
 
+	/**
+	 * Removes extraneous markup from Wiktionary dump translation strings.
+	 * 
+	 * @param translation
+	 *            the translation string
+	 * @return the cleaned string
+	 */
 	private static String cleanTranslation(String translation) {
 		translation = translation.trim();
 
@@ -476,36 +500,17 @@ public class Token implements Serializable {
 		}
 
 		// Enumerations use sequences of hash signs in the Wiktionary dump.
+		// Bullet points are easier to read.
 		translation = translation.replaceAll("#{2,} ", "•");
 		translation = translation.replaceAll("#+$", "");
 
-		// {{, }}
+		// double curly braces
 		translation = translation.replaceAll("(\\{\\{)|(\\}\\})", "");
-		// ()
+		// empty parentheses
 		translation = translation.replaceAll("\\(\\)", "");
 
 		translation = translation.replaceAll("\\s+", " ");
 		return translation;
-	}
-
-	/**
-	 * Merges another token into this one. Assumes that both tokens share the
-	 * same form.
-	 * 
-	 * @param other
-	 *            the other token
-	 */
-	public void merge(Token other) {
-		pronunciation = merge(pronunciation, other.pronunciation);
-		pos = merge(pos, other.pos);
-		inflectionParadigm = merge(inflectionParadigm, other.inflectionParadigm);
-		translations.addAll(other.translations);
-	}
-
-	private String merge(String field, String other) {
-		field = field == null ? "" : field;
-		other = other == null ? "" : other;
-		return field + ", " + other;
 	}
 
 }
