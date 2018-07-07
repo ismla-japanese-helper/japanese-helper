@@ -1,5 +1,14 @@
 package de.ws1718.ismla.JapaneseHelper.server;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +24,7 @@ import com.mariten.kanatools.KanaConverter;
 
 import de.ws1718.ismla.JapaneseHelper.client.LookupService;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
-import de.ws1718.ismla.JapaneseHelper.shared.Token;
+import de.ws1718.ismla.JapaneseHelper.shared.Token;;
 
 public class LookupServiceImpl extends RemoteServiceServlet implements LookupService {
 	private static final long serialVersionUID = 568570423376066244L;
@@ -36,6 +45,46 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		return results;
 	}
 
+	@SuppressWarnings("unchecked")
+	public String tokenizeFiles() {
+		List<FileInputStream> streams = (List<FileInputStream>) getServletContext().getAttribute("tokenizationStreams");
+		List<String> files = (List<String>) getServletContext().getAttribute("tokenizationFiles");
+		System.out.println(streams.size() + ", " + files.size());
+
+		String line;
+		for (int i = 0; i < streams.size(); i++) {
+			FileInputStream fis = streams.get(i);
+			String filename = files.get(i);
+			String[] sections = filename.split("/");
+			filename = sections[sections.length - 1];
+			logger.info("Reading " + filename);
+			filename = filename.split("\\.")[0] + "-tokenized.txt";
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+					PrintWriter pw = new PrintWriter(new File(filename))) {
+				while ((line = br.readLine()) != null) {
+					line = line.trim();
+					List<ArrayList<Token>> results = lookup(line);
+					// System.out.println(line + " " + results.size());
+					StringBuilder sb = new StringBuilder();
+					String joiner = "";
+					for (ArrayList<Token> tokens : results) {
+						Token tok = tokens.get(0);
+						sb.append(joiner);
+						joiner = " ";
+						sb.append(tok.getForm());
+					}
+					pw.println(sb.toString());
+				}
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return "";
+	}
+
 	private List<ArrayList<Token>> convertTokens(List<com.atilika.kuromoji.ipadic.Token> ipaTokens,
 			ListMultimap<String, Token> tokenMap) {
 		List<ArrayList<Token>> tokens = new ArrayList<>();
@@ -45,14 +94,15 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			String form = tok.getSurface();
 			String pos = tok.getPartOfSpeechLevel1();
 			String pron = tok.getReading();
-			logger.info(form + "\t" + tok.getAllFeatures());
+			// logger.info(form + "\t" + tok.getAllFeatures());
 
 			List<Token> dictTokens = tokenMap.get(tok.getSurface());
 
 			// If the token is inflected, try to lookup the full inflection form
 			// instead of displaying several segmented tokens.
 			if (!tok.getConjugationForm().equals("*")) {
-				logger.info("Attempting to get inflection suffixes for " + tok.getSurface());
+				// logger.info("Attempting to get inflection suffixes for " +
+				// tok.getSurface());
 				Joiner joiner = Joiner.on("");
 				List<String> multiTokenForm = new ArrayList<>();
 				multiTokenForm.add(tok.getSurface());
@@ -87,7 +137,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 				form = joiner.join(multiTokenForm);
 				pron = joiner.join(multiTokenPron);
-				logger.info("Continuing with " + form);
+				// logger.info("Continuing with " + form);
 			}
 
 			// Sort the results if there are several matches.
@@ -121,30 +171,30 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		String posK = convertIPADicPOSTag(posKuromoji);
 		String pronK = convertPronunciation(pronKuromoji);
 
-		logger.info(posK + "\t" + pronK);
+		// logger.info(posK + "\t" + pronK);
 		ArrayList<Token> sortedTokens = new ArrayList<>();
 
 		if (dictTokens == null || dictTokens.isEmpty()) {
 			String meaning = "1) [out-of-vocabulary]";
-			String difficultyRating  = "N/A";
+			String difficultyRating = "N/A";
 			if (posK.equals("PNC")) {
 				meaning = "1) [punctuation mark]";
-				difficultyRating  = "*";
+				difficultyRating = "*";
 			}
 			Token tok = new Token(form, pronK, posK, meaning);
 			tok.setDifficultyRating(difficultyRating);
-			logger.info("no matches, created token: " + tok);
+			// logger.info("no matches, created token: " + tok);
 			return new ArrayList<Token>(Arrays.asList(tok));
 		}
 
-		// primary sort order: 
+		// primary sort order:
 		// Try to match the POS tag with that of the Kuromoji token.
 		Comparator<Token> comp = Comparator.comparing(Token::getPos, (pos1, pos2) -> {
 			pos1 = convertWiktionaryPOSTag(pos1);
 			pos2 = convertWiktionaryPOSTag(pos2);
 			return pos1.equals(pos2) ? 0 : pos1.equals(posK) ? -1 : 1;
 		}).thenComparing(Token::getPronunciation, (pron1, pron2) -> {
-			// secondary sort order: 
+			// secondary sort order:
 			// Try to match the pronunciation with that of the Kuromoji token.
 			pron1 = convertPronunciation(pron1);
 			pron2 = convertPronunciation(pron2);
@@ -157,7 +207,7 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 
 		Collections.sort(dictTokens, comp);
 		for (Token tok : dictTokens) {
-			logger.info("\t" + tok);
+			// logger.info("\t" + tok);
 			sortedTokens.add(tok);
 		}
 		return sortedTokens;

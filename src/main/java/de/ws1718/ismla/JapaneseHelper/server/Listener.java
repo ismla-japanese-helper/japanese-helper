@@ -25,10 +25,11 @@ import de.ws1718.ismla.JapaneseHelper.shared.Token;
 public class Listener implements ServletContextListener, HttpSessionListener, HttpSessionAttributeListener {
 
 	// GWT looks for this inside src/main/webapp
-	private static final String RESOURCES_PATH = "/WEB-INF/";
+	public static final String RESOURCES_PATH = "/WEB-INF/";
 	public static final String DIFFICULTY_RATING_PATH = RESOURCES_PATH + "difficulty-rating/joyo-kanji.csv";
 	public static final String DICTIONARY_PATH = RESOURCES_PATH + "dictionary/";
 	public static final String INFLECTION_TEMPLATES_PATH = RESOURCES_PATH + "inflection-templates/";
+	private static final String TOKENIZE_PATH = RESOURCES_PATH + "tokenize/";
 
 	// Public constructor is required by servlet spec
 	public Listener() {
@@ -37,6 +38,7 @@ public class Listener implements ServletContextListener, HttpSessionListener, Ht
 	// -------------------------------------------------------
 	// ServletContextListener implementation
 	// -------------------------------------------------------
+	@SuppressWarnings("unchecked")
 	public void contextInitialized(ServletContextEvent sce) {
 		/*
 		 * This method is called when the servlet context is initialized(when
@@ -50,8 +52,16 @@ public class Listener implements ServletContextListener, HttpSessionListener, Ht
 
 		// Then the Wiktionary dump.
 		ListMultimap<String, Token> tokenMap = readTokens(sce, difficultyRatings);
-		// Store the Wiktionary dump in ServletContext so that we don't need to initialize it afterwards.
+		// Store the Wiktionary dump in ServletContext so that we don't need to
+		// initialize it afterwards.
 		sce.getServletContext().setAttribute("tokenMap", tokenMap);
+
+		Object[] toTokenize = readFilesToBeTokenized(sce);
+		List<String> tokenizationFiles = (List<String>) toTokenize[0];
+		List<InputStream> tokenizationStreams = (List<InputStream>) toTokenize[1];
+		sce.getServletContext().setAttribute("tokenizationFiles", tokenizationFiles);
+		sce.getServletContext().setAttribute("tokenizationStreams", tokenizationStreams);
+
 	}
 
 	public void contextDestroyed(ServletContextEvent sce) {
@@ -156,5 +166,17 @@ public class Listener implements ServletContextListener, HttpSessionListener, Ht
 		}
 
 		return difficultyRatings;
+	}
+
+	private Object[] readFilesToBeTokenized(ServletContextEvent sce) {
+		List<String> files = new ArrayList<String>(sce.getServletContext().getResourcePaths(TOKENIZE_PATH));
+		List<InputStream> streams = new ArrayList<>();
+		for (String file : files) {
+			streams.add(sce.getServletContext().getResourceAsStream(file));
+		}
+		Object[] rval = new Object[2];
+		rval[0] = files;
+		rval[1] = streams;
+		return rval;
 	}
 }
