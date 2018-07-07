@@ -3,8 +3,6 @@ package de.ws1718.ismla.JapaneseHelper.server;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -30,6 +28,8 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	private static final long serialVersionUID = 568570423376066244L;
 
 	private static final Logger logger = Logger.getLogger(LookupServiceImpl.class.getSimpleName());
+	// Separator for tokenizing file contents. Can be changed!
+	private static final String SEPARATOR = " ";
 
 	@SuppressWarnings("unchecked")
 	public List<ArrayList<Token>> lookup(String sentence) {
@@ -49,7 +49,6 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 	public String tokenizeFiles() {
 		List<FileInputStream> streams = (List<FileInputStream>) getServletContext().getAttribute("tokenizationStreams");
 		List<String> files = (List<String>) getServletContext().getAttribute("tokenizationFiles");
-		System.out.println(streams.size() + ", " + files.size());
 
 		String line;
 		for (int i = 0; i < streams.size(); i++) {
@@ -64,17 +63,17 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 				while ((line = br.readLine()) != null) {
 					line = line.trim();
 					List<ArrayList<Token>> results = lookup(line);
-					// System.out.println(line + " " + results.size());
 					StringBuilder sb = new StringBuilder();
 					String joiner = "";
 					for (ArrayList<Token> tokens : results) {
 						Token tok = tokens.get(0);
 						sb.append(joiner);
-						joiner = " ";
+						joiner = SEPARATOR;
 						sb.append(tok.getForm());
 					}
 					pw.println(sb.toString());
 				}
+			logger.info("Done with this file! Results are in " + filename);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -82,6 +81,8 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 			}
 		}
 
+		// This should technically be a void method but AsyncCallback
+		// doesn't seem to like not receiving anything...
 		return "";
 	}
 
