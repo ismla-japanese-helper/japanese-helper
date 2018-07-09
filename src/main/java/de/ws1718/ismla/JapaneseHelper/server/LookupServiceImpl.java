@@ -113,7 +113,9 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 				int curIndex = index + 1;
 				// If it's not out of bounds and it's also marked as an
 				// inflection form.
-				while (curIndex < ipaTokens.size() && !ipaTokens.get(curIndex).getConjugationForm().equals("*")) {
+				// Add exception for "て" which is recognized as a particle.
+				while (curIndex < ipaTokens.size() && (!ipaTokens.get(curIndex).getConjugationForm().equals("*") ||
+						ipaTokens.get(curIndex).getSurface().equals("て"))) {
 					multiTokenForm.add(ipaTokens.get(curIndex).getSurface());
 					multiTokenPron.add(ipaTokens.get(curIndex).getReading());
 					curIndex++;
