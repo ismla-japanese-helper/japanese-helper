@@ -8,10 +8,21 @@ For detailed documentation (information about the project, its use cases, implem
 
 ## Tokenizing files
 
+Generate the JAR:
 ```
 mvn clean package
-java -jar target/JapaneseHelper-1.0-SNAPSHOT-jar-with-dependencies.jar sample-file.txt 0 4
 ```
+
+Execute the JAR:
+```
+java -jar target/JapaneseHelper-1.0-SNAPSHOT-jar-with-dependencies.jar FILE_NAME START_INDEX END_INDEX
+```
+or
+```
+java -Dfile.encoding=UTF-8 -jar target\JapaneseHelper-1.0-SNAPSHOT-jar-with-dependencies.jar FILE_NAME START_INDEX END_INDEX
+```
+
+The start index is inclusive, the end index exclusive. Both refer to line indices.
 
 ## Licensed content
 

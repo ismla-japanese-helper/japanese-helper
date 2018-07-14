@@ -36,9 +36,10 @@ public class Listener {
 	public Listener(String tokenizationFile, int start, int stop) {
 		InputStream difficultyRatingsStream = Listener.class.getResourceAsStream(DIFFICULTY_RATING_PATH);
 		HashMap<String, String> difficultyRatings = readDifficultyRatings(difficultyRatingsStream);
+		ListMultimap<String, Token> tokenMap = readTokens(difficultyRatings);
 
-		System.out.println(Listener.class.getResourceAsStream(INFLECTION_TEMPLATES_PATH) != null);
-
+		LookupServiceImpl tokenizer = new LookupServiceImpl(tokenMap, tokenizationFile, start, stop);
+		tokenizer.tokenizeFile();
 	}
 
 	public static void main(String[] args) {
@@ -70,22 +71,13 @@ public class Listener {
 	private static ListMultimap<String, Token> readTokens(HashMap<String, String> difficultyRatings) {
 		List<String> inflectionFiles = new ArrayList<>();
 		List<InputStream> inflectionStreams = new ArrayList<>();
-		for (File file : new File(INFLECTION_TEMPLATES_PATH).listFiles()) {
-			inflectionFiles.add(file.getName());
-			try {
-				inflectionStreams.add(new FileInputStream(file));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
+		for (String file : INFLECTION_FILES) {
+			inflectionFiles.add(INFLECTION_TEMPLATES_PATH + file);
+			inflectionStreams.add(Listener.class.getResourceAsStream(INFLECTION_TEMPLATES_PATH + file));
 		}
+
 		List<InputStream> dictionaryStreams = new ArrayList<>();
-		for (File file : new File(DICTIONARY_PATH).listFiles()) {
-			try {
-				dictionaryStreams.add(new FileInputStream(file));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
+		dictionaryStreams.add(Listener.class.getResourceAsStream(DICTIONARY_PATH));
 		WiktionaryPreprocessor wp = new WiktionaryPreprocessor(inflectionFiles, inflectionStreams, dictionaryStreams,
 				difficultyRatings);
 		return wp.getTokens();

@@ -54,7 +54,7 @@ public class LookupServiceImpl {
 		String[] sections = tokenizationFile.split("/");
 		tokenizationFile = sections[sections.length - 1];
 		logger.info("Reading " + tokenizationFile);
-		String outFile = tokenizationFile.split("\\.")[0] + "-tokenized.txt";
+		String outFile = tokenizationFile.split("\\.")[0] + "-tokenized-" + start + "-" + stop + ".txt";
 		String line;
 		int lineNr = -1;
 		try (BufferedReader br = new BufferedReader(
@@ -62,11 +62,14 @@ public class LookupServiceImpl {
 				PrintWriter pw = new PrintWriter(new File(outFile))) {
 			while ((line = br.readLine()) != null) {
 				lineNr++;
-				if (lineNr < start){
-					continue;					
+				if (lineNr < start) {
+					continue;
 				}
-				if (lineNr == stop){
+				if (lineNr == stop) {
 					break;
+				}
+				if (lineNr % 100 == 0) {
+					logger.info("Currently on line " + lineNr);
 				}
 				line = line.trim();
 				List<ArrayList<Token>> results = lookup(line);
@@ -79,10 +82,9 @@ public class LookupServiceImpl {
 					sb.append(tok.getForm());
 				}
 				pw.println(sb.toString());
-				
+
 			}
 			logger.info("Done with this file! Results are in " + outFile + ".");
-			logger.info("Read lines " + start + " up to and excluding " + lineNr + ".");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -103,8 +105,6 @@ public class LookupServiceImpl {
 			String form = tok.getSurface();
 			String pos = tok.getPartOfSpeechLevel1();
 			String pron = tok.getReading();
-			// logger.info(form + "\t" + tok.getAllFeatures());
-
 			List<Token> dictTokens = tokenMap.get(tok.getSurface());
 
 			// If the token is inflected, try to lookup the full inflection form
