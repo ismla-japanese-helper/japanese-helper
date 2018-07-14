@@ -17,24 +17,29 @@ import java.util.logging.Logger;
 import com.atilika.kuromoji.ipadic.Tokenizer;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.mariten.kanatools.KanaConverter;
 
-import de.ws1718.ismla.JapaneseHelper.client.LookupService;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;;
 
-public class LookupServiceImpl extends RemoteServiceServlet implements LookupService {
-	private static final long serialVersionUID = 568570423376066244L;
+public class LookupServiceImpl {
 
 	private static final Logger logger = Logger.getLogger(LookupServiceImpl.class.getSimpleName());
 	// Separator for tokenizing file contents. Can be changed!
 	private static final String SEPARATOR = " ";
+	private ListMultimap<String, Token> tokenMap;
+	private String tokenizationFile;
+	private int start;
+	private int stop;
 
-	@SuppressWarnings("unchecked")
+	public LookupServiceImpl(ListMultimap<String, Token> tokenMap, String tokenizationFile, int start, int stop) {
+		this.tokenMap = tokenMap;
+		this.tokenizationFile = tokenizationFile;
+		this.start = start;
+		this.stop = stop;
+	}
+
 	public List<ArrayList<Token>> lookup(String sentence) {
-		ListMultimap<String, Token> tokenMap = (ListMultimap<String, Token>) getServletContext()
-				.getAttribute("tokenMap");
 		Tokenizer tokenizer = new Tokenizer();
 		// This is the Token defined by the Kuromoji parser.
 		List<com.atilika.kuromoji.ipadic.Token> ipaTokens = tokenizer.tokenize(sentence.trim());
@@ -45,40 +50,43 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		return results;
 	}
 
-	@SuppressWarnings("unchecked")
-	public String tokenizeFiles() {
-		List<FileInputStream> streams = (List<FileInputStream>) getServletContext().getAttribute("tokenizationStreams");
-		List<String> files = (List<String>) getServletContext().getAttribute("tokenizationFiles");
-
+	public String tokenizeFile() {
+		String[] sections = tokenizationFile.split("/");
+		tokenizationFile = sections[sections.length - 1];
+		logger.info("Reading " + tokenizationFile);
+		String outFile = tokenizationFile.split("\\.")[0] + "-tokenized.txt";
 		String line;
-		for (int i = 0; i < streams.size(); i++) {
-			FileInputStream fis = streams.get(i);
-			String filename = files.get(i);
-			String[] sections = filename.split("/");
-			filename = sections[sections.length - 1];
-			logger.info("Reading " + filename);
-			filename = filename.split("\\.")[0] + "-tokenized.txt";
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-					PrintWriter pw = new PrintWriter(new File(filename))) {
-				while ((line = br.readLine()) != null) {
-					line = line.trim();
-					List<ArrayList<Token>> results = lookup(line);
-					StringBuilder sb = new StringBuilder();
-					String joiner = "";
-					for (ArrayList<Token> tokens : results) {
-						Token tok = tokens.get(0);
-						sb.append(joiner);
-						joiner = SEPARATOR;
-						sb.append(tok.getForm());
-					}
-					pw.println(sb.toString());
+		int lineNr = -1;
+		try (BufferedReader br = new BufferedReader(
+				new InputStreamReader(new FileInputStream(tokenizationFile), "UTF-8"));
+				PrintWriter pw = new PrintWriter(new File(outFile))) {
+			while ((line = br.readLine()) != null) {
+				lineNr++;
+				if (lineNr < start){
+					continue;					
 				}
-			logger.info("Done with this file! Results are in " + filename);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+				if (lineNr == stop){
+					break;
+				}
+				line = line.trim();
+				List<ArrayList<Token>> results = lookup(line);
+				StringBuilder sb = new StringBuilder();
+				String joiner = "";
+				for (ArrayList<Token> tokens : results) {
+					Token tok = tokens.get(0);
+					sb.append(joiner);
+					joiner = SEPARATOR;
+					sb.append(tok.getForm());
+				}
+				pw.println(sb.toString());
+				
 			}
+			logger.info("Done with this file! Results are in " + outFile + ".");
+			logger.info("Read lines " + start + " up to and excluding " + lineNr + ".");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		// This should technically be a void method but AsyncCallback
@@ -114,8 +122,8 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 				// If it's not out of bounds and it's also marked as an
 				// inflection form.
 				// Add exception for "て" which is recognized as a particle.
-				while (curIndex < ipaTokens.size() && (!ipaTokens.get(curIndex).getConjugationForm().equals("*") ||
-						ipaTokens.get(curIndex).getSurface().equals("て"))) {
+				while (curIndex < ipaTokens.size() && (!ipaTokens.get(curIndex).getConjugationForm().equals("*")
+						|| ipaTokens.get(curIndex).getSurface().equals("て"))) {
 					multiTokenForm.add(ipaTokens.get(curIndex).getSurface());
 					multiTokenPron.add(ipaTokens.get(curIndex).getReading());
 					curIndex++;
