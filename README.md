@@ -8,10 +8,10 @@ For detailed documentation (information about the project, its use cases, implem
 
 ## Tokenizing files
 
-- Add the (uncompressed) files to `src/main/webapp/WEB-INF/tokenize`. Make sure Eclipse notices the added files.
-- If you want the tokenized content to be separated by something other than a blank space, change the [`SEPARATOR` constant in `LookupServiceImpl.java`](https://github.com/ismla-japanese-helper/japanese-helper/blob/tokenize-files/src/main/java/de/ws1718/ismla/JapaneseHelper/server/LookupServiceImpl.java#L32).
-- Run the project in SuperDev mode, open the website, and press the `Tokenize files` button. Update logs about which file is currently being read are in the console. Once all files have been processed, there is a pop-up on the website.
-- The tokenized files are in the `target/JapaneseHelper-1.0-SNAPSHOT` directory. **Note that this directory will be rebuilt and the files will be deleted whenever the project is run again!**
+```
+mvn clean package
+java -jar target/JapaneseHelper-1.0-SNAPSHOT-jar-with-dependencies.jar sample-file.txt 0 4
+```
 
 ## Licensed content
 
