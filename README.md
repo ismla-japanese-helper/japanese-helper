@@ -19,10 +19,12 @@ java -jar target/JapaneseHelper-1.0-SNAPSHOT-jar-with-dependencies.jar FILE_NAME
 ```
 or
 ```
-java -Dfile.encoding=UTF-8 -jar target\JapaneseHelper-1.0-SNAPSHOT-jar-with-dependencies.jar FILE_NAME START_INDEX END_INDEX
+java -Dfile.encoding=UTF-8 -jar target/JapaneseHelper-1.0-SNAPSHOT-jar-with-dependencies.jar FILE_NAME START_INDEX END_INDEX
 ```
 
-The start index is inclusive, the end index exclusive. Both refer to line indices.
+The start index is inclusive, the end index exclusive. Both refer to line indices, starting at 0. If the end index is negative, all of the file at/after the start index is tokenized.
+
+The new file is named `FILE_NAME-tokenized-START_INDEX-END_INDEX.txt`. The lines in the output file are formatted like this: blank space-separated tokens, tab, blank space-separated hiragana transliterations of the tokens.
 
 ## Licensed content
 

@@ -26,7 +26,8 @@ public class LookupServiceImpl {
 
 	private static final Logger logger = Logger.getLogger(LookupServiceImpl.class.getSimpleName());
 	// Separator for tokenizing file contents. Can be changed!
-	private static final String SEPARATOR = " ";
+	private static final String TOKEN_SEP = " ";
+	private static final String SENT_SEP = "\t";
 	private ListMultimap<String, Token> tokenMap;
 	private String tokenizationFile;
 	private int start;
@@ -78,13 +79,21 @@ public class LookupServiceImpl {
 				for (ArrayList<Token> tokens : results) {
 					Token tok = tokens.get(0);
 					sb.append(joiner);
-					joiner = SEPARATOR;
+					joiner = TOKEN_SEP;
 					sb.append(tok.getForm());
+				}
+				sb.append(SENT_SEP);
+				joiner = "";
+				for (ArrayList<Token> tokens : results) {
+					Token tok = tokens.get(0);
+					sb.append(joiner);
+					joiner = TOKEN_SEP;
+					sb.append(tok.getPronunciation());
 				}
 				pw.println(sb.toString());
 
 			}
-			logger.info("Done with this file! Results are in " + outFile + ".");
+			logger.info("Done! Results are in " + outFile + ".");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
