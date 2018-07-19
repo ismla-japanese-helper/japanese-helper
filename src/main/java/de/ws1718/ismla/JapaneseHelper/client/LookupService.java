@@ -15,6 +15,8 @@ public interface LookupService extends RemoteService {
      * Use LookupService.App.getInstance() to access static instance of LookupServiceAsync
      */
     List<ArrayList<Token>> lookup(String sentence);
+    
+    String tokenizeFiles();
 
     public static class App {
         private static final LookupServiceAsync ourInstance = (LookupServiceAsync) GWT.create(LookupService.class);

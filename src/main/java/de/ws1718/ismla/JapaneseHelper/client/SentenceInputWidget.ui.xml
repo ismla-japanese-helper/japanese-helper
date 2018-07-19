@@ -21,5 +21,6 @@
         <g:TextArea styleName="{style.textField}" ui:field="inputField"></g:TextArea>
         <br></br>
         <g:Button styleName="{style.submitButton}" ui:field="submitButton"></g:Button>
+        <g:Button styleName="{style.submitButton}" ui:field="tokenizeButton"></g:Button>
     </g:HTMLPanel>
 </ui:UiBinder>

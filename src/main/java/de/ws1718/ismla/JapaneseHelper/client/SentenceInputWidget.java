@@ -31,6 +31,9 @@ public class SentenceInputWidget extends Composite {
 
 	@UiField
 	Button submitButton;
+	
+	@UiField
+	Button tokenizeButton;
 
 	/**
 	 * A widget where users can enter text and submit it.
@@ -38,6 +41,7 @@ public class SentenceInputWidget extends Composite {
 	public SentenceInputWidget() {
 		initWidget(uiBinder.createAndBindUi(this));
 		submitButton.setText("Submit");
+		tokenizeButton.setText("Tokenize Files");
 	}
 
 	@UiHandler("submitButton")
@@ -61,6 +65,22 @@ public class SentenceInputWidget extends Composite {
 				ResultsWidget rw = new ResultsWidget(results);
 
 				RootPanel.get("resultsContainer").add(rw);
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert(caught.getMessage());
+			}
+		});
+	}
+	
+	@UiHandler("tokenizeButton")
+	void onTokenizeClick(ClickEvent e) {
+		lookupService.tokenizeFiles(new AsyncCallback<String>() {
+
+			@Override
+			public void onSuccess(String results) {
+				Window.alert("Done!");
 			}
 
 			@Override
