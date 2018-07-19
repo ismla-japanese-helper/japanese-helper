@@ -32,3 +32,25 @@ h1 {
 #closeButton {
   margin: 15px 6px 6px;
 }
+
+/* For the results table */
+.resultsTable {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-gap: 20px;
+}
+
+.wordContainer {
+  /* Flexbox will probably be better. */
+  display: flex;
+  flex-direction: column;
+  /* align-items: stretch; */
+}
+
+.result-row {
+  flex: 0.1;
+}
+
+.translations {
+  flex: 0.6 !important;
+}

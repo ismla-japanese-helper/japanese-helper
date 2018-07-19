@@ -37,7 +37,6 @@ public class ResultsWidget extends Composite {
 	 */
 	public ResultsWidget(List<ArrayList<Token>> sentence) {
 		initWidget(uiBinder.createAndBindUi(this));
-		resultsContainer.addStyleName("container");
 		HTMLPanel results = generateResultsTable(sentence);
 
 		// The order of the anchors should correspond to the order
@@ -95,8 +94,8 @@ public class ResultsWidget extends Composite {
 	 */
 	private HTMLPanel generateResultsTable(List<ArrayList<Token>> sentence) {
 		String html = "";
-		// This is the outer row for all the columns.
-		html += "<div class='row'>";
+		// This is the outer row for all the columns. We use display:grid; on it
+		html += "<div class='resultsTable'>";
 
 		for (List<Token> list : sentence) {
 			html += generateOneWord(list.get(0));
@@ -116,35 +115,28 @@ public class ResultsWidget extends Composite {
 	 */
 	private String generateOneWord(Token t) {
 		String representation = "";
-		representation += "<div class='col-xs-4 col-md-3 col-lg-2 mb-3'>";
-		// Needed to create a nested row within the outer column.
-		representation += "<div class='row'>";
-
-		// Each row of the output table is actually achieved via a full-width
-		// "column" in Bootstrap. In this way, the next "column" will be
-		// automatically pushed to the next row in the final display.
-		representation += "<div class='col-12'>" + t.getForm() + "</div>";
-		representation += "<div class='col-12'>" + t.getPronunciation() + "</div>";
+		// Each wordContainer has display:flex;
+		representation += "<div class='wordContainer'>";
+		representation += "<div class='form result-row'>" + t.getForm() + "</div>";
+		representation += "<div class='pronunciation result-row'>" + t.getPronunciation() + "</div>";
 		// Manually added <a> here.
-		representation += "<div class='col-12' title='Click for full list of translations'><a>"
+		representation += "<div class='translations result-row' title='Click for full list of translations'><a>"
 				+ t.getTranslations().get(0) + "</a></div>";
-		representation += "<div class='col-12'>" + t.getPrettyPos() + "</div>";
+		representation += "<div class='pos'>" + t.getPrettyPos() + "</div>";
 
 		if (t instanceof InflectedToken) {
 			String inflectionInfo = ((InflectedToken) t).getLemmaAndInflectionInformation();
-			representation += "<div class='col-12' title='Click for full list of inflections'><a>" + inflectionInfo
+			representation += "<div class='inflection result-row' title='Click for full list of inflections'><a>" + inflectionInfo
 					+ "</a></div>";
 		} else {
-			representation += "<div class='col-12'>" + "*" + "</div>";
+			representation += "<div class='inflection result-row'>" + "*" + "</div>";
 		}
-		representation += "<div class='col-12'>" + t.getDifficultyRating() + "</div>";
+		representation += "<div class='difficulty result-row'>" + t.getDifficultyRating() + "</div>";
 
-		representation += "</div>";
 		representation += "</div>";
 
 		return representation;
 	}
-
 	private static class Popup extends PopupPanel {
 		public Popup(Widget popupWidget) {
 			// "autoHide: true" means that if the user clicks on anywhere
