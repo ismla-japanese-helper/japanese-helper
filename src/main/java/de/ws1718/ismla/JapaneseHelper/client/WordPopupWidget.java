@@ -1,16 +1,15 @@
 package de.ws1718.ismla.JapaneseHelper.client;
 
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
-
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
+
+import java.util.List;
 
 public class WordPopupWidget extends Composite {
 	@UiField
@@ -43,7 +42,14 @@ public class WordPopupWidget extends Composite {
 	 * @return the HTML list
 	 */
 	private HTML generateGlossesList(List<Token> tokens) {
+		Token firstToken = tokens.get(0);
 		String html = "";
+		// First append the original word to deal with the situation where the word is blocked by the popup.
+		String firstEntry = firstToken.getPrettyPos() + ", " + firstToken.getPronunciation();
+		if (firstToken instanceof InflectedToken) {
+			firstEntry += ", " + ((InflectedToken) firstToken).getInflection();
+		}
+		html += "<li class='list-group-item'><b>" + firstEntry + "</b></li>";
 		html += "<ul class='list-group'>";
 		List<String> glosses = tokens.get(0).getTranslations();
 		for (String gloss : glosses) {
