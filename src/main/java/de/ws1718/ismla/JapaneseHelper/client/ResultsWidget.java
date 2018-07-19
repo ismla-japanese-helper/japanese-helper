@@ -31,8 +31,10 @@ public class ResultsWidget extends Composite {
 		resultsContainer.getElement().addClassName("resultsTable");
 
 		for (List<Token> tokens : sentence) {
-			WordContainerWidget wordContainer = new WordContainerWidget(tokens);
-			resultsContainer.add(wordContainer);
+			if (!tokens.get(0).getPrettyPos().equals("punctuation")) {
+				WordContainerWidget wordContainer = new WordContainerWidget(tokens);
+				resultsContainer.add(wordContainer);
+			}
 		}
 	}
 }
