@@ -5,6 +5,7 @@
             /* Flexbox will probably be better. */
             display: flex;
             flex-direction: column;
+            border: 1px solid;
             /* align-items: stretch; */
         }
         .result-row {
