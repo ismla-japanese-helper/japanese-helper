@@ -1,8 +1,5 @@
 package de.ws1718.ismla.JapaneseHelper.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
@@ -10,15 +7,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
-
+import com.google.gwt.user.client.ui.*;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectableToken;
 import de.ws1718.ismla.JapaneseHelper.shared.InflectedToken;
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResultsWidget extends Composite {
 	@UiField
@@ -53,7 +48,11 @@ public class ResultsWidget extends Composite {
 
 			// First the popup about glosses.
 			Element glossesAnchor = anchors.getItem(anchorIndex);
-			Anchor glossAnchorWithLink = new Anchor(firstToken.getTranslations().get(0));
+			String firstTranslation = firstToken.getTranslations().get(0);
+			if (firstTranslation.length() > 50) {
+				firstTranslation = firstTranslation.substring(0, 47) + "...";
+			}
+			Anchor glossAnchorWithLink = new Anchor(firstTranslation);
 			glossAnchorWithLink.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent clickEvent) {
@@ -119,9 +118,15 @@ public class ResultsWidget extends Composite {
 		representation += "<div class='wordContainer'>";
 		representation += "<div class='form result-row'>" + t.getForm() + "</div>";
 		representation += "<div class='pronunciation result-row'>" + t.getPronunciation() + "</div>";
+
+		String firstTranslation = t.getTranslations().get(0);
+		if (firstTranslation.length() > 50) {
+			firstTranslation = firstTranslation.substring(0, 47) + "...";
+		}
+
 		// Manually added <a> here.
 		representation += "<div class='translations result-row' title='Click for full list of translations'><a>"
-				+ t.getTranslations().get(0) + "</a></div>";
+				+ firstTranslation + "</a></div>";
 		representation += "<div class='pos'>" + t.getPrettyPos() + "</div>";
 
 		if (t instanceof InflectedToken) {
