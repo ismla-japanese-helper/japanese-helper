@@ -77,6 +77,9 @@ public class WordContainerWidget extends Composite {
 			translation.add(new HTMLPanel(firstTranslation));
 		}
 
+		// pos.setInnerText(firstToken.getPos());
+		pos.setInnerText(firstToken.getPrettyPos());
+
 		if (firstToken instanceof InflectedToken) {
 			InflectableToken lemmaToken = ((InflectedToken) firstToken).getLemmaToken();
 			inflection.addClickHandler(new ClickHandler() {
