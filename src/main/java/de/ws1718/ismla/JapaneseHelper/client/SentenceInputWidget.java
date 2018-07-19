@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Timer;
 
 import de.ws1718.ismla.JapaneseHelper.shared.Token;
 
@@ -31,7 +32,7 @@ public class SentenceInputWidget extends Composite {
 
 	@UiField
 	Button submitButton;
-	
+
 	@UiField
 	Button tokenizeButton;
 
@@ -44,8 +45,18 @@ public class SentenceInputWidget extends Composite {
 		tokenizeButton.setText("Tokenize Files");
 	}
 
+	private Timer submitTimer = new Timer() {
+		public void run() {
+			submitButton.setVisible(true);
+		}
+	};
+
 	@UiHandler("submitButton")
-	void onClick(ClickEvent e) {
+	void onSubmitClick(ClickEvent e) {
+		// Prevents multiple clicking. Apparently the async implementation means that this would result in the result being appended multiple times...
+		submitButton.setVisible(false);
+		submitTimer.schedule(1500);
+
 		RootPanel.get("resultsContainer").clear();
 		putResults();
 	}
