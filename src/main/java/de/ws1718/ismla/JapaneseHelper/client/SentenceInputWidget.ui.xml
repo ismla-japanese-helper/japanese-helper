@@ -2,10 +2,6 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style>
-        .container {
-            width: 60%;
-            margin: auto;
-        }
         .textField {
             width: 100%;
             height: 200px;
@@ -16,7 +12,7 @@
             margin: 15px auto !important;
         }
     </ui:style>
-    <g:HTMLPanel styleName="{style.container}">
+    <g:HTMLPanel>
         <h3>Please input the Japanese sentence</h3>
         <g:TextArea styleName="{style.textField}" ui:field="inputField"></g:TextArea>
         <br></br>
