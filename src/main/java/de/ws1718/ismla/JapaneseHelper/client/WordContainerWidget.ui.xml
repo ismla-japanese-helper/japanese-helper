@@ -1,0 +1,38 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style type="de.ws1718.ismla.JapaneseHelper.client.WordContainerWidget.Style">
+        .wordContainer {
+            /* Flexbox will probably be better. */
+            display: flex;
+            flex-direction: column;
+            /* align-items: stretch; */
+        }
+        .result-row {
+            flex: 0.1;
+        }
+
+        .translation {
+            flex: 0.6 !important;
+        }
+
+        .clickable {
+            cursor: pointer;
+            /* ... Such an absolute nightmare not even being able to use SASS within your CSS. What??? */
+            color: #007bff !important;
+        }
+
+        .clickable:hover {
+            text-decoration: underline;
+        }
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{style.wordContainer}">
+        <div class="{style.result-row} form" ui:field="form"></div>
+        <div class="{style.result-row} pronunciation" ui:field="pronunciation"></div>
+        <!--<div class="{style.result-row} {style.translation}" ui:field="translation"></div>-->
+        <g:FocusPanel addStyleNames="{style.result-row} {style.translation}" ui:field="translation"></g:FocusPanel>
+        <div class="{style.result-row} pos" ui:field="pos"></div>
+        <!--<div class="{style.result-row} inflection" ui:field="inflection"></div>-->
+        <g:FocusPanel addStyleNames="{style.result-row}" ui:field="inflection"></g:FocusPanel>
+        <div class="{style.result-row} difficulty" ui:field="difficulty"></div>
+    </g:HTMLPanel>
+</ui:UiBinder>

@@ -1,5 +1,13 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		/* ... For some reason they apparently can't get this thing to compile. OK might have something to do with minmax and all that who knows. Another that shows this thing just doesn't play that well with modern CSS then. */
+		/*.results {*/
+			/*display: grid;*/
+			/*grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));*/
+			/*grid-gap: 20px;*/
+		/*}*/
+	</ui:style>
 	<g:HTMLPanel ui:field="resultsContainer"></g:HTMLPanel>
 </ui:UiBinder>
