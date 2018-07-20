@@ -1,6 +1,7 @@
 package de.ws1718.ismla.JapaneseHelper.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,10 +32,18 @@ public class ResultsWidget extends Composite {
 		resultsContainer.getElement().addClassName("resultsTable");
 
 		for (List<Token> tokens : sentence) {
-			if (!tokens.get(0).getPrettyPos().equals("punctuation")) {
+			// Can also offer an option to strip punctuation if necessary.
+			// if (!tokens.get(0).getPrettyPos().equals("punctuation")) {
+			// Strips whitespace chars.
+			if (!isWhitespace(tokens.get(0).getForm())) {
 				WordContainerWidget wordContainer = new WordContainerWidget(tokens);
 				resultsContainer.add(wordContainer);
 			}
 		}
+	}
+
+	private boolean isWhitespace(String input) {
+		RegExp whitespaceRegex = RegExp.compile("\\s");
+		return whitespaceRegex.exec(input) != null;
 	}
 }
